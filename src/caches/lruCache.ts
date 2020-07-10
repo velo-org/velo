@@ -1,6 +1,6 @@
-import { BaseCache } from "./baseCache.ts";
-import { Options } from "../models/options.ts";
-import { LRUStorage } from "../models/lruStorage.ts";
+import { BaseCache } from './baseCache.ts';
+import { Options } from '../models/options.ts';
+import { LRUStorage } from '../models/lruStorage.ts';
 
 //TODO: replacement for unshift (push O(1) operation unshift O(n) operation no good performance)
 

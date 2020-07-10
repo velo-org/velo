@@ -1574,13 +1574,13 @@ declare namespace Deno {
   export function truncate(name: string, len?: number): Promise<void>;
 
   export interface NetAddr {
-    transport: "tcp" | "udp";
+    transport: 'tcp' | 'udp';
     hostname: string;
     port: number;
   }
 
   export interface UnixAddr {
-    transport: "unix" | "unixpacket";
+    transport: 'unix' | 'unixpacket';
     path: string;
   }
 
@@ -1637,7 +1637,7 @@ declare namespace Deno {
    *
    * Requires `allow-net` permission. */
   export function listen(
-    options: ListenOptions & { transport?: "tcp" }
+    options: ListenOptions & { transport?: 'tcp' }
   ): Listener;
 
   export interface ListenTlsOptions extends ListenOptions {
@@ -1646,7 +1646,7 @@ declare namespace Deno {
     /** Server public key file. */
     keyFile: string;
 
-    transport?: "tcp";
+    transport?: 'tcp';
   }
 
   /** Listen announces on the local transport address over TLS (transport layer
@@ -1665,7 +1665,7 @@ declare namespace Deno {
     /** A literal IP address or host name that can be resolved to an IP address.
      * If not specified, defaults to `127.0.0.1`. */
     hostname?: string;
-    transport?: "tcp";
+    transport?: 'tcp';
   }
 
   /**
@@ -1765,7 +1765,7 @@ declare namespace Deno {
   export function resources(): ResourceMap;
 
   export interface FsEvent {
-    kind: "any" | "access" | "create" | "modify" | "remove";
+    kind: 'any' | 'access' | 'create' | 'modify' | 'remove';
     paths: string[];
   }
 
@@ -1795,13 +1795,13 @@ declare namespace Deno {
   export class Process<T extends RunOptions = RunOptions> {
     readonly rid: number;
     readonly pid: number;
-    readonly stdin: T["stdin"] extends "piped"
+    readonly stdin: T['stdin'] extends 'piped'
       ? Writer & Closer
       : (Writer & Closer) | null;
-    readonly stdout: T["stdout"] extends "piped"
+    readonly stdout: T['stdout'] extends 'piped'
       ? Reader & Closer
       : (Writer & Closer) | null;
-    readonly stderr: T["stderr"] extends "piped"
+    readonly stderr: T['stderr'] extends 'piped'
       ? Reader & Closer
       : (Writer & Closer) | null;
     /** Resolves to the current status of the process. */
@@ -1849,9 +1849,9 @@ declare namespace Deno {
     env?: {
       [key: string]: string;
     };
-    stdout?: "inherit" | "piped" | "null" | number;
-    stderr?: "inherit" | "piped" | "null" | number;
-    stdin?: "inherit" | "piped" | "null" | number;
+    stdout?: 'inherit' | 'piped' | 'null' | number;
+    stderr?: 'inherit' | 'piped' | 'null' | number;
+    stdin?: 'inherit' | 'piped' | 'null' | number;
   }
 
   /** Spawns new subprocess.  RunOptions must contain at a minimum the `opt.cmd`,
@@ -1931,9 +1931,9 @@ declare namespace Deno {
     /** The LLVM target triple */
     target: string;
     /** Instruction set architecture */
-    arch: "x86_64";
+    arch: 'x86_64';
     /** Operating system */
-    os: "darwin" | "linux" | "windows";
+    os: 'darwin' | 'linux' | 'windows';
     /** Computer vendor */
     vendor: string;
     /** Optional environment */
@@ -2021,7 +2021,7 @@ declare namespace WebAssembly {
    * whether the bytes form a valid wasm module (`true`) or not (`false`). */
   function validate(bufferSource: BufferSource): boolean;
 
-  type ImportExportKind = "function" | "table" | "memory" | "global";
+  type ImportExportKind = 'function' | 'table' | 'memory' | 'global';
 
   interface ModuleExportDescriptor {
     name: string;
@@ -2077,7 +2077,7 @@ declare namespace WebAssembly {
     grow(delta: number): number;
   }
 
-  type TableKind = "anyfunc";
+  type TableKind = 'anyfunc';
 
   interface TableDescriptor {
     element: TableKind;
@@ -2102,7 +2102,7 @@ declare namespace WebAssembly {
     set(index: number, value: (...args: any[]) => any): void;
   }
 
-  type ValueType = "i32" | "i64" | "f32" | "f64";
+  type ValueType = 'i32' | 'i64' | 'f32' | 'f64';
 
   interface GlobalDescriptor {
     value: ValueType;
@@ -2284,7 +2284,7 @@ interface UnderlyingByteSource {
   cancel?: ReadableStreamErrorCallback;
   pull?: ReadableByteStreamControllerCallback;
   start?: ReadableByteStreamControllerCallback;
-  type: "bytes";
+  type: 'bytes';
 }
 
 interface UnderlyingSource<R = any> {
@@ -2333,7 +2333,7 @@ interface QueuingStrategy<T = any> {
   size?: QueuingStrategySizeCallback<T>;
 }
 
-/** This Streams API interface provides a built-in byte length queuing strategy
+/** This Streams API interface provides a built-in byte length queuing strategy
  * that can be used when constructing streams. */
 declare class CountQueuingStrategy implements QueuingStrategy {
   constructor(options: { highWaterMark: number });
@@ -2412,7 +2412,7 @@ interface UnderlyingSink<W = any> {
   write?: WritableStreamDefaultControllerWriteCallback<W>;
 }
 
-/** This Streams API interface provides a standard abstraction for writing
+/** This Streams API interface provides a standard abstraction for writing
  * streaming data to a destination, known as a sink. This object comes with
  * built-in backpressure and queuing. */
 declare class WritableStream<W = any> {
@@ -2505,7 +2505,7 @@ type BlobPart = BufferSource | Blob | string;
 
 interface BlobPropertyBag {
   type?: string;
-  ending?: "transparent" | "native";
+  ending?: 'transparent' | 'native';
 }
 
 /** A file-like object of immutable, raw data. Blobs represent data that isn't necessarily in a JavaScript-native format. The File interface is based on Blob, inheriting blob functionality and expanding it to support files on the user's system. */
@@ -2679,8 +2679,8 @@ type HeadersInit = Headers | string[][] | Record<string, string>;
 /** This Fetch API interface allows you to perform various actions on HTTP
  * request and response headers. These actions include retrieving, setting,
  * adding to, and removing. A Headers object has an associated header list,
- * which is initially empty and consists of zero or more name and value pairs.
- *  You can add to this using methods like append() (see Examples.) In all
+ * which is initially empty and consists of zero or more name and value pairs.
+ *  You can add to this using methods like append() (see Examples.) In all
  * methods of this interface, header names are matched by case-insensitive byte
  * sequence. */
 interface Headers {
@@ -2744,25 +2744,25 @@ declare const Headers: {
 
 type RequestInfo = Request | string;
 type RequestCache =
-  | "default"
-  | "force-cache"
-  | "no-cache"
-  | "no-store"
-  | "only-if-cached"
-  | "reload";
-type RequestCredentials = "include" | "omit" | "same-origin";
-type RequestMode = "cors" | "navigate" | "no-cors" | "same-origin";
-type RequestRedirect = "error" | "follow" | "manual";
+  | 'default'
+  | 'force-cache'
+  | 'no-cache'
+  | 'no-store'
+  | 'only-if-cached'
+  | 'reload';
+type RequestCredentials = 'include' | 'omit' | 'same-origin';
+type RequestMode = 'cors' | 'navigate' | 'no-cors' | 'same-origin';
+type RequestRedirect = 'error' | 'follow' | 'manual';
 type ReferrerPolicy =
-  | ""
-  | "no-referrer"
-  | "no-referrer-when-downgrade"
-  | "origin"
-  | "origin-when-cross-origin"
-  | "same-origin"
-  | "strict-origin"
-  | "strict-origin-when-cross-origin"
-  | "unsafe-url";
+  | ''
+  | 'no-referrer'
+  | 'no-referrer-when-downgrade'
+  | 'origin'
+  | 'origin-when-cross-origin'
+  | 'same-origin'
+  | 'strict-origin'
+  | 'strict-origin-when-cross-origin'
+  | 'unsafe-url';
 type BodyInit =
   | Blob
   | BufferSource
@@ -2771,24 +2771,24 @@ type BodyInit =
   | ReadableStream<Uint8Array>
   | string;
 type RequestDestination =
-  | ""
-  | "audio"
-  | "audioworklet"
-  | "document"
-  | "embed"
-  | "font"
-  | "image"
-  | "manifest"
-  | "object"
-  | "paintworklet"
-  | "report"
-  | "script"
-  | "sharedworker"
-  | "style"
-  | "track"
-  | "video"
-  | "worker"
-  | "xslt";
+  | ''
+  | 'audio'
+  | 'audioworklet'
+  | 'document'
+  | 'embed'
+  | 'font'
+  | 'image'
+  | 'manifest'
+  | 'object'
+  | 'paintworklet'
+  | 'report'
+  | 'script'
+  | 'sharedworker'
+  | 'style'
+  | 'track'
+  | 'video'
+  | 'worker'
+  | 'xslt';
 
 interface RequestInit {
   /**
@@ -2953,12 +2953,12 @@ interface ResponseInit {
 }
 
 type ResponseType =
-  | "basic"
-  | "cors"
-  | "default"
-  | "error"
-  | "opaque"
-  | "opaqueredirect";
+  | 'basic'
+  | 'cors'
+  | 'default'
+  | 'error'
+  | 'opaque'
+  | 'opaqueredirect';
 
 /** This Fetch API interface represents the response to a request. */
 interface Response extends Body {
@@ -3023,7 +3023,7 @@ declare class TextDecoder {
 
 declare class TextEncoder {
   /** Returns "utf-8". */
-  readonly encoding = "utf-8";
+  readonly encoding = 'utf-8';
   /** Returns the result of running UTF-8's encoder. */
   encode(input?: string): Uint8Array;
   encodeInto(
@@ -3183,7 +3183,7 @@ declare const URLSearchParams: {
   toString(): string;
 };
 
-/** The URL interface represents an object providing static methods used for creating object URLs. */
+/** The URL interface represents an object providing static methods used for creating object URLs. */
 interface URL {
   hash: string;
   host: string;
@@ -3249,7 +3249,7 @@ declare class Worker extends EventTarget {
   constructor(
     specifier: string,
     options?: {
-      type?: "classic" | "module";
+      type?: 'classic' | 'module';
       name?: string;
       /** UNSTABLE: New API. Expect many changes; most likely this
        * field will be made into an object for more granular

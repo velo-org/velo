@@ -1,4 +1,4 @@
-import { Options } from "../models/options.ts";
+import { Options } from '../models/options.ts';
 
 export class BaseCache<T> {
   options: Options;

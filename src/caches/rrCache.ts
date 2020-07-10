@@ -1,6 +1,6 @@
-import { BaseCache } from "./baseCache.ts";
-import { RRStorage } from "../models/rrStorage.ts";
-import { Options } from "../models/options.ts";
+import { BaseCache } from './baseCache.ts';
+import { RRStorage } from '../models/rrStorage.ts';
+import { Options } from '../models/options.ts';
 
 export class RRCache extends BaseCache<RRStorage> {
   constructor(options: Options) {
