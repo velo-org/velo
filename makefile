@@ -1,7 +1,7 @@
 run:
 	deno run -c tsconfig.json mod.ts
-test:
-	deno test
+utest:
+	deno test ./test
 format:
 	deno fmt
 debug:
