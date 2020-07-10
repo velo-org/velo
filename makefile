@@ -1,5 +1,5 @@
 run:
-	deno run mod.ts
+	deno run -c tsconfig.json mod.ts
 test:
 	deno test
 format:

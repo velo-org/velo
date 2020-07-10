@@ -1,5 +1,6 @@
 import { LRUCache } from './src/caches/lruCache.ts';
 import { RRCache } from './src/caches/rrCache.ts';
+
 const lruc = new LRUCache({ maxCache: 5 });
 lruc.set('1', { hello: 'asdf' });
 lruc.set('2', { hello: 'asdf' });
