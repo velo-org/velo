@@ -1,8 +1,8 @@
 import { Options } from '../models/options.ts';
 
-export class BaseCache<T> {
+export abstract class BaseCache<T> {
   options: Options;
-  storage: T[];
+  protected storage: T[];
 
   constructor(options: Options = { maxCache: 0 }) {
     this.options = options;

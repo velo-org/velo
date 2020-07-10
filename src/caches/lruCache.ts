@@ -9,7 +9,7 @@ export class LRUCache extends BaseCache<LRUStorage> {
     super(options);
   }
 
-  set<T = any>(key: string, value: T) {
+  set<T>(key: string, value: T) {
     if (
       this.options.maxCache !== 0 &&
       this.storage.length == this.options.maxCache
@@ -23,11 +23,14 @@ export class LRUCache extends BaseCache<LRUStorage> {
     });
   }
 
-  get<T = any>(key: string): T {
-    const item = this.storage.splice(
-      this.storage.findIndex((st) => st.key === key),
-      1
-    )[0];
+  get<T>(key: string): T | undefined {
+    const idx = this.storage.findIndex((st) => st.key === key);
+
+    if (idx === -1) {
+      return undefined;
+    }
+
+    const item = this.storage.splice(idx, 1)[0];
     item.used = Date.now();
     this.storage.unshift(item);
     return JSON.parse(item.value);

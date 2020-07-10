@@ -7,7 +7,7 @@ export class RRCache extends BaseCache<RRStorage> {
     super(options);
   }
 
-  set<T = any>(key: string, value: T) {
+  set<T>(key: string, value: T) {
     if (
       this.options.maxCache !== 0 &&
       this.storage.length == this.options.maxCache
@@ -19,7 +19,9 @@ export class RRCache extends BaseCache<RRStorage> {
       value: JSON.stringify(value),
     });
   }
-  get<T = any>(key: string): T {
-    return JSON.parse(this.storage.find((st) => st.key === key)!.value);
+
+  get<T>(key: string): T {
+    const hit = this.storage.find((st) => st.key === key)?.value;
+    return hit ? JSON.parse(hit) : undefined;
   }
 }
