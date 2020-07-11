@@ -3,7 +3,7 @@ import { assert, assertEquals } from '../deps.ts';
 
 Deno.test('LRU create cache, should create a new empty cache', () => {
   const lruCache = new LRUCache({ maxCache: 5 });
-  assertEquals(lruCache.Storage.length, 0);
+  assertEquals(lruCache.Size, 0);
 });
 
 Deno.test('LRU get existing entry, should return the value', () => {
@@ -39,6 +39,6 @@ Deno.test(
     lruCache.set('4', 4);
     lruCache.set('5', 5);
     lruCache.set('6', 6);
-    assertEquals(lruCache.Storage.length, 5);
+    assertEquals(lruCache.Size, 5);
   }
 );
