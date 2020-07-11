@@ -1,8 +1,9 @@
 import { LRUCache } from '../src/caches/lruCache.ts';
-import { assert, assertEquals } from 'https://deno.land/std/testing/asserts.ts';
+import { assert, assertEquals } from '../deps.ts';
 
 Deno.test('LRU create cache, should create a new empty cache', () => {
   const lruCache = new LRUCache({ maxCache: 5 });
+  assertEquals(lruCache.Storage.length, 0);
 });
 
 Deno.test('LRU get existing entry, should return the value', () => {

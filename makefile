@@ -1,5 +1,7 @@
 run:
 	deno run -c tsconfig.json mod.ts
+bench:
+	deno run -c tsconfig.json --allow-hrtime ./benchmark/runBenchmarks.ts
 utest:
 	deno test ./test
 format:
