@@ -1,4 +1,4 @@
-const MAX_KEYS = 1000;
+const MAX_KEYS = 100_000;
 const EVICT = 2 * MAX_KEYS;
 const RUNS = 10;
 

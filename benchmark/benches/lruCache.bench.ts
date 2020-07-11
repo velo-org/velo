@@ -5,7 +5,7 @@ import { LRUCache } from '../../src/caches/lruCache.ts';
 const cache = new LRUCache({ maxCache: MAX_KEYS });
 
 bench({
-  name: `LRU set x${MAX_KEYS}`,
+  name: 'LRU',
   runs: RUNS,
   func(b): void {
     b.start();
