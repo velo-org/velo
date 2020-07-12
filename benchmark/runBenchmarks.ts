@@ -6,8 +6,9 @@ import {
 
 // benches
 import './benches/lruCache.bench.ts';
+import './benches/rrCache.bench.ts';
 
-let filterRegex;
+let filterRegex: any;
 
 if (Deno.args.length > 0) {
   const skip = ['LRU'].filter((c) => !Deno.args.includes(c));

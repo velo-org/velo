@@ -6,7 +6,7 @@ console.log('LRU CACHE');
 console.log('===========================');
 
 const lruc = new LRUCache({ maxCache: 5 });
-lruc.set('1', { hello: 'asdf' });
+lruc.set(1, { hello: 'asdf' });
 lruc.set('2', { hello: 'asdf' });
 lruc.set('3', { hello: 'asdf' });
 lruc.set('4', { hello: 'asdf' });
@@ -14,7 +14,7 @@ lruc.set('5', { hello: 'asdf' });
 
 lruc.set('6', { hello: 'asdfdd' });
 lruc.set('7', { hello: 'asdfdd' });
-lruc.set('8', { hello: 'asdfdd' });
+lruc.set(8, { hello: 'asdfdd' });
 lruc.forEach((item, index) => {
   console.log(index, item);
 });
@@ -36,3 +36,7 @@ rrc.set('8', { hello: 'asdfdd' });
 rrc.forEach((item, index) => {
   console.log(index, item);
 });
+
+var a: any = {
+  oldkey: 100,
+};

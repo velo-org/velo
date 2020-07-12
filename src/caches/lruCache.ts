@@ -3,15 +3,17 @@ import { Options } from '../models/options.ts';
 import { TypedArray } from '../utils/typedArray.ts';
 
 //TODO: sufficent delete method
+type keyType = number | string;
 
-export class LRUCache extends BaseCache {
+export class LRUCache<V = any> extends BaseCache {
   private head: number;
   private tail: number;
-  private keys: string[];
-  private values: string[];
+  private keys: (string | number)[];
+  private values: V[];
   private forward: Float64Array | Uint8Array | Uint16Array | Uint32Array;
   private backward: Float64Array | Uint8Array | Uint16Array | Uint32Array;
-  private items: { [key: string]: number };
+
+  private items: { [key in keyType]: number };
   private size: number;
 
   constructor(options: Options) {
@@ -27,12 +29,12 @@ export class LRUCache extends BaseCache {
     this.values = [];
   }
 
-  set<T>(key: string, value: T) {
+  set(key: keyType, value: V) {
     let pointer = this.items[key];
 
     if (pointer) {
       this.toTop(pointer);
-      this.values[pointer] = JSON.stringify(value);
+      this.values[pointer] = value;
 
       return;
     }
@@ -46,14 +48,14 @@ export class LRUCache extends BaseCache {
     else {
       pointer = this.tail;
       this.tail = this.backward[pointer];
-
-      delete this.items[this.keys[pointer]];
+      this.items[key] = (this.items[this.keys[pointer]] &&
+        delete this.items[this.keys[pointer]]) as any;
     }
 
     // Storing key & value
     this.items[key] = pointer;
     this.keys[pointer] = key;
-    this.values[pointer] = JSON.stringify(value);
+    this.values[pointer] = value;
 
     // Moving the item at the front of the list
     this.forward[pointer] = this.head;
@@ -90,38 +92,32 @@ export class LRUCache extends BaseCache {
     this.items = {};
   }
 
-  get<T>(key: string): T | undefined {
+  get(key: keyType): V | undefined {
     const pointer = this.items[key];
 
     if (typeof pointer === 'undefined') return;
 
     this.toTop(pointer);
 
-    return JSON.parse(this.values[pointer]);
+    return this.values[pointer];
   }
 
-  peek(key: string) {
+  peek(key: keyType) {
     const pointer = this.items[key];
     if (pointer === undefined) return;
     return this.values[pointer];
   }
 
-  forEach<T>(
-    callback: (item: { value: T; key: string }, index: number) => void
-  ) {
+  forEach(callback: (item: { value: V; key: keyType }, index: number) => void) {
     let i = 0,
       l = this.size;
-    var pointer = this.head,
+    let pointer = this.head,
       keys = this.keys,
       values = this.values,
       forward = this.forward;
 
     while (i < l) {
-      callback.call(
-        this,
-        { value: JSON.parse(values[pointer]), key: keys[pointer] },
-        i
-      );
+      callback.call(this, { value: values[pointer], key: keys[pointer] }, i);
 
       pointer = forward[pointer];
 
@@ -129,7 +125,7 @@ export class LRUCache extends BaseCache {
     }
   }
 
-  has(key: string) {
+  has(key: keyType) {
     return this.items[key] ? true : false;
   }
 

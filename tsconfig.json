@@ -14,6 +14,7 @@
     //"noUnusedLocals": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true
+    //"lib": ["es2017", "DOM"]
   },
   "include": ["./**/*.ts"]
 }
