@@ -8,7 +8,6 @@ export class SCChache<V = any> extends BaseCache {
   private head: number;
   private tail: number;
   private arrayMap: { key: keyType; value: V; sChance: boolean }[];
-  private forward: Float64Array | Uint8Array | Uint16Array | Uint32Array;
   private backward: Float64Array | Uint8Array | Uint16Array | Uint32Array;
   private items: { [key in keyType]: number };
   private size: number;
@@ -16,13 +15,12 @@ export class SCChache<V = any> extends BaseCache {
   constructor(options: Options) {
     super(options);
     const PointerArray = TypedArray.getPointerArray(options.maxCache);
-    this.forward = new PointerArray(options.maxCache);
     this.backward = new PointerArray(options.maxCache);
     this.head = 0;
     this.size = 0;
     this.tail = 0;
     this.items = {};
-    this.arrayMap = [];
+    this.arrayMap = new Array(this.maxCache);
   }
 
   set(key: keyType, value: V) {
@@ -39,44 +37,48 @@ export class SCChache<V = any> extends BaseCache {
       this.arrayMap[this.size - 1] = { key, value, sChance: false };
 
       // Moving the item at the end of the list
-      this.forward[this.head] = pointer;
       this.backward[this.tail] = pointer;
-      this.forward[pointer] = this.tail;
       this.backward[pointer] = this.head;
       this.tail = pointer;
     } else {
       let i = this.backward[this.tail];
+      let found = false;
       while (i != this.tail) {
         if (!this.arrayMap[i].sChance) {
           delete this.items[this.arrayMap[i].key];
           this.items[key] = i;
           this.arrayMap[i] = { key, value, sChance: false };
           this.toBottom(i);
+          found = true;
           break;
         }
         this.arrayMap[i].sChance = false;
         i = this.backward[i];
+      }
+      if (!found) {
+        delete this.items[this.arrayMap[0].key];
+        this.items[key] = 0;
+        this.arrayMap[0] = { key, value, sChance: false };
+        this.toBottom(0);
       }
     }
   }
   private toBottom(pointer: number) {
     if (this.tail === pointer) return;
 
-    let oldTail = this.tail;
-    const previous = this.backward[pointer],
-      next = this.forward[pointer];
+    const previous = this.backward[pointer];
 
     if (this.head === pointer) {
       this.head = previous;
+    } else if (this.backward[this.head] == pointer) {
+      this.backward[this.head] = previous;
     } else {
-      this.forward[previous] = next;
+      this.backward[pointer - 1] = previous;
     }
 
-    this.backward[next] = previous;
-
-    this.backward[oldTail] = pointer;
+    this.backward[this.tail] = pointer;
     this.tail = pointer;
-    this.backward[pointer] = this.head;
+    this.backward[this.tail] = this.head;
 
     return;
   }
@@ -85,11 +87,11 @@ export class SCChache<V = any> extends BaseCache {
     this.arrayMap[pointer].sChance = true;
     return this.arrayMap[pointer];
   }
-  //   forEach(callback: (item: { key: keyType; value: V }, index: number) => void) {
-  //     this.keys.forEach((key, i) => {
-  //       callback.call(this, { key, value: this.values[i] }, i);
-  //     });
-  //   }
+  forEach(callback: (item: { key: keyType; value: V }, index: number) => void) {
+    this.arrayMap.forEach((val, i) => {
+      callback.call(this, { key: val.key, value: val.value }, i);
+    });
+  }
   has(key: keyType) {
     return this.items[key] ? true : false;
   }

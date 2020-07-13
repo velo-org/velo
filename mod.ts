@@ -55,5 +55,9 @@ scc.set('6', { hello: 'asdfdd' }); // sets 6 removes 1
 scc.set('7', { hello: 'asdfdd' }); //
 scc.set('8', { hello: 'asdfdd' });
 scc.set('9', { hello: 'asdfdd' });
-scc.get('5');
+console.log(scc.get('5'));
+console.log(scc.get('6'));
 scc.set('10', { hello: 'asdfdd' });
+scc.forEach((i, ind) => {
+  console.log(i, ind);
+});

@@ -46,8 +46,8 @@ export class LRUCache<V = any> extends BaseCache {
     this.size = 0;
     this.tail = 0;
     this.items = {};
-    this.keys = [];
-    this.values = [];
+    this.keys = new Array(this.maxCache);
+    this.values = new Array(this.maxCache);
   }
 
   set(key: keyType, value: V) {
