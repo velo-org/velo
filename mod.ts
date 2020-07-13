@@ -49,10 +49,10 @@ scc.set('2', { hello: 'asdf' }); // sets 2
 scc.set('3', { hello: 'asdf' }); // sets 3
 scc.set('4', { hello: 'asdf' }); // sets 4
 scc.set('5', { hello: 'asdf' }); // sets 5
-console.log(scc.get('2'));
-scc.set('6', { hello: 'asdfdd' }); // sets 6 removes 1
-// gets 6 second Chance gets activated
-scc.set('7', { hello: 'asdfdd' }); //
+console.log(scc.get('1')); // gets 2 second Chance gets activated
+scc.set('6', { hello: 'asdfdd' }); // sets 6 removes 2
+
+scc.set('7', { hello: 'asdfdd' }); // sets 7 remove 1
 scc.set('8', { hello: 'asdfdd' });
 scc.set('9', { hello: 'asdfdd' });
 console.log(scc.get('5'));
