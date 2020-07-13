@@ -7,20 +7,22 @@ import {
 import { CACHES, MARKDOWN_OUT } from './benchmark.config.ts';
 
 // benches
-//import './benches/lruCache.bench.ts';
-//import './benches/rrCache.bench.ts';
+import './benches/lruCache.bench.ts';
+import './benches/rrCache.bench.ts';
 import './benches/scCache.bench.ts';
 
 let filterRegex: RegExp | undefined;
 
-if (Deno.args.length > 0) {
-  const skip = CACHES.filter((c) => !Deno.args.includes(c));
+if (Deno.args.length > 0 && Deno.args[0] !== 'md') {
+  const skip = CACHES.filter((c) => !Deno.args[0].split(',').includes(c));
   filterRegex = skip.length > 0 ? new RegExp(skip.join('|')) : undefined;
 }
 
 runBenchmarks({ silent: true, skip: filterRegex }, prettyBenchmarkProgress())
   .then((b) => {
-    generateMarkdown(b.results);
+    if (Deno.args.length > 0 && Deno.args.includes('md')) {
+      generateMarkdown(b.results);
+    }
     return b;
   })
   .then(prettyBenchmarkResult())

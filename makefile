@@ -1,9 +1,9 @@
 run:
 	deno run -c tsconfig.json mod.ts
 
-#usage: make bench filter=LRU 
+#usage: make bench filter=LRU out=md
 bench:
-	deno run -c tsconfig.json --allow-hrtime --allow-write --allow-read ./benchmark/runBenchmarks.ts $(filter)
+	deno run -c tsconfig.json --allow-hrtime --allow-write --allow-read ./benchmark/runBenchmarks.ts $(filter) $(out)
 
 utest:
 	deno test ./test
