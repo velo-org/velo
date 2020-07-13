@@ -7,14 +7,14 @@ import {
 import { CACHES, MARKDOWN_OUT } from './benchmark.config.ts';
 
 // benches
-//import './benches/lruCache.bench.ts';
-//import './benches/rrCache.bench.ts';
+import './benches/lruCache.bench.ts';
+import './benches/rrCache.bench.ts';
 import './benches/scCache.bench.ts';
 
 let filterRegex: RegExp | undefined;
 
 if (Deno.args.length > 0) {
-  const skip = CACHES.filter((c) => !Deno.args.includes(c));
+  const skip = CACHES.filter((c) => !Deno.args[0].split(',').includes(c));
   filterRegex = skip.length > 0 ? new RegExp(skip.join('|')) : undefined;
 }
 
