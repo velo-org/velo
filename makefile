@@ -3,7 +3,7 @@ run:
 
 #usage: make bench filter=LRU 
 bench:
-	deno run -c tsconfig.json --allow-hrtime ./benchmark/runBenchmarks.ts $(filter)
+	deno run -c tsconfig.json --allow-hrtime --allow-write --allow-read ./benchmark/runBenchmarks.ts $(filter)
 
 utest:
 	deno test ./test
