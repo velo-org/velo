@@ -5,8 +5,9 @@ import {
 } from '../deps.ts';
 
 // benches
-import './benches/lruCache.bench.ts';
-import './benches/rrCache.bench.ts';
+//import './benches/lruCache.bench.ts';
+//import './benches/rrCache.bench.ts';
+import './benches/scCache.bench.ts';
 
 let filterRegex: any;
 

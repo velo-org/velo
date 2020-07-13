@@ -1,8 +1,8 @@
 import * as Log from 'https://deno.land/std/log/mod.ts';
 import { runBenchmarks, bench } from 'https://deno.land/std/testing/bench.ts';
-import { assert, assertEquals } from 'https://deno.land/std/testing/asserts.ts';
+//import { assert, assertEquals } from 'https://deno.land/std/testing/asserts.ts';
 
-export { Log, runBenchmarks, bench, assert, assertEquals };
+export { Log, runBenchmarks, bench };
 
 import {
   prettyBenchmarkResult,

@@ -2,14 +2,31 @@ import { BaseCache } from './baseCache.ts';
 import { Options } from '../models/options.ts';
 import { TypedArray } from '../utils/typedArray.ts';
 
-//TODO: evict no good performance :(
 type keyType = number | string;
+/**
+ *A cache object that deletes a random entry
+ *
+ * @export
+ * @class RRCache
+ * @extends {BaseCache}
+ * @template V
+ * @example
+ * const rrc = new RRCache({ maxCache: 5 }); // init Random Replacement Cache with max 5 key-value pairs
+ * rrc.set('1', { hello: 'asdf' }); // sets 1
+ * rrc.set('2', { hello: 'asdf' }); // sets 2
+ * rrc.set('3', { hello: 'asdf' }); // sets 3
+ * rrc.set('4', { hello: 'asdf' }); // sets 4
+ * rrc.set('5', { hello: 'asdf' }); // sets 5
+ *
+ * rrc.set('6', { hello: 'asdfdd' }); // sets 6 removes random entry
+ */
 export class RRCache<V = any> extends BaseCache {
   private storage: { [key in keyType]: V | undefined };
-  keys: (keyType | undefined)[];
-  freeMemory: number;
-  counter: number;
-  randomArr: Float64Array | Uint8Array | Uint16Array | Uint32Array;
+  private keys: (keyType | undefined)[];
+  private freeMemory: number;
+  private counter: number;
+  private size: number;
+  private randomArr: Float64Array | Uint8Array | Uint16Array | Uint32Array;
 
   constructor(options: Options) {
     super(options);
@@ -17,8 +34,9 @@ export class RRCache<V = any> extends BaseCache {
     this.keys = [];
     this.freeMemory = -1;
     this.counter = 0;
-    const PointerArray = TypedArray.getPointerArray(options.maxCache);
-    this.randomArr = new PointerArray(options.maxCache);
+    this.size = 0;
+    const PointerArray = TypedArray.getPointerArray(this.maxCache);
+    this.randomArr = new PointerArray(this.maxCache);
     for (var i = this.maxCache; i > 0; i--) {
       this.randomArr[i] = (this.maxCache * Math.random()) | 0;
     }
@@ -29,12 +47,13 @@ export class RRCache<V = any> extends BaseCache {
       this.storage[key] = value;
       return;
     }
-    if (this.keys.length >= this.maxCache) {
+    if (this.size >= this.maxCache) {
       const prop = this.randomProperty()!;
-      this.storage[key] =
-        this.storage[prop] && (delete this.storage[prop] as any);
+      delete this.storage[prop];
+    } else {
+      this.size++;
     }
-    if (this.freeMemory !== -1 && this.keys.length >= this.maxCache) {
+    if (this.freeMemory !== -1 && this.size < this.maxCache) {
       this.keys[this.freeMemory] = key;
       this.freeMemory = -1;
     } else {
@@ -74,5 +93,8 @@ export class RRCache<V = any> extends BaseCache {
 
   get Storage() {
     return this.storage;
+  }
+  get Size() {
+    return Object.keys(this.storage).length;
   }
 }

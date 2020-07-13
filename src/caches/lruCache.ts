@@ -4,7 +4,28 @@ import { TypedArray } from '../utils/typedArray.ts';
 
 //TODO: sufficent delete method
 type keyType = number | string;
+/**
+ * A cache object that deletes the least-recently-used items.
+ *
+ * @export
+ * @class LRUCache
+ * @extends {BaseCache}
+ * @template V
+ * @example
+ * const lruc = new LRUCache({ maxCache: 5 }); // init LRUCache with a max of 5 key-value pairs
+ * lruc.set(1, { hello: 'asdf' }); //sets 1
+ * lruc.set('2', { hello: 'asdf' }); // sets 2
+ * lruc.set('3', { hello: 'asdf' }); // sets 3
+ * lruc.set('4', { hello: 'asdf' }); // sets 4
+ * lruc.set('5', { hello: 'asdf' }); // sets 5
+ * 
+ * lruc.get('2'); // gets 2 and pushes to the front
+ *
+ * lruc.set('6', { hello: 'asdfdd' }); // removes 1 sets 6 
+ * lruc.set('7', { hello: 'asdfdd' }); // removes 3 sets 7
+ * lruc.set(8, { hello: 'asdfdd' }); // removes 4 sets 8
 
+ */
 export class LRUCache<V = any> extends BaseCache {
   private head: number;
   private tail: number;
@@ -48,8 +69,7 @@ export class LRUCache<V = any> extends BaseCache {
     else {
       pointer = this.tail;
       this.tail = this.backward[pointer];
-      this.items[key] = (this.items[this.keys[pointer]] &&
-        delete this.items[this.keys[pointer]]) as any;
+      delete this.items[this.keys[pointer]];
     }
 
     // Storing key & value
@@ -95,7 +115,7 @@ export class LRUCache<V = any> extends BaseCache {
   get(key: keyType): V | undefined {
     const pointer = this.items[key];
 
-    if (typeof pointer === 'undefined') return;
+    if (!pointer) return;
 
     this.toTop(pointer);
 
@@ -109,6 +129,11 @@ export class LRUCache<V = any> extends BaseCache {
   }
 
   forEach(callback: (item: { value: V; key: keyType }, index: number) => void) {
+    console.log(this.forward);
+    console.log(this.backward);
+    console.log(this.head);
+    console.log(this.tail);
+    console.log(this.items);
     let i = 0,
       l = this.size;
     let pointer = this.head,
