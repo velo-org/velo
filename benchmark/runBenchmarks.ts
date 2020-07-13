@@ -13,14 +13,16 @@ import './benches/scCache.bench.ts';
 
 let filterRegex: RegExp | undefined;
 
-if (Deno.args.length > 0) {
+if (Deno.args.length > 0 && Deno.args[0] !== 'md') {
   const skip = CACHES.filter((c) => !Deno.args[0].split(',').includes(c));
   filterRegex = skip.length > 0 ? new RegExp(skip.join('|')) : undefined;
 }
 
 runBenchmarks({ silent: true, skip: filterRegex }, prettyBenchmarkProgress())
   .then((b) => {
-    generateMarkdown(b.results);
+    if (Deno.args.length > 0 && Deno.args.includes('md')) {
+      generateMarkdown(b.results);
+    }
     return b;
   })
   .then(prettyBenchmarkResult())
