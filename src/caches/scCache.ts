@@ -1,8 +1,8 @@
 import { BaseCache } from './baseCache.ts';
 import { Options } from '../models/options.ts';
 import { getTypedArray } from '../utils/typedArray.ts';
+import { Key } from '../models/key.ts';
 
-type keyType = number | string;
 /**
  *
  *
@@ -25,9 +25,9 @@ type keyType = number | string;
 export class SCChache<V = any> extends BaseCache {
   private head: number;
   private tail: number;
-  private arrayMap: { key: keyType; value: V; sChance: boolean }[];
+  private arrayMap: { key: Key; value: V; sChance: boolean }[];
   private backward: Float64Array | Uint8Array | Uint16Array | Uint32Array;
-  private items: { [key in keyType]: number };
+  private items: { [key in Key]: number };
   private size: number;
 
   constructor(options: Options) {
@@ -40,7 +40,7 @@ export class SCChache<V = any> extends BaseCache {
     this.arrayMap = new Array(this.maxCache);
   }
 
-  set(key: keyType, value: V) {
+  set(key: Key, value: V) {
     let pointer = this.items[key];
     if (pointer) {
       this.arrayMap[pointer].value = value;
@@ -80,6 +80,7 @@ export class SCChache<V = any> extends BaseCache {
       }
     }
   }
+
   private toBottom(pointer: number) {
     if (this.tail === pointer) return;
 
@@ -99,17 +100,20 @@ export class SCChache<V = any> extends BaseCache {
 
     return;
   }
+
   get(key: string) {
     const pointer = this.items[key];
     this.arrayMap[pointer].sChance = true;
     return this.arrayMap[pointer];
   }
-  forEach(callback: (item: { key: keyType; value: V }, index: number) => void) {
+
+  forEach(callback: (item: { key: Key; value: V }, index: number) => void) {
     this.arrayMap.forEach((val, i) => {
       callback.call(this, { key: val.key, value: val.value }, i);
     });
   }
-  has(key: keyType) {
+
+  has(key: Key) {
     return this.items[key] ? true : false;
   }
 
