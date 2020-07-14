@@ -1,8 +1,8 @@
 import { BaseCache } from './baseCache.ts';
 import { Options } from '../models/options.ts';
-import { TypedArray } from '../utils/typedArray.ts';
+import { getTypedArray } from '../utils/typedArray.ts';
+import { Key } from '../models/key.ts';
 
-type keyType = number | string;
 /**
  *  when being accessed an item gets a second Chance so it can't be evicted immediately
  *
@@ -25,15 +25,14 @@ type keyType = number | string;
 export class SCChache<V = any> extends BaseCache {
   private head: number;
   private tail: number;
-  private arrayMap: { key: keyType; value: V; sChance: boolean }[];
+  private arrayMap: { key: Key; value: V; sChance: boolean }[];
   private backward: Float64Array | Uint8Array | Uint16Array | Uint32Array;
-  private items: { [key in keyType]: number };
+  private items: { [key in Key]: number };
   private size: number;
 
   constructor(options: Options) {
     super(options);
-    const PointerArray = TypedArray.getPointerArray(options.maxCache);
-    this.backward = new PointerArray(options.maxCache);
+    this.backward = getTypedArray(options.maxCache);
     this.head = 0;
     this.size = 0;
     this.tail = 0;
@@ -41,7 +40,7 @@ export class SCChache<V = any> extends BaseCache {
     this.arrayMap = new Array(this.maxCache);
   }
 
-  set(key: keyType, value: V) {
+  set(key: Key, value: V) {
     let pointer = this.items[key];
     if (pointer) {
       this.arrayMap[pointer].value = value;
@@ -81,7 +80,11 @@ export class SCChache<V = any> extends BaseCache {
       }
     }
   }
+<<<<<<< HEAD
   private removeFromList(pointer: number) {}
+=======
+
+>>>>>>> ea0f161966510038c96fa9cdb036700ffd14fb0e
   private toBottom(pointer: number) {
     if (this.tail === pointer) return;
 
@@ -101,22 +104,28 @@ export class SCChache<V = any> extends BaseCache {
 
     return;
   }
+
   get(key: string) {
     const pointer = this.items[key];
     this.arrayMap[pointer].sChance = true;
     return this.arrayMap[pointer];
   }
-  forEach(callback: (item: { key: keyType; value: V }, index: number) => void) {
+
+  forEach(callback: (item: { key: Key; value: V }, index: number) => void) {
     this.arrayMap.forEach((val, i) => {
       callback.call(this, { key: val.key, value: val.value }, i);
     });
   }
 
+<<<<<<< HEAD
   remove(key: keyType) {
     const pointer = this.items[key];
   }
 
   has(key: keyType) {
+=======
+  has(key: Key) {
+>>>>>>> ea0f161966510038c96fa9cdb036700ffd14fb0e
     return this.items[key] ? true : false;
   }
 

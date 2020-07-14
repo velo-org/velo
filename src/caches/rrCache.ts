@@ -1,8 +1,8 @@
 import { BaseCache } from './baseCache.ts';
 import { Options } from '../models/options.ts';
-import { TypedArray } from '../utils/typedArray.ts';
+import { getTypedArray } from '../utils/typedArray.ts';
+import { Key } from '../models/key.ts';
 
-type keyType = number | string;
 /**
  *A cache object that deletes a random entry
  *
@@ -21,8 +21,8 @@ type keyType = number | string;
  * rrc.set('6', { hello: 'asdfdd' }); // sets 6 removes random entry
  */
 export class RRCache<V = any> extends BaseCache {
-  private storage: { [key in keyType]: V | undefined };
-  private keys: (keyType | undefined)[];
+  private storage: { [key in Key]: V | undefined };
+  private keys: (Key | undefined)[];
   private freeMemory: number;
   private counter: number;
   private size: number;
@@ -35,14 +35,13 @@ export class RRCache<V = any> extends BaseCache {
     this.freeMemory = -1;
     this.counter = 0;
     this.size = 0;
-    const PointerArray = TypedArray.getPointerArray(this.maxCache);
-    this.randomArr = new PointerArray(this.maxCache);
+    this.randomArr = getTypedArray(this.maxCache);
     for (var i = this.maxCache; i > 0; i--) {
       this.randomArr[i] = (this.maxCache * Math.random()) | 0;
     }
   }
 
-  set(key: keyType, value: V) {
+  set(key: Key, value: V) {
     if (this.storage[key]) {
       this.storage[key] = value;
       return;
@@ -76,12 +75,12 @@ export class RRCache<V = any> extends BaseCache {
     return this.storage[key]!;
   }
 
-  remove(key: keyType) {
+  remove(key: Key) {
     this.keys.splice(this.keys.indexOf(key), 1);
     delete this.storage[key];
   }
 
-  forEach(callback: (item: { key: keyType; value: V }, index: number) => void) {
+  forEach(callback: (item: { key: Key; value: V }, index: number) => void) {
     let i = 0;
     Object.keys(this.storage).forEach((key) => {
       if (this.storage[key]) {
