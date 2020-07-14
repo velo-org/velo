@@ -3,12 +3,6 @@ import { Options } from '../models/options.ts';
 import { getTypedArray } from '../utils/typedArray.ts';
 import { Key } from '../models/key.ts';
 
-<<<<<<< HEAD
-type keyType = number | string;
-=======
-//TODO: sufficent delete method
-
->>>>>>> ea0f161966510038c96fa9cdb036700ffd14fb0e
 /**
  * A cache object that deletes the least-recently-used items.
  *
@@ -128,6 +122,14 @@ export class LRUCache<V = any> extends BaseCache {
     this.tail = 0;
     this.items = {};
   }
+  remove(key: Key) {
+    const pointer = this.items[key];
+    this.freeMemory.push(pointer);
+    this.keys[pointer] = undefined;
+    this.values[pointer] = undefined;
+    this.size--;
+    delete this.items[key];
+  }
 
   get(key: Key): V | undefined {
     const pointer = this.items[key];
@@ -145,16 +147,12 @@ export class LRUCache<V = any> extends BaseCache {
     return this.values[pointer];
   }
 
-<<<<<<< HEAD
-  forEach(callback: (item: { value: V; key: keyType }, index: number) => void) {
-=======
   forEach(callback: (item: { value: V; key: Key }, index: number) => void) {
     console.log(this.forward);
     console.log(this.backward);
     console.log(this.head);
     console.log(this.tail);
     console.log(this.items);
->>>>>>> ea0f161966510038c96fa9cdb036700ffd14fb0e
     let i = 0,
       l = this.size;
     let pointer = this.head,
@@ -164,12 +162,14 @@ export class LRUCache<V = any> extends BaseCache {
 
     while (i < l) {
       if (keys[pointer]) {
-        callback.call(
-          this,
-          { value: values[pointer]!, key: keys[pointer]! },
-          i
-        );
-        i++;
+        if (keys[pointer]) {
+          callback.call(
+            this,
+            { value: values[pointer]!, key: keys[pointer]! },
+            i
+          );
+          i++;
+        }
       }
 
       pointer = forward[pointer];

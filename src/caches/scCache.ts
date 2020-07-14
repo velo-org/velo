@@ -80,11 +80,8 @@ export class SCChache<V = any> extends BaseCache {
       }
     }
   }
-<<<<<<< HEAD
   private removeFromList(pointer: number) {}
-=======
 
->>>>>>> ea0f161966510038c96fa9cdb036700ffd14fb0e
   private toBottom(pointer: number) {
     if (this.tail === pointer) return;
 
@@ -117,15 +114,11 @@ export class SCChache<V = any> extends BaseCache {
     });
   }
 
-<<<<<<< HEAD
-  remove(key: keyType) {
+  remove(key: Key) {
     const pointer = this.items[key];
   }
 
-  has(key: keyType) {
-=======
   has(key: Key) {
->>>>>>> ea0f161966510038c96fa9cdb036700ffd14fb0e
     return this.items[key] ? true : false;
   }
 
