@@ -1,6 +1,6 @@
 import { BaseCache } from './baseCache.ts';
 import { Options } from '../models/options.ts';
-import { TypedArray } from '../utils/typedArray.ts';
+import { getTypedArray } from '../utils/typedArray.ts';
 
 //TODO: sufficent delete method
 type keyType = number | string;
@@ -39,9 +39,8 @@ export class LRUCache<V = any> extends BaseCache {
 
   constructor(options: Options) {
     super(options);
-    const PointerArray = TypedArray.getPointerArray(options.maxCache);
-    this.forward = new PointerArray(options.maxCache);
-    this.backward = new PointerArray(options.maxCache);
+    this.forward = getTypedArray(options.maxCache);
+    this.backward = getTypedArray(options.maxCache);
     this.head = 0;
     this.size = 0;
     this.tail = 0;

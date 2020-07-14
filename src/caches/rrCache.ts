@@ -1,6 +1,6 @@
 import { BaseCache } from './baseCache.ts';
 import { Options } from '../models/options.ts';
-import { TypedArray } from '../utils/typedArray.ts';
+import { getTypedArray } from '../utils/typedArray.ts';
 
 type keyType = number | string;
 /**
@@ -35,8 +35,7 @@ export class RRCache<V = any> extends BaseCache {
     this.freeMemory = -1;
     this.counter = 0;
     this.size = 0;
-    const PointerArray = TypedArray.getPointerArray(this.maxCache);
-    this.randomArr = new PointerArray(this.maxCache);
+    this.randomArr = getTypedArray(this.maxCache);
     for (var i = this.maxCache; i > 0; i--) {
       this.randomArr[i] = (this.maxCache * Math.random()) | 0;
     }
