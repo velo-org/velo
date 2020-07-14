@@ -4,9 +4,9 @@ import {
   bench,
   BenchmarkResult,
 } from 'https://deno.land/std/testing/bench.ts';
-import { assert, assertEquals } from 'https://deno.land/std/testing/asserts.ts';
+//import { assert, assertEquals } from 'https://deno.land/std/testing/asserts.ts';
 
-export { Log, runBenchmarks, bench, BenchmarkResult, assert, assertEquals };
+export { Log, runBenchmarks, bench, BenchmarkResult };
 
 import {
   prettyBenchmarkResult,

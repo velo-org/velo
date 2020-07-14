@@ -4,7 +4,7 @@ import { TypedArray } from '../utils/typedArray.ts';
 
 type keyType = number | string;
 /**
- *
+ *  when being accessed an item gets a second Chance so it can't be evicted immediately
  *
  * @export
  * @class SCChache
@@ -81,6 +81,7 @@ export class SCChache<V = any> extends BaseCache {
       }
     }
   }
+  private removeFromList(pointer: number) {}
   private toBottom(pointer: number) {
     if (this.tail === pointer) return;
 
@@ -110,6 +111,11 @@ export class SCChache<V = any> extends BaseCache {
       callback.call(this, { key: val.key, value: val.value }, i);
     });
   }
+
+  remove(key: keyType) {
+    const pointer = this.items[key];
+  }
+
   has(key: keyType) {
     return this.items[key] ? true : false;
   }

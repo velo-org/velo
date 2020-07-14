@@ -1,6 +1,7 @@
 import { LRUCache } from './src/caches/lruCache.ts';
 import { RRCache } from './src/caches/rrCache.ts';
 import { SCChache } from './src/caches/scCache.ts';
+import { LFUCache } from './src/caches/lfuCache.ts';
 
 console.log('===========================');
 console.log('LRU CACHE');
@@ -13,10 +14,18 @@ lruc.set('3', { hello: 'asdf' });
 lruc.set('4', { hello: 'asdf' });
 lruc.set('5', { hello: 'asdf' });
 
-lruc.get('2');
+lruc.remove('5');
+
 lruc.set('6', { hello: 'asdfdd' });
-lruc.set('7', { hello: 'asdfdd' });
-lruc.set(8, { hello: 'asdfdd' });
+lruc.get('2'); //26345
+
+lruc.set('7', { hello: 'asdfdd' }); //72634
+lruc.set(8, { hello: 'asdfdd' }); //87263
+lruc.set('9', { hello: 'asdfdd' }); // 96872
+
+lruc.get('4');
+lruc.set('10', { hello: 'asdfsdf' });
+
 lruc.forEach((item, index) => {
   console.log(index, item);
 });
@@ -61,3 +70,26 @@ scc.set('10', { hello: 'asdfdd' });
 scc.forEach((i, ind) => {
   console.log(i, ind);
 });
+
+console.log('===========================');
+console.log('LFU CACHE');
+console.log('===========================');
+
+// const lfuc = new LFUCache({ maxCache: 5 }); // init Second Chance Cache with max 5 key-value pairs
+// lfuc.set('1', { hello: 'asdf' }); // sets 1
+// lfuc.set('2', { hello: 'asdf' }); // sets 2
+// lfuc.set('3', { hello: 'asdf' }); // sets 3
+// lfuc.set('4', { hello: 'asdf' }); // sets 4
+// lfuc.set('5', { hello: 'asdf' }); // sets 5
+// console.log(lfuc.get('1')); // gets 2 second Chance gets activated
+// lfuc.set('6', { hello: 'asdfdd' }); // sets 6 removes 2
+
+// lfuc.set('7', { hello: 'asdfdd' }); // sets 7 remove 1
+// lfuc.set('8', { hello: 'asdfdd' });
+// lfuc.set('9', { hello: 'asdfdd' });
+// console.log(scc.get('5'));
+// console.log(lfuc.get('6'));
+// lfuc.set('10', { hello: 'asdfdd' });
+// lfuc.forEach((i, ind) => {
+//   console.log(i, ind);
+// });

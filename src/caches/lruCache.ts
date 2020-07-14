@@ -2,7 +2,6 @@ import { BaseCache } from './baseCache.ts';
 import { Options } from '../models/options.ts';
 import { TypedArray } from '../utils/typedArray.ts';
 
-//TODO: sufficent delete method
 type keyType = number | string;
 /**
  * A cache object that deletes the least-recently-used items.
@@ -29,10 +28,11 @@ type keyType = number | string;
 export class LRUCache<V = any> extends BaseCache {
   private head: number;
   private tail: number;
-  private keys: (string | number)[];
-  private values: V[];
+  private keys: (string | number | undefined)[];
+  private values: (V | undefined)[];
   private forward: Float64Array | Uint8Array | Uint16Array | Uint32Array;
   private backward: Float64Array | Uint8Array | Uint16Array | Uint32Array;
+  private freeMemory: number[];
 
   private items: { [key in keyType]: number };
   private size: number;
@@ -46,6 +46,7 @@ export class LRUCache<V = any> extends BaseCache {
     this.size = 0;
     this.tail = 0;
     this.items = {};
+    this.freeMemory = [];
     this.keys = new Array(this.maxCache);
     this.values = new Array(this.maxCache);
   }
@@ -62,14 +63,25 @@ export class LRUCache<V = any> extends BaseCache {
 
     // The cache is not yet full
     if (this.size < this.maxCache) {
-      pointer = this.size++;
+      if (this.freeMemory.length > 0) {
+        pointer = this.freeMemory[0];
+        this.freeMemory.splice(0, 1);
+        this.size++;
+        this.toTop(pointer);
+        this.items[key] = pointer;
+        this.keys[pointer] = key;
+        this.values[pointer] = value;
+        return;
+      } else {
+        pointer = this.size++;
+      }
     }
 
     // Cache is full, we need to drop the last value
     else {
       pointer = this.tail;
       this.tail = this.backward[pointer];
-      delete this.items[this.keys[pointer]];
+      delete this.items[this.keys[pointer]!];
     }
 
     // Storing key & value
@@ -115,7 +127,7 @@ export class LRUCache<V = any> extends BaseCache {
   get(key: keyType): V | undefined {
     const pointer = this.items[key];
 
-    if (!pointer) return;
+    if (pointer === undefined) return;
 
     this.toTop(pointer);
 
@@ -129,11 +141,6 @@ export class LRUCache<V = any> extends BaseCache {
   }
 
   forEach(callback: (item: { value: V; key: keyType }, index: number) => void) {
-    console.log(this.forward);
-    console.log(this.backward);
-    console.log(this.head);
-    console.log(this.tail);
-    console.log(this.items);
     let i = 0,
       l = this.size;
     let pointer = this.head,
@@ -142,11 +149,16 @@ export class LRUCache<V = any> extends BaseCache {
       forward = this.forward;
 
     while (i < l) {
-      callback.call(this, { value: values[pointer], key: keys[pointer] }, i);
+      if (keys[pointer]) {
+        callback.call(
+          this,
+          { value: values[pointer]!, key: keys[pointer]! },
+          i
+        );
+        i++;
+      }
 
       pointer = forward[pointer];
-
-      i++;
     }
   }
 
