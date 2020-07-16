@@ -75,21 +75,29 @@ console.log('===========================');
 console.log('LFU CACHE');
 console.log('===========================');
 
-// const lfuc = new LFUCache({ maxCache: 5 }); // init Second Chance Cache with max 5 key-value pairs
-// lfuc.set('1', { hello: 'asdf' }); // sets 1
-// lfuc.set('2', { hello: 'asdf' }); // sets 2
-// lfuc.set('3', { hello: 'asdf' }); // sets 3
-// lfuc.set('4', { hello: 'asdf' }); // sets 4
-// lfuc.set('5', { hello: 'asdf' }); // sets 5
-// console.log(lfuc.get('1')); // gets 2 second Chance gets activated
-// lfuc.set('6', { hello: 'asdfdd' }); // sets 6 removes 2
+const lfuc = new LFUCache({ maxCache: 5 }); // init Second Chance Cache with max 5 key-value pairs
+lfuc.set('1', { hello: 'asdf' }); // sets 1
+lfuc.set('2', { hello: 'asdf' }); // sets 2
+lfuc.set('3', { hello: 'asdf' }); // sets 3
+lfuc.set('4', { hello: 'asdf' }); // sets 4
+lfuc.set('5', { hello: 'asdf' }); // sets 5
+console.log(lfuc.get('1')); // gets 2 second Chance gets activated
+lfuc.set('6', { hello: 'asdfdd' }); // sets 6 removes 2
 
-// lfuc.set('7', { hello: 'asdfdd' }); // sets 7 remove 1
-// lfuc.set('8', { hello: 'asdfdd' });
-// lfuc.set('9', { hello: 'asdfdd' });
-// console.log(scc.get('5'));
-// console.log(lfuc.get('6'));
-// lfuc.set('10', { hello: 'asdfdd' });
-// lfuc.forEach((i, ind) => {
-//   console.log(i, ind);
-// });
+lfuc.set('7', { hello: 'asdfdd' }); // sets 7 remove 1
+lfuc.set('8', { hello: 'asdfdd' });
+lfuc.set('9', { hello: 'asdfdd' });
+
+console.log(lfuc.get('6'));
+lfuc.set('10', { hello: 'asdfdd' });
+lfuc.forEach((i, ind) => {
+  console.log(i, ind);
+});
+
+const arr: Uint32Array = new Uint32Array(13);
+arr[0] = 1;
+arr[1] = 2;
+arr[2] = 3;
+
+const barr = arr.filter((x) => x != 1);
+console.log(barr);

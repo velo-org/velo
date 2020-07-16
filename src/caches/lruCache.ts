@@ -39,8 +39,9 @@ export class LRUCache<V = any> extends BaseCache {
 
   constructor(options: Options) {
     super(options);
-    this.forward = getTypedArray(options.maxCache);
-    this.backward = getTypedArray(options.maxCache);
+    if (!this.maxCache) throw new Error('Please provide a Maximum Cache');
+    this.forward = getTypedArray(this.maxCache);
+    this.backward = getTypedArray(this.maxCache);
     this.head = 0;
     this.size = 0;
     this.tail = 0;
@@ -51,6 +52,7 @@ export class LRUCache<V = any> extends BaseCache {
   }
 
   set(key: Key, value: V) {
+    if (this.freeMemory.length === this.maxCache) this.freeMemory = [];
     let pointer = this.items[key];
 
     if (pointer) {
@@ -61,7 +63,7 @@ export class LRUCache<V = any> extends BaseCache {
     }
 
     // The cache is not yet full
-    if (this.size < this.maxCache) {
+    if (this.size < this.maxCache!) {
       if (this.freeMemory.length > 0) {
         pointer = this.freeMemory[0];
         this.freeMemory.splice(0, 1);
@@ -94,6 +96,63 @@ export class LRUCache<V = any> extends BaseCache {
     this.head = pointer;
   }
 
+  setPop(key: Key, value: V) {
+    if (this.freeMemory.length === this.maxCache) this.freeMemory = [];
+    var oldValue = null;
+    var oldKey = null;
+    // The key already exists, we just need to update the value and splay on top
+    var pointer = this.items[key];
+
+    if (typeof pointer !== 'undefined') {
+      this.toTop(pointer);
+      oldValue = this.values[pointer];
+      this.values[pointer] = value;
+      return { evicted: false, key: key, value: oldValue };
+    }
+
+    // The cache is not yet full
+    if (this.size < this.maxCache!) {
+      if (this.freeMemory.length > 0) {
+        pointer = this.freeMemory[0];
+        this.freeMemory.splice(0, 1);
+        this.size++;
+        this.toTop(pointer);
+        this.items[key] = pointer;
+        this.keys[pointer] = key;
+        this.values[pointer] = value;
+        return;
+      } else {
+        pointer = this.size++;
+      }
+    }
+
+    // Cache is full, we need to drop the last value
+    else {
+      pointer = this.tail;
+      this.tail = this.backward[pointer];
+      oldValue = this.values[pointer];
+      oldKey = this.keys[pointer];
+      delete this.items[this.keys[pointer]!];
+    }
+
+    // Storing key & value
+    this.items[key] = pointer;
+    this.keys[pointer] = key;
+    this.values[pointer] = value;
+
+    // Moving the item at the front of the list
+    this.forward[pointer] = this.head;
+    this.backward[this.head] = pointer;
+    this.head = pointer;
+
+    // Return object if eviction took place, otherwise return null
+    if (oldKey) {
+      return { evicted: true, key: oldKey, value: oldValue };
+    } else {
+      return null;
+    }
+  }
+
   toTop(pointer: number) {
     if (this.head === pointer) return;
 
@@ -121,6 +180,11 @@ export class LRUCache<V = any> extends BaseCache {
     this.head = 0;
     this.tail = 0;
     this.items = {};
+    this.freeMemory = [];
+    this.keys = [];
+    this.values = [];
+    this.backward = getTypedArray(this.maxCache!);
+    this.forward = getTypedArray(this.maxCache!);
   }
   remove(key: Key) {
     const pointer = this.items[key];

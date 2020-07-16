@@ -3,6 +3,8 @@ import { Options } from '../models/options.ts';
 import { getTypedArray } from '../utils/typedArray.ts';
 import { Key } from '../models/key.ts';
 
+//TODO: delete single entry
+
 /**
  *  when being accessed an item gets a second Chance so it can't be evicted immediately
  *
@@ -32,7 +34,8 @@ export class SCChache<V = any> extends BaseCache {
 
   constructor(options: Options) {
     super(options);
-    this.backward = getTypedArray(options.maxCache);
+    if (!this.maxCache) throw new Error('Please provide a Maximum Cache');
+    this.backward = getTypedArray(this.maxCache);
     this.head = 0;
     this.size = 0;
     this.tail = 0;
@@ -48,10 +51,10 @@ export class SCChache<V = any> extends BaseCache {
       return;
     }
 
-    if (this.size < this.maxCache) {
+    if (this.size < this.maxCache!) {
       pointer = this.size++;
       this.items[key] = pointer;
-      this.arrayMap[this.size - 1] = { key, value, sChance: false };
+      this.arrayMap[pointer] = { key, value, sChance: false };
 
       // Moving the item at the end of the list
       this.backward[this.tail] = pointer;
@@ -80,7 +83,6 @@ export class SCChache<V = any> extends BaseCache {
       }
     }
   }
-  private removeFromList(pointer: number) {}
 
   private toBottom(pointer: number) {
     if (this.tail === pointer) return;
@@ -102,16 +104,31 @@ export class SCChache<V = any> extends BaseCache {
     return;
   }
 
-  get(key: string) {
+  get(key: Key) {
     const pointer = this.items[key];
+    if (!pointer) return undefined;
     this.arrayMap[pointer].sChance = true;
     return this.arrayMap[pointer];
   }
 
+  peek(key: Key) {
+    const pointer = this.items[key];
+    if (!pointer) return undefined;
+    return this.arrayMap[pointer];
+  }
   forEach(callback: (item: { key: Key; value: V }, index: number) => void) {
     this.arrayMap.forEach((val, i) => {
       callback.call(this, { key: val.key, value: val.value }, i);
     });
+  }
+
+  clear() {
+    this.backward = getTypedArray(this.maxCache!);
+    this.head = 0;
+    this.size = 0;
+    this.tail = 0;
+    this.items = {};
+    this.arrayMap = new Array(this.maxCache);
   }
 
   remove(key: Key) {

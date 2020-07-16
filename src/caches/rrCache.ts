@@ -30,6 +30,7 @@ export class RRCache<V = any> extends BaseCache {
 
   constructor(options: Options) {
     super(options);
+    if (!this.maxCache) throw new Error('Please provide a Maximum Cache');
     this.storage = {};
     this.keys = [];
     this.freeMemory = -1;
@@ -46,13 +47,13 @@ export class RRCache<V = any> extends BaseCache {
       this.storage[key] = value;
       return;
     }
-    if (this.size >= this.maxCache) {
+    if (this.size >= this.maxCache!) {
       const prop = this.randomProperty()!;
       delete this.storage[prop];
     } else {
       this.size++;
     }
-    if (this.freeMemory !== -1 && this.size < this.maxCache) {
+    if (this.freeMemory !== -1 && this.size < this.maxCache!) {
       this.keys[this.freeMemory] = key;
       this.freeMemory = -1;
     } else {
@@ -63,7 +64,7 @@ export class RRCache<V = any> extends BaseCache {
   private randomProperty() {
     let num = this.randomArr[this.counter];
     this.counter++;
-    if (this.counter >= this.maxCache) this.counter = 0;
+    if (this.counter >= this.maxCache!) this.counter = 0;
     if (this.freeMemory === num) num += 1;
     const key = this.keys[num];
     this.keys[num] = undefined;
@@ -81,19 +82,29 @@ export class RRCache<V = any> extends BaseCache {
   }
 
   forEach(callback: (item: { key: Key; value: V }, index: number) => void) {
-    let i = 0;
-    Object.keys(this.storage).forEach((key) => {
-      if (this.storage[key]) {
-        callback.call(this, { key, value: this.storage[key]! }, i);
-        i++;
-      }
+    Object.keys(this.storage).forEach((key, i) => {
+      callback.call(this, { key, value: this.storage[key]! }, i);
     });
   }
 
-  get Storage() {
-    return this.storage;
+  has(key: Key) {
+    return this.storage[key] ? true : false;
+  }
+
+  get Keys() {
+    return this.keys.filter((key) => key !== undefined);
+  }
+  get Values() {
+    return Object.keys(this.storage).map((k) => this.storage[k]);
   }
   get Size() {
-    return Object.keys(this.storage).length;
+    return this.size;
+  }
+  clear() {
+    this.size = 0;
+    this.keys = [];
+    this.freeMemory = -1;
+    this.counter = 0;
+    this.storage = {};
   }
 }
