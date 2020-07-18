@@ -1,10 +1,7 @@
 import { BaseCache } from './baseCache.ts';
 import { Options } from '../models/options.ts';
-import { quickSort } from '../utils/quickSort.ts';
 import { Node, DoublyLinkedList } from '../utils/doublyLinkedList.ts';
 import { Key } from '../models/key.ts';
-
-//TODO: delete single entry
 
 export class LFUCache<V = any> extends BaseCache {
   keys: { [key in Key]: Node<V> };
@@ -79,6 +76,7 @@ export class LFUCache<V = any> extends BaseCache {
         this.frequency[oldFrequencyCount].size === 0
       ) {
         this.minFrequency++;
+        delete this.frequency[oldFrequencyCount];
       }
     }
   }
@@ -103,6 +101,7 @@ export class LFUCache<V = any> extends BaseCache {
       this.frequency[oldFrequencyCount].size === 0
     ) {
       this.minFrequency++;
+      delete this.frequency[oldFrequencyCount];
     }
 
     return node.data;
@@ -111,6 +110,23 @@ export class LFUCache<V = any> extends BaseCache {
     Object.keys(this.keys).forEach((val, i) => {
       callback.call(this, { key: val, value: this.keys[val].data }, i);
     });
+  }
+
+  remove(key: Key) {
+    const node = this.keys[key];
+    if (!node) throw new Error('key not found');
+    else {
+      const oldFrequencyCount = node.frequencyCount;
+      this.frequency[oldFrequencyCount].removeNode(node);
+      delete this.keys[key];
+      if (
+        oldFrequencyCount === this.minFrequency &&
+        this.frequency[oldFrequencyCount].size === 0
+      ) {
+        this.minFrequency++;
+        delete this.frequency[oldFrequencyCount];
+      }
+    }
   }
 
   get Values() {
@@ -133,5 +149,12 @@ export class LFUCache<V = any> extends BaseCache {
 
   has(key: Key) {
     return this.keys[key] ? true : false;
+  }
+
+  clear() {
+    this.keys = {};
+    this.frequency = {};
+    this.size = 0;
+    this.minFrequency = 1;
   }
 }

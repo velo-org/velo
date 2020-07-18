@@ -198,7 +198,7 @@ export class LRUCache<V = any> extends BaseCache {
   get(key: Key): V | undefined {
     const pointer = this.items[key];
 
-    if (pointer === undefined) return;
+    if (pointer === undefined) return undefined;
 
     this.toTop(pointer);
 
@@ -207,7 +207,7 @@ export class LRUCache<V = any> extends BaseCache {
 
   peek(key: Key) {
     const pointer = this.items[key];
-    if (pointer === undefined) return;
+    if (pointer === undefined) return undefined;
     return this.values[pointer];
   }
 
