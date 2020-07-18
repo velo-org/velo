@@ -81,6 +81,7 @@ lfuc.set('2', { hello: 'asdf' }); // sets 2
 lfuc.set('3', { hello: 'asdf' }); // sets 3
 lfuc.set('4', { hello: 'asdf' }); // sets 4
 lfuc.set('5', { hello: 'asdf' }); // sets 5
+console.log(lfuc.Keys, lfuc.Values);
 console.log(lfuc.get('1')); // gets 2 second Chance gets activated
 lfuc.set('6', { hello: 'asdfdd' }); // sets 6 removes 2
 
@@ -90,14 +91,9 @@ lfuc.set('9', { hello: 'asdfdd' });
 
 console.log(lfuc.get('6'));
 lfuc.set('10', { hello: 'asdfdd' });
+lfuc.remove('1');
+lfuc.remove('6');
+lfuc.remove('10');
 lfuc.forEach((i, ind) => {
   console.log(i, ind);
 });
-
-const arr: Uint32Array = new Uint32Array(13);
-arr[0] = 1;
-arr[1] = 2;
-arr[2] = 3;
-
-const barr = arr.filter((x) => x != 1);
-console.log(barr);

@@ -45,7 +45,7 @@ export class SCChache<V = any> extends BaseCache {
 
   set(key: Key, value: V) {
     let pointer = this.items[key];
-    if (pointer) {
+    if (pointer !== undefined) {
       this.arrayMap[pointer].value = value;
       this.arrayMap[pointer].sChance = true;
       return;
@@ -106,14 +106,14 @@ export class SCChache<V = any> extends BaseCache {
 
   get(key: Key) {
     const pointer = this.items[key];
-    if (!pointer) return undefined;
+    if (pointer === undefined) return undefined;
     this.arrayMap[pointer].sChance = true;
-    return this.arrayMap[pointer];
+    return this.arrayMap[pointer].value;
   }
 
   peek(key: Key) {
     const pointer = this.items[key];
-    if (!pointer) return undefined;
+    if (pointer === undefined) return undefined;
     return this.arrayMap[pointer];
   }
   forEach(callback: (item: { key: Key; value: V }, index: number) => void) {

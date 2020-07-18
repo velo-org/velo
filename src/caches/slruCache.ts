@@ -3,12 +3,10 @@ import { LRUCache } from './lruCache.ts';
 import { SLRUOptions } from '../models/slruOptions.ts';
 import { Key } from '../models/key.ts';
 
-//TODO: delete single entry
-
 export class SLRUCache<V = any> extends BaseCache {
   protectedPartition: LRUCache<V>;
   probationaryPartition: LRUCache<V>;
-  size: number;
+  items: { [key in Key]: V };
   protectedCache: number;
   probationaryCache: number;
 
@@ -22,12 +20,11 @@ export class SLRUCache<V = any> extends BaseCache {
     this.probationaryPartition = new LRUCache<V>({
       maxCache: this.probationaryCache,
     });
-    this.size = 0;
+    this.items = {};
   }
 
   set(key: Key, value: V) {
     this.probationaryPartition.set(key, value);
-    this.size++;
   }
   get(key: Key) {
     const cObjectProtected = this.protectedPartition.get(key);
@@ -37,7 +34,6 @@ export class SLRUCache<V = any> extends BaseCache {
     else {
       const cObject = this.protectedPartition.setPop(key, cObjectProbationary!);
       if (!cObject) {
-        this.size++;
         return cObjectProbationary!;
       }
       this.probationaryPartition.set(key, cObject.value!);
@@ -48,5 +44,43 @@ export class SLRUCache<V = any> extends BaseCache {
   forEach(callback: (item: { value: V; key: Key }, index: number) => void) {
     this.protectedPartition.forEach(callback);
     this.probationaryPartition.forEach(callback);
+  }
+
+  peek(key: Key) {
+    return this.probationaryPartition.peek(key)
+      ? this.probationaryPartition.peek(key)
+      : this.protectedPartition.peek(key);
+  }
+
+  has(key: Key) {
+    return this.probationaryPartition.has(key)
+      ? true
+      : this.protectedPartition.peek(key);
+  }
+  get ProtectedPartition() {
+    return this.protectedPartition;
+  }
+  get PropationaryPartition() {
+    return this.probationaryPartition;
+  }
+
+  get Size() {
+    return this.probationaryPartition.Size + this.ProtectedPartition.Size;
+  }
+
+  clear() {
+    this.probationaryPartition.clear();
+    this.protectedPartition.clear();
+  }
+
+  remove(key: Key) {
+    const propationaryObj = this.probationaryPartition.peek(key);
+    const protectedObj = this.protectedPartition.peek(key);
+    if (!propationaryObj && !protectedObj) throw new Error('Key not found');
+    else if (propationaryObj) {
+      this.probationaryPartition.remove(key);
+    } else {
+      this.protectedPartition.remove(key);
+    }
   }
 }

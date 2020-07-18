@@ -10,8 +10,8 @@ import { CACHES, MARKDOWN_OUT } from './benchmark.config.ts';
 //import './benches/lruCache.bench.ts';
 //import './benches/rrCache.bench.ts';
 //import './benches/scCache.bench.ts';
-//import './benches/lfuCache.bench.ts';
-import './benches/slruCache.bench.ts';
+import './benches/lfuCache.bench.ts';
+//import './benches/slruCache.bench.ts';
 
 let filterRegex: RegExp | undefined;
 
