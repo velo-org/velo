@@ -1,11 +1,11 @@
 import { bench } from '../../deps.ts';
 import { RUNS, MAX_KEYS, EVICT, DATA_1, DATA_2 } from '../benchmark.config.ts';
-import { LRUCache } from '../../src/caches/lruCache.ts';
+import { LFUCache } from '../../src/caches/lfu.ts';
 
-const cache = new LRUCache({ maxCache: MAX_KEYS });
+const cache = new LFUCache({ maxCache: MAX_KEYS });
 
 bench({
-  name: `LRU set x${MAX_KEYS}`,
+  name: `LFU set x${MAX_KEYS}`,
   runs: RUNS,
   func(b): void {
     b.start();
@@ -17,7 +17,7 @@ bench({
 });
 
 bench({
-  name: `LRU get x${MAX_KEYS}`,
+  name: `LFU get x${MAX_KEYS}`,
   runs: RUNS,
   func(b): void {
     b.start();
@@ -29,7 +29,7 @@ bench({
 });
 
 bench({
-  name: `LRU update x${MAX_KEYS}`,
+  name: `LFU update x${MAX_KEYS}`,
   runs: RUNS,
   func(b): void {
     b.start();
@@ -41,7 +41,7 @@ bench({
 });
 
 bench({
-  name: `LRU evict x${MAX_KEYS}`,
+  name: `LFU evict x${MAX_KEYS}`,
   runs: RUNS,
   func(b): void {
     b.start();

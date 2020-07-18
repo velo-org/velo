@@ -1,11 +1,11 @@
 import { bench } from '../../deps.ts';
 import { RUNS, MAX_KEYS, EVICT, DATA_1, DATA_2 } from '../benchmark.config.ts';
-import { SCChache } from '../../src/caches/scCache.ts';
+import { LRUCache } from '../../src/caches/lru.ts';
 
-const cache = new SCChache({ maxCache: MAX_KEYS });
+const cache = new LRUCache({ maxCache: MAX_KEYS });
 
 bench({
-  name: `SC set x${MAX_KEYS}`,
+  name: `LRU set x${MAX_KEYS}`,
   runs: RUNS,
   func(b): void {
     b.start();
@@ -17,7 +17,7 @@ bench({
 });
 
 bench({
-  name: `SC get x${MAX_KEYS}`,
+  name: `LRU get x${MAX_KEYS}`,
   runs: RUNS,
   func(b): void {
     b.start();
@@ -29,7 +29,7 @@ bench({
 });
 
 bench({
-  name: `SC update x${MAX_KEYS}`,
+  name: `LRU update x${MAX_KEYS}`,
   runs: RUNS,
   func(b): void {
     b.start();
@@ -41,7 +41,7 @@ bench({
 });
 
 bench({
-  name: `SC evict x${MAX_KEYS}`,
+  name: `LRU evict x${MAX_KEYS}`,
   runs: RUNS,
   func(b): void {
     b.start();

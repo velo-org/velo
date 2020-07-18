@@ -1,5 +1,5 @@
-import { BaseCache } from './baseCache.ts';
-import { LRUCache } from './lruCache.ts';
+import { BaseCache } from './base.ts';
+import { LRUCache } from './lru.ts';
 import { SLRUOptions } from '../models/slruOptions.ts';
 import { Key } from '../models/key.ts';
 

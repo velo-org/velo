@@ -1,4 +1,4 @@
-import { BaseCache } from './baseCache.ts';
+import { BaseCache } from './base.ts';
 import { Options } from '../models/options.ts';
 import { getTypedArray } from '../utils/typedArray.ts';
 import { Key } from '../models/key.ts';
