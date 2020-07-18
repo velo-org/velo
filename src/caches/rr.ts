@@ -11,7 +11,7 @@ import { Key } from '../models/key.ts';
  * @extends {BaseCache}
  * @template V
  * @example
- * const rrc = new RRCache({ maxCache: 5 }); // init Random Replacement Cache with max 5 key-value pairs
+ * const rrc = new RRCache({ capacity: 5 }); // init Random Replacement Cache with max 5 key-value pairs
  * rrc.set('1', { hello: 'asdf' }); // sets 1
  * rrc.set('2', { hello: 'asdf' }); // sets 2
  * rrc.set('3', { hello: 'asdf' }); // sets 3
@@ -30,15 +30,15 @@ export class RRCache<V = any> extends BaseCache {
 
   constructor(options: Options) {
     super(options);
-    if (!this.maxCache) throw new Error('Please provide a Maximum Cache');
+    if (!this.capacity) throw new Error('Please provide a Maximum Cache');
     this.storage = {};
     this.keys = [];
     this.freeMemory = -1;
     this.counter = 0;
     this.size = 0;
-    this.randomArr = getTypedArray(this.maxCache);
-    for (var i = this.maxCache; i > 0; i--) {
-      this.randomArr[i] = (this.maxCache * Math.random()) | 0;
+    this.randomArr = getTypedArray(this.capacity);
+    for (var i = this.capacity; i > 0; i--) {
+      this.randomArr[i] = (this.capacity * Math.random()) | 0;
     }
   }
 
@@ -47,13 +47,13 @@ export class RRCache<V = any> extends BaseCache {
       this.storage[key] = value;
       return;
     }
-    if (this.size >= this.maxCache!) {
+    if (this.size >= this.capacity) {
       const prop = this.randomProperty()!;
       delete this.storage[prop];
     } else {
       this.size++;
     }
-    if (this.freeMemory !== -1 && this.size < this.maxCache!) {
+    if (this.freeMemory !== -1 && this.size < this.capacity) {
       this.keys[this.freeMemory] = key;
       this.freeMemory = -1;
     } else {
@@ -64,7 +64,7 @@ export class RRCache<V = any> extends BaseCache {
   private randomProperty() {
     let num = this.randomArr[this.counter];
     this.counter++;
-    if (this.counter >= this.maxCache!) this.counter = 0;
+    if (this.counter >= this.capacity) this.counter = 0;
     if (this.freeMemory === num) num += 1;
     const key = this.keys[num];
     this.keys[num] = undefined;

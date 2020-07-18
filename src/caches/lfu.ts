@@ -27,7 +27,7 @@ export class LFUCache<V = any> extends BaseCache {
       this.keys[key] = node;
 
       // if we have space for node then try to add it to linked list with frequency 1
-      if (this.size !== this.maxCache) {
+      if (this.size !== this.capacity) {
         // if linked list for frequency 1 doesnt exist then create it
         if (this.frequency[1] == undefined)
           this.frequency[1] = new DoublyLinkedList();

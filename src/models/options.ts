@@ -1,3 +1,3 @@
 export interface Options {
-  maxCache?: number;
+  capacity: number;
 }

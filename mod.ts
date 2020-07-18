@@ -1,13 +1,13 @@
-import { LRUCache } from './src/caches/lruCache.ts';
-import { RRCache } from './src/caches/rrCache.ts';
-import { SCChache } from './src/caches/scCache.ts';
-import { LFUCache } from './src/caches/lfuCache.ts';
+import { LRUCache } from './src/caches/lru.ts';
+import { RRCache } from './src/caches/rr.ts';
+import { SCChache } from './src/caches/sc.ts';
+import { LFUCache } from './src/caches/lfu.ts';
 
 console.log('===========================');
 console.log('LRU CACHE');
 console.log('===========================');
 
-const lruc = new LRUCache({ maxCache: 5 });
+const lruc = new LRUCache({ capacity: 5 });
 lruc.set(1, { hello: 'asdf' });
 lruc.set('2', { hello: 'asdf' });
 lruc.set('3', { hello: 'asdf' });
@@ -34,7 +34,7 @@ console.log('===========================');
 console.log('RR CACHE');
 console.log('===========================');
 
-const rrc = new RRCache({ maxCache: 5 }); // init Random Replacement Cache with max 5 key-value pairs
+const rrc = new RRCache({ capacity: 5 }); // init Random Replacement Cache with max 5 key-value pairs
 rrc.set('1', { hello: 'asdf' }); // sets 1
 rrc.set('2', { hello: 'asdf' }); // sets 2
 rrc.set('3', { hello: 'asdf' }); // sets 3
@@ -52,7 +52,7 @@ console.log('===========================');
 console.log('SC CACHE');
 console.log('===========================');
 
-const scc = new SCChache({ maxCache: 5 }); // init Second Chance Cache with max 5 key-value pairs
+const scc = new SCChache({ capacity: 5 }); // init Second Chance Cache with max 5 key-value pairs
 scc.set('1', { hello: 'asdf' }); // sets 1
 scc.set('2', { hello: 'asdf' }); // sets 2
 scc.set('3', { hello: 'asdf' }); // sets 3
@@ -75,7 +75,7 @@ console.log('===========================');
 console.log('LFU CACHE');
 console.log('===========================');
 
-const lfuc = new LFUCache({ maxCache: 5 }); // init Second Chance Cache with max 5 key-value pairs
+const lfuc = new LFUCache({ capacity: 5 }); // init Second Chance Cache with max 5 key-value pairs
 lfuc.set('1', { hello: 'asdf' }); // sets 1
 lfuc.set('2', { hello: 'asdf' }); // sets 2
 lfuc.set('3', { hello: 'asdf' }); // sets 3

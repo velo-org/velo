@@ -11,7 +11,7 @@ import { Key } from '../models/key.ts';
  * @extends {BaseCache}
  * @template V
  * @example
- * const lruc = new LRUCache({ maxCache: 5 }); // init LRUCache with a max of 5 key-value pairs
+ * const lruc = new LRUCache({ capacity: 5 }); // init LRUCache with a max of 5 key-value pairs
  * lruc.set(1, { hello: 'asdf' }); //sets 1
  * lruc.set('2', { hello: 'asdf' }); // sets 2
  * lruc.set('3', { hello: 'asdf' }); // sets 3
@@ -39,20 +39,20 @@ export class LRUCache<V = any> extends BaseCache {
 
   constructor(options: Options) {
     super(options);
-    if (!this.maxCache) throw new Error('Please provide a Maximum Cache');
-    this.forward = getTypedArray(this.maxCache);
-    this.backward = getTypedArray(this.maxCache);
+    if (!this.capacity) throw new Error('Please provide a Maximum Cache');
+    this.forward = getTypedArray(this.capacity);
+    this.backward = getTypedArray(this.capacity);
     this.head = 0;
     this.size = 0;
     this.tail = 0;
     this.items = {};
     this.freeMemory = [];
-    this.keys = new Array(this.maxCache);
-    this.values = new Array(this.maxCache);
+    this.keys = new Array(this.capacity);
+    this.values = new Array(this.capacity);
   }
 
   set(key: Key, value: V) {
-    if (this.freeMemory.length === this.maxCache) this.freeMemory = [];
+    if (this.freeMemory.length === this.capacity) this.freeMemory = [];
     let pointer = this.items[key];
 
     if (pointer) {
@@ -63,7 +63,7 @@ export class LRUCache<V = any> extends BaseCache {
     }
 
     // The cache is not yet full
-    if (this.size < this.maxCache!) {
+    if (this.size < this.capacity!) {
       if (this.freeMemory.length > 0) {
         pointer = this.freeMemory[0];
         this.freeMemory.splice(0, 1);
@@ -97,7 +97,7 @@ export class LRUCache<V = any> extends BaseCache {
   }
 
   setPop(key: Key, value: V) {
-    if (this.freeMemory.length === this.maxCache) this.freeMemory = [];
+    if (this.freeMemory.length === this.capacity) this.freeMemory = [];
     var oldValue = null;
     var oldKey = null;
     // The key already exists, we just need to update the value and splay on top
@@ -111,7 +111,7 @@ export class LRUCache<V = any> extends BaseCache {
     }
 
     // The cache is not yet full
-    if (this.size < this.maxCache!) {
+    if (this.size < this.capacity!) {
       if (this.freeMemory.length > 0) {
         pointer = this.freeMemory[0];
         this.freeMemory.splice(0, 1);
@@ -183,8 +183,8 @@ export class LRUCache<V = any> extends BaseCache {
     this.freeMemory = [];
     this.keys = [];
     this.values = [];
-    this.backward = getTypedArray(this.maxCache!);
-    this.forward = getTypedArray(this.maxCache!);
+    this.backward = getTypedArray(this.capacity!);
+    this.forward = getTypedArray(this.capacity!);
   }
   remove(key: Key) {
     const pointer = this.items[key];

@@ -2,7 +2,7 @@ import { bench } from '../../deps.ts';
 import { RUNS, MAX_KEYS, EVICT, DATA_1, DATA_2 } from '../benchmark.config.ts';
 import { SCChache } from '../../src/caches/sc.ts';
 
-const cache = new SCChache({ maxCache: MAX_KEYS });
+const cache = new SCChache({ capacity: MAX_KEYS });
 
 bench({
   name: `SC set x${MAX_KEYS}`,

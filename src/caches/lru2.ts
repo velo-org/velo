@@ -1,4 +1,4 @@
-import { BaseCache } from './baseCache.ts';
+import { BaseCache } from './base.ts';
 import { Options } from '../models/options.ts';
 import { Key } from '../models/key.ts';
 import { PointerList } from '../utils/pointerList.ts';
@@ -12,9 +12,9 @@ export class LRUCache<V = any> extends BaseCache {
   constructor(options: Options) {
     super(options);
     this.items = {};
-    this.keys = new Array(this.maxCache);
-    this.values = new Array(this.maxCache);
-    this.pointers = new PointerList(this.maxCache!);
+    this.keys = new Array(this.capacity);
+    this.values = new Array(this.capacity);
+    this.pointers = new PointerList(this.capacity);
   }
 
   set(key: Key, value: V) {
@@ -28,7 +28,7 @@ export class LRUCache<V = any> extends BaseCache {
     }
 
     // The cache is not yet full
-    if (this.pointers.size < this.maxCache!) {
+    if (this.pointers.size < this.capacity) {
       pointer = this.pointers.size;
     }
 

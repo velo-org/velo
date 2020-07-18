@@ -15,11 +15,11 @@ export class ARC<V = any> extends BaseCache {
 
   constructor(options: Options) {
     super(options);
-    this.partition = this.maxCache! / 2;
-    this.values = new Array<V>(this.maxCache!);
-    this.t1 = new PointerList(this.maxCache!);
-    this.t2 = new PointerList(this.maxCache!);
-    this.b1 = new PointerList(this.maxCache!);
-    this.b2 = new PointerList(this.maxCache!);
+    this.partition = this.capacity / 2;
+    this.values = new Array<V>(this.capacity);
+    this.t1 = new PointerList(this.capacity);
+    this.t2 = new PointerList(this.capacity);
+    this.b1 = new PointerList(this.capacity);
+    this.b2 = new PointerList(this.capacity);
   }
 }

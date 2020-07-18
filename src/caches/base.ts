@@ -1,13 +1,13 @@
 import { Options } from '../models/options.ts';
 
 export abstract class BaseCache {
-  protected maxCache?: number;
+  protected readonly capacity: number;
 
-  constructor(options: Options = { maxCache: 0 }) {
-    this.maxCache = options.maxCache;
+  constructor(options: Options) {
+    this.capacity = options.capacity;
   }
 
-  get MaxCache() {
-    return this.maxCache;
+  get Capacity() {
+    return this.capacity;
   }
 }

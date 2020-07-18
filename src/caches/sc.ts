@@ -13,7 +13,7 @@ import { Key } from '../models/key.ts';
  * @extends {BaseCache}
  * @template V
  * @example
- * const scc = new SCChache({ maxCache: 5 }); // init Second Chance Cache with max 5 key-value pairs
+ * const scc = new SCChache({ capacity: 5 }); // init Second Chance Cache with max 5 key-value pairs
  * scc.set('1', { hello: 'asdf' }); // sets 1
  * scc.set('2', { hello: 'asdf' }); // sets 2
  * scc.set('3', { hello: 'asdf' }); // sets 3
@@ -34,13 +34,13 @@ export class SCChache<V = any> extends BaseCache {
 
   constructor(options: Options) {
     super(options);
-    if (!this.maxCache) throw new Error('Please provide a Maximum Cache');
-    this.backward = getTypedArray(this.maxCache);
+    if (!this.capacity) throw new Error('Please provide a Maximum Cache');
+    this.backward = getTypedArray(this.capacity);
     this.head = 0;
     this.size = 0;
     this.tail = 0;
     this.items = {};
-    this.arrayMap = new Array(this.maxCache);
+    this.arrayMap = new Array(this.capacity);
   }
 
   set(key: Key, value: V) {
@@ -51,7 +51,7 @@ export class SCChache<V = any> extends BaseCache {
       return;
     }
 
-    if (this.size < this.maxCache!) {
+    if (this.size < this.capacity!) {
       pointer = this.size++;
       this.items[key] = pointer;
       this.arrayMap[pointer] = { key, value, sChance: false };
@@ -123,12 +123,12 @@ export class SCChache<V = any> extends BaseCache {
   }
 
   clear() {
-    this.backward = getTypedArray(this.maxCache!);
+    this.backward = getTypedArray(this.capacity!);
     this.head = 0;
     this.size = 0;
     this.tail = 0;
     this.items = {};
-    this.arrayMap = new Array(this.maxCache);
+    this.arrayMap = new Array(this.capacity);
   }
 
   remove(key: Key) {

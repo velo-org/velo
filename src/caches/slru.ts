@@ -15,10 +15,10 @@ export class SLRUCache<V = any> extends BaseCache {
     this.protectedCache = options.protectedCache;
     this.probationaryCache = options.probationaryCache;
     this.protectedPartition = new LRUCache<V>({
-      maxCache: this.protectedCache,
+      capacity: this.protectedCache,
     });
     this.probationaryPartition = new LRUCache<V>({
-      maxCache: this.probationaryCache,
+      capacity: this.probationaryCache,
     });
     this.items = {};
   }
