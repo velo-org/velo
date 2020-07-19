@@ -78,7 +78,7 @@ export class LRUCache<V = any> extends BaseCache {
   }
 
   forEach(
-    callback: (item: V, index: number) => void,
+    callback: (item: { key: Key; value: V }, index: number) => void,
     reverse: boolean = false
   ) {
     let p: number | undefined = this.pointers.nextOf(this.pointers.root);
@@ -88,7 +88,7 @@ export class LRUCache<V = any> extends BaseCache {
       p !== undefined;
       reverse ? i-- : i++
     ) {
-      callback(this.values[p], i);
+      callback({ key: this.keys[p]!, value: this.values[p] }, i);
       p = reverse ? this.pointers.prevOf(p) : this.pointers.nextOf(p);
     }
   }
