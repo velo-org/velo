@@ -28,15 +28,15 @@ export class LRUCache<V = any> extends BaseCache {
     }
 
     // The cache is not yet full
-    if (this.pointers.size < this.capacity) {
-      pointer = this.pointers.size;
+    if (!this.pointers.isFull()) {
+      pointer = this.pointers.newPointer();
     }
 
     // Cache is full, we need to drop the last value
     else {
       this.pointers.removeBack();
       delete this.items[this.keys[pointer]!];
-      pointer = this.pointers.size;
+      pointer = this.pointers.newPointer();
     }
 
     // Storing key & value
@@ -51,11 +51,13 @@ export class LRUCache<V = any> extends BaseCache {
     this.items = {};
     this.keys = [];
     this.values = [];
+    this.pointers.clear();
   }
 
   remove(key: Key) {
     const pointer = this.items[key];
     this.keys[pointer] = undefined;
+    this.pointers.remove(pointer);
     delete this.items[key];
   }
 
@@ -79,15 +81,15 @@ export class LRUCache<V = any> extends BaseCache {
     callback: (item: V, index: number) => void,
     reverse: boolean = false
   ) {
-    let p: number | undefined = this.pointers.nextPointer(this.pointers.root);
+    let p: number | undefined = this.pointers.nextOf(this.pointers.root);
 
     for (
-      let i = reverse ? this.pointers.size : 0;
+      let i = reverse ? this.pointers.size() : 0;
       p !== undefined;
       reverse ? i-- : i++
     ) {
       callback(this.values[p], i);
-      p = this.pointers.nextPointer(p);
+      p = reverse ? this.pointers.prevOf(p) : this.pointers.nextOf(p);
     }
   }
 }

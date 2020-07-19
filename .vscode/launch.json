@@ -8,7 +8,7 @@
       "cwd": "${workspaceFolder}",
       "runtimeExecutable": "deno",
       "outputCapture": "std",
-      "runtimeArgs": ["run", "-A", "--inspect-brk", "mod.ts"],
+      "runtimeArgs": ["run", "-A", "--inspect-brk", "${file}"],
       "port": 9229
     }
   ]
