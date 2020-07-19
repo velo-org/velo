@@ -2,7 +2,17 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug Deno",
+      "name": "Debug Entry Point",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "deno",
+      "outputCapture": "std",
+      "runtimeArgs": ["run", "-A", "--inspect-brk", "mod.ts"],
+      "port": 9229
+    },
+    {
+      "name": "Debug Here",
       "type": "node",
       "request": "launch",
       "cwd": "${workspaceFolder}",
