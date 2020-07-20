@@ -1,8 +1,8 @@
 import { bench } from '../../deps.ts';
 import { RUNS, MAX_KEYS, EVICT, DATA_1, DATA_2 } from '../benchmark.config.ts';
-import { RRCache } from '../../src/caches/rr.ts';
+import { RR } from '../../src/caches/rr.ts';
 
-const cache = new RRCache({ capacity: MAX_KEYS });
+const cache = new RR({ capacity: MAX_KEYS });
 
 bench({
   name: `RR set x${MAX_KEYS}`,

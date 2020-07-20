@@ -4,14 +4,15 @@ import { getTypedArray } from '../utils/typedArray.ts';
 import { Key } from '../models/key.ts';
 
 /**
- *A cache object that deletes a random entry
+ * https://en.wikipedia.org/wiki/Cache_replacement_policies#Random_replacement_(RR)
  *
- * @export
- * @class RRCache
- * @extends {BaseCache}
- * @template V
+ * Randomly selects a candidate item and discards it to make space when necessary.
+ *
  * @example
- * const rrc = new RRCache({ capacity: 5 }); // init Random Replacement Cache with max 5 key-value pairs
+ * ```ts
+ * import {RR} from "https://deno.land/x/velo/mod.ts"
+ *
+ * const rrc = new RR({ capacity: 5 }); // init Random Replacement Cache with max 5 key-value pairs
  * rrc.set('1', { hello: 'asdf' }); // sets 1
  * rrc.set('2', { hello: 'asdf' }); // sets 2
  * rrc.set('3', { hello: 'asdf' }); // sets 3
@@ -19,8 +20,10 @@ import { Key } from '../models/key.ts';
  * rrc.set('5', { hello: 'asdf' }); // sets 5
  *
  * rrc.set('6', { hello: 'asdfdd' }); // sets 6 removes random entry
+ * rrc.get('6') // returns value for key 6
+ * ```
  */
-export class RRCache<V = any> extends BaseCache {
+export class RR<V = any> extends BaseCache {
   private storage: { [key in Key]: V | undefined };
   private keys: (Key | undefined)[];
   private freeMemory: number;
@@ -42,6 +45,12 @@ export class RRCache<V = any> extends BaseCache {
     }
   }
 
+  /**
+   * Sets a Value with the corresponding Key
+   *
+   * @param {Key} key - the key for which the value gets stored
+   * @param {V} value - the value that has to be stored
+   */
   set(key: Key, value: V) {
     if (this.storage[key]) {
       this.storage[key] = value;
@@ -72,34 +81,69 @@ export class RRCache<V = any> extends BaseCache {
 
     return key;
   }
-  get(key: string): V {
-    return this.storage[key]!;
+  /**
+   * Returns the value for a Key or undefined if the key was not found
+   *
+   * @param {Key} key - the Key for which you want a value
+   */
+  get(key: string) {
+    return this.storage[key];
   }
-
+  /**
+   *  removes the specific entry
+   *
+   * @param {Key} key - the Key which you want to remove
+   */
   remove(key: Key) {
     this.keys.splice(this.keys.indexOf(key), 1);
     delete this.storage[key];
   }
-
+  /**
+   *  add array like forEach to the cache Object
+   *
+   * @param {(item: { key: Key; value: V }, index: number) => void} callback - method which gets called forEach Iteration
+   */
   forEach(callback: (item: { key: Key; value: V }, index: number) => void) {
     Object.keys(this.storage).forEach((key, i) => {
       callback.call(this, { key, value: this.storage[key]! }, i);
     });
   }
-
+  /**
+   * Checks if the Key is already in the cache
+   *
+   * @param {Key} key - the Key which you want to check
+   */
   has(key: Key) {
     return this.storage[key] ? true : false;
   }
-
+  /**
+   *  getter for the Keys stored in the Cache
+   *
+   * @readonly
+   */
   get Keys() {
     return this.keys.filter((key) => key !== undefined);
   }
+  /**
+   *  getter for the Values stored in the cache
+   *
+   * @readonly
+   */
   get Values() {
     return Object.keys(this.storage).map((k) => this.storage[k]);
   }
+  /**
+   * getter for the current size of the cache
+   *
+   * @readonly
+   */
   get Size() {
     return this.size;
   }
+  /**
+   * Resets the cache
+   *
+   */
   clear() {
     this.size = 0;
     this.keys = [];

@@ -37,7 +37,7 @@ function generateMarkdown(results: BenchmarkResult[]) {
 
   Deno.writeTextFileSync(
     MARKDOWN_OUT,
-    '|Name|Runs|Total (ms)|Average (ms)|\n|---|---|---|---|\n'
+    `# Benchmark Results\n|Name|Runs|Total (ms)|Average (ms)|\n|---|---|---|---|\n`
   );
 
   results.forEach((r) => {

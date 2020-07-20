@@ -3,7 +3,7 @@ import { Options } from '../models/options.ts';
 import { Key } from '../models/key.ts';
 import { PointerList } from '../utils/pointerList.ts';
 
-export class LRUCache<V = any> extends BaseCache {
+export class LRU<V = any> extends BaseCache {
   private keys: (string | number | undefined)[];
   private values: Array<V>;
   private items: { [key in Key]: number };

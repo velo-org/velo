@@ -4,28 +4,30 @@ import { getTypedArray } from '../utils/typedArray.ts';
 import { Key } from '../models/key.ts';
 
 /**
- * A cache object that deletes the least-recently-used items.
+ * https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU)
  *
- * @export
- * @class LRUCache
- * @extends {BaseCache}
- * @template V
+ * Discards the least recently used items first. This algorithm requires keeping track of what was used when
+ *
  * @example
- * const lruc = new LRUCache({ capacity: 5 }); // init LRUCache with a max of 5 key-value pairs
+ *
+ * ```ts
+ * import {LRU} from "https://deno.land/x/velo/mod.ts"
+ *
+ * const lruc = new LRU({ capacity: 5 }); // init least recently used Cache with a max of 5 key-value pairs
  * lruc.set(1, { hello: 'asdf' }); //sets 1
  * lruc.set('2', { hello: 'asdf' }); // sets 2
  * lruc.set('3', { hello: 'asdf' }); // sets 3
  * lruc.set('4', { hello: 'asdf' }); // sets 4
  * lruc.set('5', { hello: 'asdf' }); // sets 5
- * 
+ *
  * lruc.get('2'); // gets 2 and pushes to the front
  *
- * lruc.set('6', { hello: 'asdfdd' }); // removes 1 sets 6 
+ * lruc.set('6', { hello: 'asdfdd' }); // removes 1 sets 6
  * lruc.set('7', { hello: 'asdfdd' }); // removes 3 sets 7
  * lruc.set(8, { hello: 'asdfdd' }); // removes 4 sets 8
-
+ * ```
  */
-export class LRUCache<V = any> extends BaseCache {
+export class LRU<V = any> extends BaseCache {
   private head: number;
   private tail: number;
   private keys: (string | number | undefined)[];
@@ -51,6 +53,12 @@ export class LRUCache<V = any> extends BaseCache {
     this.values = new Array(this.capacity);
   }
 
+  /**
+   * Sets a Value with the corresponding Key
+   *
+   * @param {Key} key - the key for which the value gets stored
+   * @param {V} value - the value that has to be stored
+   */
   set(key: Key, value: V) {
     if (this.freeMemory.length === this.capacity) this.freeMemory = [];
     let pointer = this.items[key];
@@ -96,6 +104,12 @@ export class LRUCache<V = any> extends BaseCache {
     this.head = pointer;
   }
 
+  /**
+   * Sets a Value with the corresponding Key. returns the oldvalue and the oldKey and if an eviction took place
+   *
+   * @param {Key} key - the key for which the value gets stored
+   * @param {V} value - the value that has to be stored
+   */
   setPop(key: Key, value: V) {
     if (this.freeMemory.length === this.capacity) this.freeMemory = [];
     var oldValue = null;
@@ -153,7 +167,7 @@ export class LRUCache<V = any> extends BaseCache {
     }
   }
 
-  toTop(pointer: number) {
+  private toTop(pointer: number) {
     if (this.head === pointer) return;
 
     let oldHead = this.head;
@@ -175,6 +189,10 @@ export class LRUCache<V = any> extends BaseCache {
     return;
   }
 
+  /**
+   * Resets the cache
+   *
+   */
   clear() {
     this.size = 0;
     this.head = 0;
@@ -186,6 +204,12 @@ export class LRUCache<V = any> extends BaseCache {
     this.backward = getTypedArray(this.capacity!);
     this.forward = getTypedArray(this.capacity!);
   }
+
+  /**
+   *  removes the specific entry
+   *
+   * @param {Key} key - the Key which you want to remove
+   */
   remove(key: Key) {
     const pointer = this.items[key];
     this.freeMemory.push(pointer);
@@ -194,7 +218,11 @@ export class LRUCache<V = any> extends BaseCache {
     this.size--;
     delete this.items[key];
   }
-
+  /**
+   * Returns the value for a Key or undefined if the key was not found
+   *
+   * @param {Key} key - the Key for which you want a value
+   */
   get(key: Key): V | undefined {
     const pointer = this.items[key];
 
@@ -205,18 +233,23 @@ export class LRUCache<V = any> extends BaseCache {
     return this.values[pointer];
   }
 
+  /**
+   * Returns the value for the given Key or undefined if the key was not found but the order does not change
+   *
+   * @param {Key} key - the Key for which you want a value
+   */
   peek(key: Key) {
     const pointer = this.items[key];
     if (pointer === undefined) return undefined;
     return this.values[pointer];
   }
 
+  /**
+   *  add array like forEach to the cache Object
+   *
+   * @param {(item: { key: Key; value: V }, index: number) => void} callback - method which gets called forEach Iteration
+   */
   forEach(callback: (item: { value: V; key: Key }, index: number) => void) {
-    console.log(this.forward);
-    console.log(this.backward);
-    console.log(this.head);
-    console.log(this.tail);
-    console.log(this.items);
     let i = 0,
       l = this.size;
     let pointer = this.head,
@@ -239,19 +272,38 @@ export class LRUCache<V = any> extends BaseCache {
       pointer = forward[pointer];
     }
   }
-
+  /**
+   * Checks if the Key is already in the cache
+   *
+   * @param {Key} key - the Key which you want to check
+   */
   has(key: Key) {
     return this.items[key] ? true : false;
   }
 
+  /**
+   *  getter for the Keys stored in the Cache
+   *
+   * @readonly
+   */
   get Keys() {
     return this.keys;
   }
 
+  /**
+   *  getter for the Values stored in the cache
+   *
+   * @readonly
+   */
   get Values() {
     return this.values;
   }
 
+  /**
+   * getter for the current size of the cache
+   *
+   * @readonly
+   */
   get Size() {
     return this.size;
   }

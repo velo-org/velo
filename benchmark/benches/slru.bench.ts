@@ -1,8 +1,8 @@
 import { bench } from '../../deps.ts';
 import { RUNS, MAX_KEYS, EVICT, DATA_1, DATA_2 } from '../benchmark.config.ts';
-import { SLRUCache } from '../../src/caches/slru.ts';
+import { SLRU } from '../../src/caches/slru.ts';
 
-const cache = new SLRUCache({
+const cache = new SLRU({
   capacity: MAX_KEYS,
   probationaryCache: MAX_KEYS / 2,
   protectedCache: MAX_KEYS / 2,

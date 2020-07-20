@@ -1,8 +1,8 @@
 import { bench } from '../../deps.ts';
 import { RUNS, MAX_KEYS, EVICT, DATA_1, DATA_2 } from '../benchmark.config.ts';
-import { LRUCache } from '../../src/caches/lru.ts';
+import { LRU } from '../../src/caches/lru.ts';
 
-const cache = new LRUCache({ capacity: MAX_KEYS });
+const cache = new LRU({ capacity: MAX_KEYS });
 
 bench({
   name: `LRU set x${MAX_KEYS}`,

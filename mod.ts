@@ -1,13 +1,23 @@
-import { LRUCache } from './src/caches/lru.ts';
-import { RRCache } from './src/caches/rr.ts';
-import { SCChache } from './src/caches/sc.ts';
-import { LFUCache } from './src/caches/lfu.ts';
+export { LRU } from './src/caches/lru.ts';
+export { RR } from './src/caches/rr.ts';
+export { SC } from './src/caches/sc.ts';
+export { LFU } from './src/caches/lfu.ts';
+export { SLRU } from './src/caches/slru.ts';
+export { ARC } from './src/caches/arc.ts';
+export { Key } from './src/models/key.ts';
+export { Options } from './src/models/options.ts';
+export { SLRUOptions } from './src/models/slruOptions.ts';
+
+import { LRU } from './src/caches/lru.ts';
+import { RR } from './src/caches/rr.ts';
+import { SC } from './src/caches/sc.ts';
+import { LFU } from './src/caches/lfu.ts';
 
 console.log('===========================');
 console.log('LRU CACHE');
 console.log('===========================');
 
-const lruc = new LRUCache({ capacity: 5 });
+const lruc = new LRU({ capacity: 5 });
 lruc.set(1, { hello: 'asdf' });
 lruc.set('2', { hello: 'asdf' });
 lruc.set('3', { hello: 'asdf' });
@@ -34,7 +44,7 @@ console.log('===========================');
 console.log('RR CACHE');
 console.log('===========================');
 
-const rrc = new RRCache({ capacity: 5 }); // init Random Replacement Cache with max 5 key-value pairs
+const rrc = new RR({ capacity: 5 }); // init Random Replacement Cache with max 5 key-value pairs
 rrc.set('1', { hello: 'asdf' }); // sets 1
 rrc.set('2', { hello: 'asdf' }); // sets 2
 rrc.set('3', { hello: 'asdf' }); // sets 3
@@ -52,7 +62,7 @@ console.log('===========================');
 console.log('SC CACHE');
 console.log('===========================');
 
-const scc = new SCChache({ capacity: 5 }); // init Second Chance Cache with max 5 key-value pairs
+const scc = new SC({ capacity: 5 }); // init Second Chance Cache with max 5 key-value pairs
 scc.set('1', { hello: 'asdf' }); // sets 1
 scc.set('2', { hello: 'asdf' }); // sets 2
 scc.set('3', { hello: 'asdf' }); // sets 3
@@ -75,7 +85,7 @@ console.log('===========================');
 console.log('LFU CACHE');
 console.log('===========================');
 
-const lfuc = new LFUCache({ capacity: 5 }); // init Second Chance Cache with max 5 key-value pairs
+const lfuc = new LFU({ capacity: 5 }); // init Second Chance Cache with max 5 key-value pairs
 lfuc.set('1', { hello: 'asdf' }); // sets 1
 lfuc.set('2', { hello: 'asdf' }); // sets 2
 lfuc.set('3', { hello: 'asdf' }); // sets 3
