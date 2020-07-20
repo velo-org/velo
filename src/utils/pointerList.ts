@@ -27,8 +27,8 @@ export class PointerList {
   /** Internal actual size (including the root, therefore initialized with 1)*/
   private _size = 1;
 
-  /** Keeps track of the last freed index */
-  private nextIndex = 0;
+  /** Keeps track of the freed indices */
+  private nextIndex: Array<number> = [];
 
   private next: TypedArray;
   private prev: TypedArray;
@@ -149,7 +149,7 @@ export class PointerList {
     if (pointer === this.root) return;
 
     if (this._size >= this._capacity) {
-      this.nextIndex = pointer;
+      this.nextIndex.push(pointer);
     }
 
     this.next[this.prev[pointer]] = this.next[pointer];
@@ -213,6 +213,6 @@ export class PointerList {
 
   /** Returns a save pointer to be inserted */
   newPointer() {
-    return this.nextIndex !== 0 ? this.nextIndex : this._size;
+    return this.nextIndex.length > 0 ? this.nextIndex.shift()! : this._size;
   }
 }
