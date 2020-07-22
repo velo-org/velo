@@ -4,7 +4,7 @@ import {
   prettyBenchmarkProgress,
   prettyBenchmarkResult,
 } from '../deps.ts';
-import { CACHES, MARKDOWN_OUT } from './benchmark.config.ts';
+import { CACHES, MARKDOWN_OUT, MAX_KEYS, RUNS } from './benchmark.config.ts';
 
 // benches
 import './benches/lru.bench.ts';
@@ -37,7 +37,12 @@ function generateMarkdown(results: BenchmarkResult[]) {
 
   Deno.writeTextFileSync(
     MARKDOWN_OUT,
-    `# Benchmark Results\n|Name|Runs|Total (ms)|Average (ms)|\n|---|---|---|---|\n`
+    `# Benchmark Results\n\n\`\`\`bash\nKEYS: ${MAX_KEYS}\nRUNS: ${RUNS}\n\`\`\``
+  );
+
+  Deno.writeTextFileSync(
+    MARKDOWN_OUT,
+    `\n|Name|Runs|Total (ms)|Average (ms)|\n|---|---|---|---|\n`
   );
 
   results.forEach((r) => {
