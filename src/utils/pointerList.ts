@@ -61,10 +61,10 @@ export class PointerList {
   }
 
   /**
-   * @param [withRoot=true] True if the root element should be included
+   * @param [withRoot=false] True if the root element should be included
    * @returns The size of the list
    */
-  size(withRoot: boolean = true) {
+  size(withRoot: boolean = false) {
     return this._size - (withRoot ? 0 : 1);
   }
 
@@ -144,8 +144,9 @@ export class PointerList {
    * Removes a non-root pointer from the list
    *
    * @param pointer The pointer to remove
+   * @returns The removed pointer or undefined if root
    */
-  remove(pointer: number) {
+  remove(pointer: number): number | undefined {
     if (pointer === this.root) return;
 
     if (this._size >= this._capacity) {
@@ -155,24 +156,27 @@ export class PointerList {
     this.next[this.prev[pointer]] = this.next[pointer];
     this.prev[this.next[pointer]] = this.prev[pointer];
     this._size--;
+    return pointer;
   }
 
   /**
    * Convenience wrapper to remove the front pointer
    *
    * @param pointer The pointer to remove
+   * @returns The removed pointer
    */
-  removeFront() {
-    this.remove(this.root);
+  removeFront(): number {
+    return this.remove(this.root)!;
   }
 
   /**
    * Convenience wrapper to remove the back pointer
    *
    * @param pointer The pointer to remove
+   * @returns The removed pointer
    */
-  removeBack() {
-    this.remove(this.prev[this.root]);
+  removeBack(): number {
+    return this.remove(this.prev[this.root])!;
   }
 
   /**

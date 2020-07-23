@@ -67,14 +67,21 @@ export class LRU<V = any> extends BaseCache {
     if (pointer === undefined) return;
 
     this.pointers.moveToFront(pointer);
-
     return this.values[pointer];
+  }
+
+  has(key: Key) {
+    this.items[key] ? true : false;
   }
 
   peek(key: Key) {
     const pointer = this.items[key];
     if (pointer === undefined) return;
     return this.values[pointer];
+  }
+
+  size() {
+    return this.pointers.size();
   }
 
   forEach(
@@ -84,7 +91,7 @@ export class LRU<V = any> extends BaseCache {
     let p: number | undefined = this.pointers.nextOf(this.pointers.root);
 
     for (
-      let i = reverse ? this.pointers.size() : 0;
+      let i = reverse ? this.pointers.size(true) : 0;
       p !== undefined;
       reverse ? i-- : i++
     ) {
