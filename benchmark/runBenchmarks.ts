@@ -12,6 +12,7 @@ import './benches/rr.bench.ts';
 import './benches/sc.bench.ts';
 import './benches/lfu.bench.ts';
 import './benches/slru.bench.ts';
+import './benches/arc.bench.ts';
 
 let filterRegex: RegExp | undefined;
 
