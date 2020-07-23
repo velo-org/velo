@@ -4,22 +4,212 @@ import { Key } from '../models/key.ts';
 import { PointerList } from '../utils/pointerList.ts';
 
 export class ARC<V = any> extends BaseCache {
-  private size: number = 0;
-  private values: Array<V>;
-  private items: { [key in Key]: number } = {};
-  private partition: number;
-  private t1: PointerList;
-  private t2: PointerList;
-  private b1: PointerList;
-  private b2: PointerList;
+  private partition = 0;
+
+  private t1: ARCList<V>;
+  private t2: ARCList<V>;
+  private b1: ARCList<null>;
+  private b2: ARCList<null>;
 
   constructor(options: Options) {
     super(options);
-    this.partition = this.capacity / 2;
-    this.values = new Array<V>(this.capacity);
-    this.t1 = new PointerList(this.capacity);
-    this.t2 = new PointerList(this.capacity);
-    this.b1 = new PointerList(this.capacity);
-    this.b2 = new PointerList(this.capacity);
+    this.t1 = new ARCList(this.capacity);
+    this.t2 = new ARCList(this.capacity);
+    this.b1 = new ARCList(this.capacity);
+    this.b2 = new ARCList(this.capacity);
+  }
+
+  size() {
+    return this.t1.size() + this.t2.size();
+  }
+
+  private replace(in_t2: boolean) {
+    const t1Size = this.t1.size();
+
+    if (
+      t1Size > 0 &&
+      (t1Size > this.partition || (t1Size === this.partition && in_t2))
+    ) {
+      const oldKey = this.t1.removeBack();
+      this.b1.insert(oldKey, null);
+    } else {
+      const oldKey = this.t2.removeBack();
+      this.b2.insert(oldKey, null);
+    }
+  }
+
+  set(key: Key, value: V) {
+    // in frequent set
+    if (this.t2.has(key)) {
+      this.t2.insert(key, value);
+      return;
+    }
+
+    // in recent set
+    if (this.t1.has(key)) {
+      this.t1.remove(key);
+      this.t2.insert(key, value);
+      return;
+    }
+
+    // in frequent evicted
+    if (this.b2.has(key)) {
+      const b1Size = this.b1.size();
+      const b2Size = this.b2.size();
+      const delta = b1Size > b2Size ? Math.floor(b1Size / b2Size) : 1;
+
+      if (delta < this.partition) {
+        this.partition -= delta;
+      } else {
+        this.partition = 0;
+      }
+
+      if (this.size() >= this.capacity) {
+        this.replace(true);
+      }
+
+      this.b2.remove(key);
+      this.t2.insert(key, value);
+      return;
+    }
+
+    // in recent evicted
+    if (this.b1.has(key)) {
+      const b1Size = this.b1.size();
+      const b2Size = this.b2.size();
+      const delta = b2Size > b1Size ? Math.floor(b2Size / b1Size) : 1;
+
+      if (delta <= this.capacity - this.partition) {
+        this.partition += delta;
+      } else {
+        this.partition = this.capacity;
+      }
+
+      if (this.size() >= this.capacity) {
+        this.replace(false);
+      }
+
+      this.b1.remove(key);
+      this.t2.insert(key, value);
+      return;
+    }
+
+    // not in cache or ghost lists
+
+    if (this.size() >= this.capacity) {
+      this.replace(false);
+    }
+
+    if (this.b1.size() > this.capacity - this.partition) {
+      this.b1.removeBack();
+    }
+
+    if (this.b2.size() > this.partition) {
+      this.b2.removeBack();
+    }
+
+    this.t1.insert(key, value);
+  }
+
+  get(key: Key): V | undefined {
+    const value = this.t1.removeWithValue(key);
+    if (!value) return undefined;
+    this.t2.insert(key, value);
+    return this.t2.get(key);
+  }
+
+  peek(key: Key) {
+    let value = this.t1.get(key);
+
+    if (!value) {
+      value = this.t2.get(key);
+    }
+
+    return value;
+  }
+
+  clear() {
+    this.partition = 0;
+    this.t1.clear();
+    this.t2.clear();
+    this.b1.clear();
+    this.b2.clear();
+  }
+}
+
+class ARCList<V> {
+  private items: { [key in Key]: number } = {};
+  private keys: Array<Key>;
+  private pointers: PointerList;
+  private values: Array<V>;
+
+  constructor(capacity: number) {
+    this.keys = new Array<Key>(capacity);
+    this.pointers = new PointerList(capacity);
+    this.values = new Array<V>();
+  }
+
+  has(key: Key) {
+    return this.items[key] ? true : false;
+  }
+
+  get(key: Key): V | undefined {
+    const p = this.items[key];
+    if (!p) return undefined;
+    return this.values[p];
+  }
+
+  remove(key: Key) {
+    const p = this.items[key];
+    if (p) {
+      delete this.items[key];
+      this.pointers.remove(p);
+    }
+  }
+
+  removeWithValue(key: Key): V | undefined {
+    const p = this.items[key];
+
+    if (!p) return undefined;
+
+    delete this.items[key];
+    this.pointers.remove(p);
+    return this.values[p];
+  }
+
+  insert(key: Key, value: V) {
+    let p = this.items[key];
+
+    if (!p) {
+      p = this.pointers.newPointer();
+      this.pointers.pushFront(p);
+      this.keys[p] = key;
+      this.items[key] = p;
+    }
+
+    this.values[p] = value;
+  }
+
+  moveToFront(key: Key) {
+    const p = this.items[key];
+    this.pointers.moveToFront(p);
+  }
+
+  removeBack(): Key {
+    const p = this.pointers.removeBack();
+    const key = this.keys[p];
+    delete this.items[key];
+    return key;
+  }
+
+  clear() {
+    this.items = {};
+    this.keys = [];
+    this.values = [];
+    this.pointers.clear();
+  }
+
+  size() {
+    return this.pointers.size();
   }
 }
