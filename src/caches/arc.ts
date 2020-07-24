@@ -126,10 +126,10 @@ export class ARC<V = any> extends BaseCache<V> implements Cache<V> {
   }
 
   peek(key: Key) {
-    let value = this.t1.get(key);
+    let value = this.t1.peek(key);
 
     if (!value) {
-      value = this.t2.get(key);
+      value = this.t2.peek(key);
     }
 
     return value;
@@ -184,6 +184,13 @@ class ARCList<V> {
   }
 
   get(key: Key): V | undefined {
+    const p = this.items[key];
+    if (!p) return undefined;
+    this.pointers.moveToFront(p);
+    return this.values[p];
+  }
+
+  peek(key: Key): V | undefined {
     const p = this.items[key];
     if (!p) return undefined;
     return this.values[p];
