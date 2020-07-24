@@ -2,8 +2,9 @@ import { BaseCache } from './base.ts';
 import { Options } from '../models/options.ts';
 import { Key } from '../models/key.ts';
 import { PointerList } from '../utils/pointerList.ts';
+import { Cache } from '../models/Cache.ts';
 
-export class ARC<V = any> extends BaseCache {
+export class ARC<V = any> extends BaseCache implements Cache<V> {
   private partition = 0;
 
   private t1: ARCList<V>;
@@ -19,7 +20,7 @@ export class ARC<V = any> extends BaseCache {
     this.b2 = new ARCList(this.capacity);
   }
 
-  size() {
+  get size() {
     return this.t1.size() + this.t2.size();
   }
 
@@ -64,7 +65,7 @@ export class ARC<V = any> extends BaseCache {
         this.partition = 0;
       }
 
-      if (this.size() >= this.capacity) {
+      if (this.size >= this.capacity) {
         this.replace(true);
       }
 
@@ -85,7 +86,7 @@ export class ARC<V = any> extends BaseCache {
         this.partition = this.capacity;
       }
 
-      if (this.size() >= this.capacity) {
+      if (this.size >= this.capacity) {
         this.replace(false);
       }
 
@@ -96,7 +97,7 @@ export class ARC<V = any> extends BaseCache {
 
     // not in cache or ghost lists
 
-    if (this.size() >= this.capacity) {
+    if (this.size >= this.capacity) {
       this.replace(false);
     }
 
@@ -113,9 +114,15 @@ export class ARC<V = any> extends BaseCache {
 
   get(key: Key): V | undefined {
     const value = this.t1.removeWithValue(key);
-    if (!value) return undefined;
-    this.t2.insert(key, value);
+    // if in t1 move to t2
+    if (value) {
+      this.t2.insert(key, value);
+    }
     return this.t2.get(key);
+  }
+
+  has(key: Key) {
+    return this.t1.has(key) || this.t2.has(key);
   }
 
   peek(key: Key) {
@@ -128,6 +135,13 @@ export class ARC<V = any> extends BaseCache {
     return value;
   }
 
+  remove(key: Key) {
+    this.t1.remove(key);
+    this.t2.remove(key);
+    this.b1.remove(key);
+    this.b2.remove(key);
+  }
+
   clear() {
     this.partition = 0;
     this.t1.clear();
@@ -135,13 +149,24 @@ export class ARC<V = any> extends BaseCache {
     this.b1.clear();
     this.b2.clear();
   }
+
+  get keys() {
+    return this.t1.keys.concat(this.t2.keys);
+  }
+
+  get values() {
+    return this.t1.values.concat(this.t2.values);
+  }
 }
 
+/**
+ * An LRU with some special functions
+ */
 class ARCList<V> {
-  private items: { [key in Key]: number } = {};
-  private keys: Array<Key>;
-  private pointers: PointerList;
-  private values: Array<V>;
+  items: { [key in Key]: number } = {};
+  keys: Array<Key>;
+  pointers: PointerList;
+  values: Array<V>;
 
   constructor(capacity: number) {
     this.keys = new Array<Key>(capacity);

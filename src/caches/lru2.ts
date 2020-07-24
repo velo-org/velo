@@ -2,18 +2,19 @@ import { BaseCache } from './base.ts';
 import { Options } from '../models/options.ts';
 import { Key } from '../models/key.ts';
 import { PointerList } from '../utils/pointerList.ts';
+import { Cache } from '../models/Cache.ts';
 
-export class LRU<V = any> extends BaseCache {
-  private keys: (string | number | undefined)[];
-  private values: Array<V>;
+export class LRU<V = any> extends BaseCache implements Cache<V> {
+  private _keys: Array<Key>;
+  private _values: Array<V>;
   private items: { [key in Key]: number };
   pointers: PointerList;
 
   constructor(options: Options) {
     super(options);
     this.items = {};
-    this.keys = new Array(this.capacity);
-    this.values = new Array(this.capacity);
+    this._keys = new Array(this.capacity);
+    this._values = new Array(this.capacity);
     this.pointers = new PointerList(this.capacity);
   }
 
@@ -22,7 +23,7 @@ export class LRU<V = any> extends BaseCache {
 
     if (pointer) {
       this.pointers.moveToFront(pointer);
-      this.values[pointer] = value;
+      this._values[pointer] = value;
 
       return;
     }
@@ -35,28 +36,27 @@ export class LRU<V = any> extends BaseCache {
     // Cache is full, we need to drop the last value
     else {
       this.pointers.removeBack();
-      delete this.items[this.keys[pointer]!];
+      delete this.items[this._keys[pointer]!];
       pointer = this.pointers.newPointer();
     }
 
     // Storing key & value
     this.items[key] = pointer;
-    this.keys[pointer] = key;
-    this.values[pointer] = value;
+    this._keys[pointer] = key;
+    this._values[pointer] = value;
 
     this.pointers.pushFront(pointer);
   }
 
   clear() {
     this.items = {};
-    this.keys = [];
-    this.values = [];
+    this._keys = [];
+    this._values = [];
     this.pointers.clear();
   }
 
   remove(key: Key) {
     const pointer = this.items[key];
-    this.keys[pointer] = undefined;
     this.pointers.remove(pointer);
     delete this.items[key];
   }
@@ -67,21 +67,29 @@ export class LRU<V = any> extends BaseCache {
     if (pointer === undefined) return;
 
     this.pointers.moveToFront(pointer);
-    return this.values[pointer];
+    return this._values[pointer];
   }
 
   has(key: Key) {
-    this.items[key] ? true : false;
+    return this.items[key] ? true : false;
   }
 
   peek(key: Key) {
     const pointer = this.items[key];
     if (pointer === undefined) return;
-    return this.values[pointer];
+    return this._values[pointer];
   }
 
-  size() {
+  get size() {
     return this.pointers.size();
+  }
+
+  get keys() {
+    return this._keys;
+  }
+
+  get values() {
+    return this._values;
   }
 
   forEach(
@@ -95,7 +103,7 @@ export class LRU<V = any> extends BaseCache {
       p !== undefined;
       reverse ? i-- : i++
     ) {
-      callback({ key: this.keys[p]!, value: this.values[p] }, i);
+      callback({ key: this._keys[p]!, value: this._values[p] }, i);
       p = reverse ? this.pointers.prevOf(p) : this.pointers.nextOf(p);
     }
   }
