@@ -10,7 +10,11 @@ import { SC } from '../mod.ts';
  * been accessed since its last consideration.
  */
 
-const scc = new SC({ capacity: 5 }); // init Second Chance Cache with max 5 key-value pairs
+interface Hello {
+  hello: string;
+}
+
+const scc = new SC<Hello>({ capacity: 5 }); // init Second Chance Cache with max 5 key-value pairs
 
 scc.set('1', { hello: 'asdf' }); // sets 1
 scc.set('2', { hello: 'asdf' }); // sets 2

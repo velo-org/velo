@@ -11,8 +11,12 @@ import { SLRU } from '../mod.ts';
  * the protected segment.
  */
 
+interface Hello {
+  hello: string;
+}
+
 // inits a Segmented Least Recently Used Cache with max 5 key-value pairs
-const slruc = new SLRU({
+const slruc = new SLRU<Hello>({
   protectedCache: 5,
   probationaryCache: 5,
 });

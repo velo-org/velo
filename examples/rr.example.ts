@@ -6,7 +6,11 @@ import { RR } from '../mod.ts';
  * Randomly selects a candidate item and discards it to make space when necessary.
  */
 
-const rrc = new RR({ capacity: 5 }); // init Random Replacement Cache with max 5 key-value pairs
+interface Hello {
+  hello: string;
+}
+
+const rrc = new RR<Hello>({ capacity: 5 }); // init Random Replacement Cache with max 5 key-value pairs
 
 rrc.set('1', { hello: 'asdf' }); // sets 1
 rrc.set('2', { hello: 'asdf' }); // sets 2

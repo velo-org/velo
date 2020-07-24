@@ -6,7 +6,11 @@ import { LFU } from '../mod.ts';
  * Counts how often an item is needed. Those that are used least often are discarded first.
  */
 
-const lfuc = new LFU({ capacity: 5 }); // inits a Least frequently used Cache with a max of 5 key-value pairs
+interface Hello {
+  hello: string;
+}
+
+const lfuc = new LFU<Hello>({ capacity: 5 }); // inits a Least frequently used Cache with a max of 5 key-value pairs
 
 lfuc.set(1, { hello: 'asdf' }); //sets 1
 lfuc.set('2', { hello: 'asdf' }); // sets 2

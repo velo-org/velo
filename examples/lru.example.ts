@@ -7,7 +7,11 @@ import { LRU } from '../mod.ts';
  * track of what was used when.
  */
 
-const lruc = new LRU({ capacity: 5 }); // init least recently used Cache with a max of 5 key-value pairs
+interface Hello {
+  hello: string;
+}
+
+const lruc = new LRU<Hello>({ capacity: 5 }); // init least recently used Cache with a max of 5 key-value pairs
 
 lruc.set(1, { hello: 'asdf' }); //sets 1
 lruc.set('2', { hello: 'asdf' }); // sets 2
