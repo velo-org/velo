@@ -48,7 +48,7 @@ function generateMarkdown(results: BenchmarkResult[]) {
     Deno.writeFileSync(
       MARKDOWN_OUT,
       encoder.encode(
-        `\n## ${c}\n|Name|Runs|Total (ms)|Average (ms)|\n|---|---|---|---|\n`
+        `\n## ${c}\n|Name|Runs|Total (ms)|Average (ms)|Avg. Operations per ms|\n|---|---|---|---|---|\n`
       ),
       {
         append: true,
@@ -60,9 +60,10 @@ function generateMarkdown(results: BenchmarkResult[]) {
     results
       .filter((r) => r.name.match(nameRegex))
       .forEach((r) => {
-        const row = `|${r.name}|${r.runsCount}|${r.totalMs.toFixed(
-          3
-        )}|${r.measuredRunsAvgMs.toFixed(3)}|\n`;
+        const totalMs = r.totalMs.toFixed(3);
+        const avgMs = r.measuredRunsAvgMs.toFixed(3);
+        const opsPerMs = Math.floor(MAX_KEYS / r.measuredRunsAvgMs);
+        const row = `|${r.name}|${r.runsCount}|${totalMs}|${avgMs}|${opsPerMs}|\n`;
 
         Deno.writeFileSync(MARKDOWN_OUT, encoder.encode(row), {
           append: true,
