@@ -23,9 +23,9 @@ if (Deno.args.length > 0 && Deno.args[0] !== 'md') {
 
 runBenchmarks({ silent: true, skip: filterRegex }, prettyBenchmarkProgress())
   .then((b) => {
-    if (Deno.args.length > 0 && Deno.args.includes('md')) {
-      generateMarkdown(b.results);
-    }
+    //if (Deno.args.length > 0 && Deno.args.includes('md')) {
+    generateMarkdown(b.results);
+    //}
     return b;
   })
   .then(prettyBenchmarkResult())
@@ -38,21 +38,32 @@ function generateMarkdown(results: BenchmarkResult[]) {
 
   Deno.writeTextFileSync(
     MARKDOWN_OUT,
-    `# Benchmark Results\n\n\`\`\`bash\nKEYS: ${MAX_KEYS}\nRUNS: ${RUNS}\n\`\`\``
+    `# Benchmark Results\n\nConfig:\n\`\`\`bash\nKEYS: ${MAX_KEYS}\nRUNS: ${RUNS}\n\`\`\``
   );
 
-  Deno.writeTextFileSync(
-    MARKDOWN_OUT,
-    `\n|Name|Runs|Total (ms)|Average (ms)|\n|---|---|---|---|\n`
-  );
+  CACHES.forEach((c) => {
+    Deno.writeFileSync(
+      MARKDOWN_OUT,
+      encoder.encode(
+        `\n## ${c}\n|Name|Runs|Total (ms)|Average (ms)|\n|---|---|---|---|\n`
+      ),
+      {
+        append: true,
+      }
+    );
 
-  results.forEach((r) => {
-    const row = `|${r.name}|${r.runsCount}|${r.totalMs.toFixed(
-      3
-    )}|${r.measuredRunsAvgMs.toFixed(3)}|\n`;
+    const nameRegex = new RegExp(`^${c}`);
 
-    Deno.writeFileSync(MARKDOWN_OUT, encoder.encode(row), {
-      append: true,
-    });
+    results
+      .filter((r) => r.name.match(nameRegex))
+      .forEach((r) => {
+        const row = `|${r.name}|${r.runsCount}|${r.totalMs.toFixed(
+          3
+        )}|${r.measuredRunsAvgMs.toFixed(3)}|\n`;
+
+        Deno.writeFileSync(MARKDOWN_OUT, encoder.encode(row), {
+          append: true,
+        });
+      });
   });
 }
