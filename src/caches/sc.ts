@@ -2,33 +2,29 @@ import { BaseCache } from './base.ts';
 import { Options } from '../models/options.ts';
 import { getTypedArray } from '../utils/typedArray.ts';
 import { Key } from '../models/key.ts';
+import { Cache } from '../models/Cache.ts';
 
 //TODO: delete single entry
 
-export class SC<V = any> extends BaseCache {
+export class SC<V = any> extends BaseCache implements Cache<V> {
   private head: number;
   private tail: number;
   private arrayMap: { key: Key; value: V; sChance: boolean }[];
   private backward: Float64Array | Uint8Array | Uint16Array | Uint32Array;
   private items: { [key in Key]: number };
-  private size: number;
+  private _size: number;
 
   constructor(options: Options) {
     super(options);
     if (!this.capacity) throw new Error('Please provide a Maximum Cache');
     this.backward = getTypedArray(this.capacity);
     this.head = 0;
-    this.size = 0;
+    this._size = 0;
     this.tail = 0;
     this.items = {};
     this.arrayMap = new Array(this.capacity);
   }
-  /**
-   * Sets a Value with the corresponding Key
-   *
-   * @param {Key} key - the key for which the value gets stored
-   * @param {V} value - the value that has to be stored
-   */
+
   set(key: Key, value: V) {
     let pointer = this.items[key];
     if (pointer !== undefined) {
@@ -37,8 +33,8 @@ export class SC<V = any> extends BaseCache {
       return;
     }
 
-    if (this.size < this.capacity!) {
-      pointer = this.size++;
+    if (this._size < this.capacity!) {
+      pointer = this._size++;
       this.items[key] = pointer;
       this.arrayMap[pointer] = { key, value, sChance: false };
 
@@ -89,11 +85,7 @@ export class SC<V = any> extends BaseCache {
 
     return;
   }
-  /**
-   * Returns the value for a Key or undefined if the key was not found
-   *
-   * @param {Key} key - the Key for which you want a value
-   */
+
   get(key: Key) {
     const pointer = this.items[key];
     if (pointer === undefined) return undefined;
@@ -108,7 +100,7 @@ export class SC<V = any> extends BaseCache {
   peek(key: Key) {
     const pointer = this.items[key];
     if (pointer === undefined) return undefined;
-    return this.arrayMap[pointer];
+    return this.arrayMap[pointer].value;
   }
   /**
    *  add array like forEach to the cache Object
@@ -120,56 +112,33 @@ export class SC<V = any> extends BaseCache {
       callback.call(this, { key: val.key, value: val.value }, i);
     });
   }
-  /**
-   * Resets the cache
-   *
-   */
+
   clear() {
     this.backward = getTypedArray(this.capacity!);
     this.head = 0;
-    this.size = 0;
+    this._size = 0;
     this.tail = 0;
     this.items = {};
     this.arrayMap = new Array(this.capacity);
   }
-  /**
-   *  removes the specific entry
-   *
-   * @param {Key} key - the Key which you want to remove
-   */
+
   remove(key: Key) {
     const pointer = this.items[key];
   }
-  /**
-   * Checks if the Key is already in the cache
-   *
-   * @param {Key} key - the Key which you want to check
-   */
+
   has(key: Key) {
     return this.items[key] ? true : false;
   }
-  /**
-   *  getter for the Keys stored in the Cache
-   *
-   * @readonly
-   */
-  get Keys() {
+
+  get keys() {
     return this.arrayMap.map((v) => v.key);
   }
-  /**
-   *  getter for the Values stored in the cache
-   *
-   * @readonly
-   */
-  get Values() {
+
+  get values() {
     return this.arrayMap.map((v) => v.value);
   }
-  /**
-   * getter for the current size of the cache
-   *
-   * @readonly
-   */
-  get Size() {
-    return this.size;
+
+  get size() {
+    return this._size;
   }
 }

@@ -2,8 +2,9 @@ import { BaseCache } from './base.ts';
 import { LRU } from './lru.ts';
 import { SLRUOptions } from '../models/slruOptions.ts';
 import { Key } from '../models/key.ts';
+import { Cache } from '../models/Cache.ts';
 
-export class SLRU<V = any> extends BaseCache {
+export class SLRU<V = any> extends BaseCache implements Cache<V> {
   private protectedPartition: LRU<V>;
   private probationaryPartition: LRU<V>;
   private items: { [key in Key]: V };
@@ -23,21 +24,10 @@ export class SLRU<V = any> extends BaseCache {
     this.items = {};
   }
 
-  /**
-   * Sets a Value with the corresponding Key
-   *
-   * @param {Key} key - the key for which the value gets stored
-   * @param {V} value - the value that has to be stored
-   */
   set(key: Key, value: V) {
     this.probationaryPartition.set(key, value);
   }
 
-  /**
-   * Returns the value for a Key or undefined if the key was not found
-   *
-   * @param {Key} key - the Key for which you want a value
-   */
   get(key: Key) {
     const cObjectProtected = this.protectedPartition.get(key);
     const cObjectProbationary = this.probationaryPartition.peek(key);
@@ -62,57 +52,39 @@ export class SLRU<V = any> extends BaseCache {
     this.protectedPartition.forEach(callback);
     this.probationaryPartition.forEach(callback);
   }
-  /**
-   * Returns the value for the given Key or undefined if the key was not found but the order does not change
-   *
-   * @param {Key} key - the Key for which you want a value
-   */
+
   peek(key: Key) {
     return this.probationaryPartition.peek(key)
       ? this.probationaryPartition.peek(key)
       : this.protectedPartition.peek(key);
   }
-  /**
-   * Checks if the Key is already in the cache
-   *
-   * @param {Key} key - the Key which you want to check
-   */
+
   has(key: Key) {
     return this.probationaryPartition.has(key)
       ? true
-      : this.protectedPartition.peek(key);
+      : this.protectedPartition.has(key);
   }
 
-  /**
-   *  getter for the protected Partition of the cache
-   *
-   * @readonly
-   */
   get ProtectedPartition() {
     return this.protectedPartition;
   }
-  /**
-   *  getter for the probationary Partition of the cache
-   *
-   * @readonly
-   */
+
   get PropationaryPartition() {
     return this.probationaryPartition;
   }
 
-  /**
-   * getter for the current size of the cache
-   *
-   * @readonly
-   */
-  get Size() {
+  get size() {
     return this.probationaryPartition.Size + this.ProtectedPartition.Size;
   }
 
-  /**
-   * Resets the cache
-   *
-   */
+  get keys() {
+    return [];
+  }
+
+  get values() {
+    return [];
+  }
+
   clear() {
     this.probationaryPartition.clear();
     this.protectedPartition.clear();

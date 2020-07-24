@@ -2,49 +2,44 @@ import { BaseCache } from './base.ts';
 import { Options } from '../models/options.ts';
 import { Node, DoublyLinkedList } from '../utils/doublyLinkedList.ts';
 import { Key } from '../models/key.ts';
+import { Cache } from '../models/Cache.ts';
 
-export class LFU<V = any> extends BaseCache {
-  keys: { [key in Key]: Node<V> };
-  frequency: { [key: number]: DoublyLinkedList };
-  size: number;
-  minFrequency: number;
+export class LFU<V = any> extends BaseCache implements Cache<V> {
+  private _keys: { [key in Key]: Node<V> };
+  private frequency: { [key: number]: DoublyLinkedList };
+  private _size: number;
+  private minFrequency: number;
 
   constructor(options: Options) {
     super(options);
-    this.keys = {};
+    this._keys = {};
     this.frequency = {};
-    this.size = 0;
+    this._size = 0;
     this.minFrequency = 1;
   }
 
-  /**
-   * Sets a Value with the corresponding Key
-   *
-   * @param {Key} key - the key for which the value gets stored
-   * @param {V} value - the value that has to be stored
-   */
   set(key: Key, value: V) {
-    let node = this.keys[key];
+    let node = this._keys[key];
 
-    // if node doesnt exist in keys then add it
+    // if node doesnt exist in _keys then add it
     if (node == undefined) {
-      // create new node and store in keys
+      // create new node and store in _keys
       node = new Node(key, value);
-      this.keys[key] = node;
+      this._keys[key] = node;
 
       // if we have space for node then try to add it to linked list with frequency 1
-      if (this.size !== this.capacity) {
+      if (this._size !== this.capacity) {
         // if linked list for frequency 1 doesnt exist then create it
         if (this.frequency[1] == undefined)
           this.frequency[1] = new DoublyLinkedList();
 
-        // add new node and increment size of frequency 1
+        // add new node and increment _size of frequency 1
         this.frequency[1].insertAtHead(node);
-        this.size++;
+        this._size++;
       } else {
         // else frequency 1 is full and we need to delete a node first so delete tail
         const oldTail = this.frequency[this.minFrequency].removeAtTail();
-        delete this.keys[oldTail!.key];
+        delete this._keys[oldTail!.key];
 
         // if we deleted frequency 1 then add it back before adding new node
         if (this.frequency[1] === undefined)
@@ -87,14 +82,9 @@ export class LFU<V = any> extends BaseCache {
     }
   }
 
-  /**
-   * Returns the value for a Key or undefined if the key was not found
-   *
-   * @param {Key} key - the Key for which you want a value
-   */
   get(key: Key) {
-    const node = this.keys[key];
-    if (node == undefined) return null;
+    const node = this._keys[key];
+    if (node == undefined) return undefined;
 
     const oldFrequencyCount = node.frequencyCount;
     node.frequencyCount++;
@@ -125,23 +115,18 @@ export class LFU<V = any> extends BaseCache {
    * @param {(item: { key: Key; value: V }, index: number) => void} callback - method which gets called forEach Iteration
    */
   forEach(callback: (item: { key: Key; value: V }, index: number) => void) {
-    Object.keys(this.keys).forEach((val, i) => {
-      callback.call(this, { key: val, value: this.keys[val].data }, i);
+    Object.keys(this._keys).forEach((val, i) => {
+      callback.call(this, { key: val, value: this._keys[val].data }, i);
     });
   }
 
-  /**
-   *  removes the specific entry
-   *
-   * @param {Key} key - the Key which you want to remove
-   */
   remove(key: Key) {
-    const node = this.keys[key];
+    const node = this._keys[key];
     if (!node) throw new Error('key not found');
     else {
       const oldFrequencyCount = node.frequencyCount;
       this.frequency[oldFrequencyCount].removeNode(node);
-      delete this.keys[key];
+      delete this._keys[key];
       if (
         oldFrequencyCount === this.minFrequency &&
         this.frequency[oldFrequencyCount].size === 0
@@ -152,60 +137,32 @@ export class LFU<V = any> extends BaseCache {
     }
   }
 
-  /**
-   *  getter for the Values stored in the cache
-   *
-   * @readonly
-   */
-  get Values() {
-    return Object.keys(this.keys).map((k) => this.keys[k].data);
+  get values() {
+    return Object.keys(this._keys).map((k) => this._keys[k].data);
   }
 
-  /**
-   *  getter for the Keys stored in the Cache
-   *
-   * @readonly
-   */
-  get Keys() {
-    return Object.keys(this.keys);
+  get keys() {
+    return Object.keys(this._keys);
   }
 
-  /**
-   * getter for the current size of the cache
-   *
-   * @readonly
-   */
-  get Size() {
-    return this.size;
+  get size() {
+    return this._size;
   }
 
-  /**
-   * Returns the value for the given Key or undefined if the key was not found but the order does not change
-   *
-   * @param {Key} key - the Key for which you want a value
-   */
   peek(key: Key) {
-    const node = this.keys[key];
-    if (node == undefined) return null;
-    return node;
+    const node = this._keys[key];
+    if (node == undefined) return undefined;
+    return node.data;
   }
 
-  /**
-   * Checks if the Key is already in the cache
-   *
-   * @param {Key} key - the Key which you want to check
-   */
   has(key: Key) {
-    return this.keys[key] ? true : false;
+    return this._keys[key] ? true : false;
   }
-  /**
-   * Resets the cache
-   *
-   */
+
   clear() {
-    this.keys = {};
+    this._keys = {};
     this.frequency = {};
-    this.size = 0;
+    this._size = 0;
     this.minFrequency = 1;
   }
 }
