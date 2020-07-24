@@ -1,6 +1,4 @@
-import { Options } from './options.ts';
-
-export interface SLRUOptions extends Options {
+export interface SLRUOptions {
   protectedCache: number;
   probationaryCache: number;
 }
