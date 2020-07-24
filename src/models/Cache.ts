@@ -38,6 +38,22 @@ export interface Cache<V> {
   get(key: Key): V | undefined;
 
   /**
+   * Get the value to a key __without__ manipulating the cache
+   *
+   * @param key The entries key
+   * @returns The element with given key or undefined if the key is unknown
+   */
+  peek(key: Key): V | undefined;
+
+  /**
+   * Checks if a given key is in the cache
+   *
+   * @param key The key to check
+   * @returns True if the cache has the key
+   */
+  has(key: Key): boolean;
+
+  /**
    * Removes the cache entry with given key
    *
    * @param key The entries key
@@ -50,18 +66,11 @@ export interface Cache<V> {
   clear(): void;
 
   /**
-   * Checks if a given key is in the cache
+   * Array like forEach, iterating over all entries in the cache
    *
-   * @param key The key to check
-   * @returns True if the cache has the key
+   * @param callback function to call on each item
    */
-  has(key: Key): boolean;
-
-  /**
-   * Get the value to a key __without__ manipulating the cache
-   *
-   * @param key The entries key
-   * @returns The element with given key or undefined if the key is unknown
-   */
-  peek(key: Key): V | undefined;
+  forEach(
+    callback: (item: { key: Key; value: V }, index: number) => void
+  ): void;
 }

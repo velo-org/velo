@@ -92,21 +92,13 @@ export class SC<V = any> extends BaseCache implements Cache<V> {
     this.arrayMap[pointer].sChance = true;
     return this.arrayMap[pointer].value;
   }
-  /**
-   * Returns the value for the given Key or undefined if the key was not found but the order does not change
-   *
-   * @param {Key} key - the Key for which you want a value
-   */
+
   peek(key: Key) {
     const pointer = this.items[key];
     if (pointer === undefined) return undefined;
     return this.arrayMap[pointer].value;
   }
-  /**
-   *  add array like forEach to the cache Object
-   *
-   * @param {(item: { key: Key; value: V }, index: number) => void} callback - method which gets called forEach Iteration
-   */
+
   forEach(callback: (item: { key: Key; value: V }, index: number) => void) {
     this.arrayMap.forEach((val, i) => {
       callback.call(this, { key: val.key, value: val.value }, i);

@@ -43,11 +43,7 @@ export class SLRU<V = any> extends BaseCache implements Cache<V> {
       return cObjectProbationary;
     }
   }
-  /**
-   *  add array like forEach to the cache Object
-   *
-   * @param {(item: { key: Key; value: V }, index: number) => void} callback - method which gets called forEach Iteration
-   */
+
   forEach(callback: (item: { value: V; key: Key }, index: number) => void) {
     this.protectedPartition.forEach(callback);
     this.probationaryPartition.forEach(callback);

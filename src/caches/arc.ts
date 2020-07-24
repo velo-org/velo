@@ -157,6 +157,11 @@ export class ARC<V = any> extends BaseCache implements Cache<V> {
   get values() {
     return this.t1.values.concat(this.t2.values);
   }
+
+  forEach(callback: (item: { key: Key; value: V }, index: number) => void) {
+    this.t1.forEach(0, callback);
+    this.t2.forEach(this.t1.size(), callback);
+  }
 }
 
 /**
@@ -236,5 +241,17 @@ class ARCList<V> {
 
   size() {
     return this.pointers.size();
+  }
+
+  forEach(
+    start: number,
+    callback: (item: { key: Key; value: V }, index: number) => void
+  ) {
+    let p: number | undefined = this.pointers.nextOf(this.pointers.root);
+
+    for (let i = start; p !== undefined; i++) {
+      callback({ key: this.keys[p]!, value: this.values[p] }, i);
+      p = this.pointers.nextOf(p);
+    }
   }
 }

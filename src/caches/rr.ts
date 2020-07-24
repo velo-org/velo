@@ -83,11 +83,7 @@ export class RR<V = any> extends BaseCache implements Cache<V> {
   get keys() {
     return Object.keys(this.storage);
   }
-  /**
-   *  getter for the Values stored in the cache
-   *
-   * @readonly
-   */
+
   get values() {
     return Object.keys(this.storage)
       .filter((k) => this.storage[k] !== undefined)

@@ -109,11 +109,6 @@ export class LFU<V = any> extends BaseCache implements Cache<V> {
     return node.data;
   }
 
-  /**
-   *  add array like forEach to the cache Object
-   *
-   * @param {(item: { key: Key; value: V }, index: number) => void} callback - method which gets called forEach Iteration
-   */
   forEach(callback: (item: { key: Key; value: V }, index: number) => void) {
     Object.keys(this._keys).forEach((val, i) => {
       callback.call(this, { key: val, value: this._keys[val].data }, i);
