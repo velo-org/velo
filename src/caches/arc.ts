@@ -4,7 +4,7 @@ import { Key } from '../models/key.ts';
 import { PointerList } from '../utils/pointerList.ts';
 import { Cache } from '../models/Cache.ts';
 
-export class ARC<V = any> extends BaseCache implements Cache<V> {
+export class ARC<V = any> extends BaseCache<V> implements Cache<V> {
   private partition = 0;
 
   private t1: ARCList<V>;

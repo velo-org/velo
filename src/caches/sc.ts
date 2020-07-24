@@ -6,7 +6,7 @@ import { Cache } from '../models/Cache.ts';
 
 //TODO: delete single entry
 
-export class SC<V = any> extends BaseCache implements Cache<V> {
+export class SC<V = any> extends BaseCache<V> implements Cache<V> {
   private head: number;
   private tail: number;
   private arrayMap: { key: Key; value: V; sChance: boolean }[];

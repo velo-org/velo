@@ -61,6 +61,15 @@ export interface Cache<V> {
   remove(key: Key): void;
 
   /**
+   * Returns the value for a given key while removing this key from the cache.
+   * Equal to calling _get_ and _remove_.
+   *
+   * @param key The entries key, will be removed
+   * @returns The element with given key or undefined if the key is unknown
+   */
+  take(key: Key): V | undefined;
+
+  /**
    * Reset the cache
    */
   clear(): void;

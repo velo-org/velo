@@ -3,7 +3,7 @@ import { Options } from '../models/options.ts';
 import { getTypedArray } from '../utils/typedArray.ts';
 import { Key } from '../models/key.ts';
 
-export class LRU<V = any> extends BaseCache {
+export class LRU<V = any> extends BaseCache<V> {
   private head: number;
   private tail: number;
   private keys: (string | number | undefined)[];

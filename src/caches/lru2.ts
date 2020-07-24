@@ -4,7 +4,7 @@ import { Key } from '../models/key.ts';
 import { PointerList } from '../utils/pointerList.ts';
 import { Cache } from '../models/Cache.ts';
 
-export class LRU<V = any> extends BaseCache implements Cache<V> {
+export class LRU<V = any> extends BaseCache<V> implements Cache<V> {
   private _keys: Array<Key>;
   private _values: Array<V>;
   private items: { [key in Key]: number };

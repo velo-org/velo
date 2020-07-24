@@ -4,7 +4,7 @@ import { Node, DoublyLinkedList } from '../utils/doublyLinkedList.ts';
 import { Key } from '../models/key.ts';
 import { Cache } from '../models/Cache.ts';
 
-export class LFU<V = any> extends BaseCache implements Cache<V> {
+export class LFU<V = any> extends BaseCache<V> implements Cache<V> {
   private _keys: { [key in Key]: Node<V> };
   private frequency: { [key: number]: DoublyLinkedList };
   private _size: number;

@@ -4,7 +4,7 @@ import { getTypedArray } from '../utils/typedArray.ts';
 import { Key } from '../models/key.ts';
 import { Cache } from '../models/Cache.ts';
 
-export class RR<V = any> extends BaseCache implements Cache<V> {
+export class RR<V = any> extends BaseCache<V> implements Cache<V> {
   private storage: { [key in Key]: V | undefined };
   private _keys: (Key | undefined)[];
   private freeMemory: number;

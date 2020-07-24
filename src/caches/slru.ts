@@ -4,7 +4,7 @@ import { SLRUOptions } from '../models/slruOptions.ts';
 import { Key } from '../models/key.ts';
 import { Cache } from '../models/Cache.ts';
 
-export class SLRU<V = any> extends BaseCache implements Cache<V> {
+export class SLRU<V = any> extends BaseCache<V> implements Cache<V> {
   private protectedPartition: LRU<V>;
   private probationaryPartition: LRU<V>;
   private items: { [key in Key]: V };
