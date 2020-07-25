@@ -202,6 +202,22 @@ export class ARC<V = any> extends BaseCache<V> implements Cache<V> {
     return this.t1.values.concat(this.t2.values);
   }
 
+  get recentlySet() {
+    return this.t1;
+  }
+
+  get frequentlySet() {
+    return this.t2;
+  }
+
+  get recentlyEvicted() {
+    return this.b1;
+  }
+
+  get frequentlyEvicted() {
+    return this.b2;
+  }
+
   /**
    * Array like forEach, iterating over all entries in the cache
    *
@@ -217,9 +233,9 @@ export class ARC<V = any> extends BaseCache<V> implements Cache<V> {
  * An LRU with some special functions
  */
 class ARCList<V> {
-  items: { [key in Key]: number } = {};
+  private items: { [key in Key]: number } = {};
   keys: Array<Key>;
-  pointers: PointerList;
+  private pointers: PointerList;
   values: Array<V>;
 
   constructor(capacity: number) {

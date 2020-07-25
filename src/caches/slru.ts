@@ -152,9 +152,9 @@ export class SLRU<V = any> extends BaseCache<V> implements Cache<V> {
 
 /** An LRU with some special functions */
 class SLRUList<V> {
-  items: { [key in Key]: number } = {};
+  private items: { [key in Key]: number } = {};
   keys: Array<Key>;
-  pointers: PointerList;
+  private pointers: PointerList;
   values: Array<V>;
 
   constructor(capacity: number) {
