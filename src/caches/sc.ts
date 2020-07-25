@@ -6,6 +6,9 @@ import { Cache } from '../models/Cache.ts';
 
 //TODO: delete single entry
 
+/**
+ * Second Chance Cache
+ */
 export class SC<V = any> extends BaseCache<V> implements Cache<V> {
   private head: number;
   private tail: number;
@@ -25,6 +28,12 @@ export class SC<V = any> extends BaseCache<V> implements Cache<V> {
     this.arrayMap = new Array(this.capacity);
   }
 
+  /**
+   * Inserts a new entry into the cache
+   *
+   * @param key The entries key
+   * @param value The entries value
+   */
   set(key: Key, value: V) {
     let pointer = this.items[key];
     if (pointer !== undefined) {
@@ -86,6 +95,12 @@ export class SC<V = any> extends BaseCache<V> implements Cache<V> {
     return;
   }
 
+  /**
+   * Gets the value for a given key
+   *
+   * @param key The entries key
+   * @returns The element with given key or undefined if the key is unknown
+   */
   get(key: Key) {
     const pointer = this.items[key];
     if (pointer === undefined) return undefined;
@@ -93,18 +108,32 @@ export class SC<V = any> extends BaseCache<V> implements Cache<V> {
     return this.arrayMap[pointer].value;
   }
 
+  /**
+   * Get the value to a key __without__ manipulating the cache
+   *
+   * @param key The entries key
+   * @returns The element with given key or undefined if the key is unknown
+   */
   peek(key: Key) {
     const pointer = this.items[key];
     if (pointer === undefined) return undefined;
     return this.arrayMap[pointer].value;
   }
 
+  /**
+   * Array like forEach, iterating over all entries in the cache
+   *
+   * @param callback function to call on each item
+   */
   forEach(callback: (item: { key: Key; value: V }, index: number) => void) {
     this.arrayMap.forEach((val, i) => {
       callback.call(this, { key: val.key, value: val.value }, i);
     });
   }
 
+  /**
+   * Reset the cache
+   */
   clear() {
     this.backward = getTypedArray(this.capacity!);
     this.head = 0;
@@ -114,22 +143,42 @@ export class SC<V = any> extends BaseCache<V> implements Cache<V> {
     this.arrayMap = new Array(this.capacity);
   }
 
+  /**
+   * Removes the cache entry with given key
+   *
+   * @param key The entries key
+   */
   remove(key: Key) {
     const pointer = this.items[key];
   }
 
+  /**
+   * Checks if a given key is in the cache
+   *
+   * @param key The key to check
+   * @returns True if the cache has the key
+   */
   has(key: Key) {
     return this.items[key] ? true : false;
   }
 
+  /**
+   * List of keys in the cache
+   */
   get keys() {
     return this.arrayMap.map((v) => v.key);
   }
 
+  /**
+   * List of values in the cache
+   */
   get values() {
     return this.arrayMap.map((v) => v.value);
   }
 
+  /**
+   * Current number of entries in the cache
+   */
   get size() {
     return this._size;
   }

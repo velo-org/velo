@@ -4,6 +4,9 @@ import { Key } from '../models/key.ts';
 import { PointerList } from '../utils/pointerList.ts';
 import { Cache } from '../models/Cache.ts';
 
+/**
+ * Adaptive Replacement Cache
+ */
 export class ARC<V = any> extends BaseCache<V> implements Cache<V> {
   private partition = 0;
 
@@ -18,10 +21,6 @@ export class ARC<V = any> extends BaseCache<V> implements Cache<V> {
     this.t2 = new ARCList(this.capacity);
     this.b1 = new ARCList(this.capacity);
     this.b2 = new ARCList(this.capacity);
-  }
-
-  get size() {
-    return this.t1.size() + this.t2.size();
   }
 
   private replace(in_t2: boolean) {
@@ -39,6 +38,12 @@ export class ARC<V = any> extends BaseCache<V> implements Cache<V> {
     }
   }
 
+  /**
+   * Inserts a new entry into the cache
+   *
+   * @param key The entries key
+   * @param value The entries value
+   */
   set(key: Key, value: V) {
     // in frequent set
     if (this.t2.has(key)) {
@@ -112,6 +117,12 @@ export class ARC<V = any> extends BaseCache<V> implements Cache<V> {
     this.t1.insert(key, value);
   }
 
+  /**
+   * Gets the value for a given key
+   *
+   * @param key The entries key
+   * @returns The element with given key or undefined if the key is unknown
+   */
   get(key: Key): V | undefined {
     const value = this.t1.removeWithValue(key);
     // if in t1 move to t2
@@ -121,10 +132,22 @@ export class ARC<V = any> extends BaseCache<V> implements Cache<V> {
     return this.t2.get(key);
   }
 
+  /**
+   * Checks if a given key is in the cache
+   *
+   * @param key The key to check
+   * @returns True if the cache has the key
+   */
   has(key: Key) {
     return this.t1.has(key) || this.t2.has(key);
   }
 
+  /**
+   * Get the value to a key __without__ manipulating the cache
+   *
+   * @param key The entries key
+   * @returns The element with given key or undefined if the key is unknown
+   */
   peek(key: Key) {
     let value = this.t1.peek(key);
 
@@ -135,6 +158,11 @@ export class ARC<V = any> extends BaseCache<V> implements Cache<V> {
     return value;
   }
 
+  /**
+   * Removes the cache entry with given key
+   *
+   * @param key The entries key
+   */
   remove(key: Key) {
     this.t1.remove(key);
     this.t2.remove(key);
@@ -142,6 +170,9 @@ export class ARC<V = any> extends BaseCache<V> implements Cache<V> {
     this.b2.remove(key);
   }
 
+  /**
+   * Reset the cache
+   */
   clear() {
     this.partition = 0;
     this.t1.clear();
@@ -150,14 +181,32 @@ export class ARC<V = any> extends BaseCache<V> implements Cache<V> {
     this.b2.clear();
   }
 
+  /**
+   * Current number of entries in the cache
+   */
+  get size() {
+    return this.t1.size() + this.t2.size();
+  }
+
+  /**
+   * List of keys in the cache
+   */
   get keys() {
     return this.t1.keys.concat(this.t2.keys);
   }
 
+  /**
+   * List of values in the cache
+   */
   get values() {
     return this.t1.values.concat(this.t2.values);
   }
 
+  /**
+   * Array like forEach, iterating over all entries in the cache
+   *
+   * @param callback function to call on each item
+   */
   forEach(callback: (item: { key: Key; value: V }, index: number) => void) {
     this.t1.forEach(0, callback);
     this.t2.forEach(this.t1.size(), callback);

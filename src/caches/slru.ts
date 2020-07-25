@@ -4,6 +4,9 @@ import { Key } from '../models/key.ts';
 import { Cache } from '../models/Cache.ts';
 import { PointerList } from '../utils/pointerList.ts';
 
+/**
+ * Segmented LRU Cache
+ */
 export class SLRU<V = any> extends BaseCache<V> implements Cache<V> {
   private protectedPartition: SLRUList<V>;
   private probationaryPartition: SLRUList<V>;
@@ -22,10 +25,22 @@ export class SLRU<V = any> extends BaseCache<V> implements Cache<V> {
     this.items = {};
   }
 
+  /**
+   * Inserts a new entry into the cache
+   *
+   * @param key The entries key
+   * @param value The entries value
+   */
   set(key: Key, value: V) {
     this.probationaryPartition.setPop(key, value);
   }
 
+  /**
+   * Gets the value for a given key
+   *
+   * @param key The entries key
+   * @returns The element with given key or undefined if the key is unknown
+   */
   get(key: Key) {
     const cObjectProtected = this.protectedPartition.get(key);
     const cObjectProbationary = this.probationaryPartition.peek(key);
@@ -42,6 +57,11 @@ export class SLRU<V = any> extends BaseCache<V> implements Cache<V> {
     }
   }
 
+  /**
+   * Array like forEach, iterating over all entries in the cache
+   *
+   * @param callback function to call on each item
+   */
   forEach(callback: (item: { value: V; key: Key }, index: number) => void) {
     this.protectedPartition.forEach(0, callback);
     this.probationaryPartition.forEach(
@@ -50,12 +70,24 @@ export class SLRU<V = any> extends BaseCache<V> implements Cache<V> {
     );
   }
 
+  /**
+   * Get the value to a key __without__ manipulating the cache
+   *
+   * @param key The entries key
+   * @returns The element with given key or undefined if the key is unknown
+   */
   peek(key: Key) {
     return this.probationaryPartition.peek(key)
       ? this.probationaryPartition.peek(key)
       : this.protectedPartition.peek(key);
   }
 
+  /**
+   * Checks if a given key is in the cache
+   *
+   * @param key The key to check
+   * @returns True if the cache has the key
+   */
   has(key: Key) {
     return this.probationaryPartition.has(key)
       ? true
@@ -70,25 +102,42 @@ export class SLRU<V = any> extends BaseCache<V> implements Cache<V> {
     return this.probationaryPartition;
   }
 
+  /**
+   * Current number of entries in the cache
+   */
   get size() {
     return this.probationaryPartition.size() + this.protectedPartition.size();
   }
 
+  /**
+   * List of keys in the cache
+   */
   get keys() {
     return this.probationaryPartition.keys.concat(this.protectedPartition.keys);
   }
 
+  /**
+   * List of values in the cache
+   */
   get values() {
     return this.probationaryPartition.values.concat(
       this.protectedPartition.values
     );
   }
 
+  /**
+   * Reset the cache
+   */
   clear() {
     this.probationaryPartition.clear();
     this.protectedPartition.clear();
   }
 
+  /**
+   * Removes the cache entry with given key
+   *
+   * @param key The entries key
+   */
   remove(key: Key) {
     const propationaryObj = this.probationaryPartition.peek(key);
     const protectedObj = this.protectedPartition.peek(key);

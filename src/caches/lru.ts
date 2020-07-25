@@ -4,6 +4,9 @@ import { Key } from '../models/key.ts';
 import { PointerList } from '../utils/pointerList.ts';
 import { Cache } from '../models/Cache.ts';
 
+/**
+ * Least Recently Used Cache
+ */
 export class LRU<V = any> extends BaseCache<V> implements Cache<V> {
   private _keys: Array<Key>;
   private _values: Array<V>;
@@ -18,6 +21,12 @@ export class LRU<V = any> extends BaseCache<V> implements Cache<V> {
     this.pointers = new PointerList(this.capacity);
   }
 
+  /**
+   * Inserts a new entry into the cache
+   *
+   * @param key The entries key
+   * @param value The entries value
+   */
   set(key: Key, value: V) {
     let pointer = this.items[key];
 
@@ -48,6 +57,9 @@ export class LRU<V = any> extends BaseCache<V> implements Cache<V> {
     this.pointers.pushFront(pointer);
   }
 
+  /**
+   * Reset the cache
+   */
   clear() {
     this.items = {};
     this._keys = [];
@@ -55,12 +67,23 @@ export class LRU<V = any> extends BaseCache<V> implements Cache<V> {
     this.pointers.clear();
   }
 
+  /**
+   * Removes the cache entry with given key
+   *
+   * @param key The entries key
+   */
   remove(key: Key) {
     const pointer = this.items[key];
     this.pointers.remove(pointer);
     delete this.items[key];
   }
 
+  /**
+   * Gets the value for a given key
+   *
+   * @param key The entries key
+   * @returns The element with given key or undefined if the key is unknown
+   */
   get(key: Key): V | undefined {
     const pointer = this.items[key];
 
@@ -70,28 +93,54 @@ export class LRU<V = any> extends BaseCache<V> implements Cache<V> {
     return this._values[pointer];
   }
 
+  /**
+   * Checks if a given key is in the cache
+   *
+   * @param key The key to check
+   * @returns True if the cache has the key
+   */
   has(key: Key) {
     return this.items[key] ? true : false;
   }
 
+  /**
+   * Get the value to a key __without__ manipulating the cache
+   *
+   * @param key The entries key
+   * @returns The element with given key or undefined if the key is unknown
+   */
   peek(key: Key) {
     const pointer = this.items[key];
     if (pointer === undefined) return;
     return this._values[pointer];
   }
 
+  /**
+   * Current number of entries in the cache
+   */
   get size() {
     return this.pointers.size();
   }
 
+  /**
+   * List of keys in the cache
+   */
   get keys() {
     return this._keys;
   }
 
+  /**
+   * List of values in the cache
+   */
   get values() {
     return this._values;
   }
 
+  /**
+   * Array like forEach, iterating over all entries in the cache
+   *
+   * @param callback function to call on each item
+   */
   forEach(
     callback: (item: { key: Key; value: V }, index: number) => void,
     reverse: boolean = false

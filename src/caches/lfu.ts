@@ -4,6 +4,9 @@ import { Node, DoublyLinkedList } from '../utils/doublyLinkedList.ts';
 import { Key } from '../models/key.ts';
 import { Cache } from '../models/Cache.ts';
 
+/**
+ * Least Frequently Used Cache
+ */
 export class LFU<V = any> extends BaseCache<V> implements Cache<V> {
   private _keys: { [key in Key]: Node<V> };
   private frequency: { [key: number]: DoublyLinkedList };
@@ -18,6 +21,12 @@ export class LFU<V = any> extends BaseCache<V> implements Cache<V> {
     this.minFrequency = 1;
   }
 
+  /**
+   * Inserts a new entry into the cache
+   *
+   * @param key The entries key
+   * @param value The entries value
+   */
   set(key: Key, value: V) {
     let node = this._keys[key];
 
@@ -82,6 +91,12 @@ export class LFU<V = any> extends BaseCache<V> implements Cache<V> {
     }
   }
 
+  /**
+   * Gets the value for a given key
+   *
+   * @param key The entries key
+   * @returns The element with given key or undefined if the key is unknown
+   */
   get(key: Key) {
     const node = this._keys[key];
     if (node == undefined) return undefined;
@@ -109,12 +124,22 @@ export class LFU<V = any> extends BaseCache<V> implements Cache<V> {
     return node.data;
   }
 
+  /**
+   * Array like forEach, iterating over all entries in the cache
+   *
+   * @param callback function to call on each item
+   */
   forEach(callback: (item: { key: Key; value: V }, index: number) => void) {
     Object.keys(this._keys).forEach((val, i) => {
       callback.call(this, { key: val, value: this._keys[val].data }, i);
     });
   }
 
+  /**
+   * Removes the cache entry with given key
+   *
+   * @param key The entries key
+   */
   remove(key: Key) {
     const node = this._keys[key];
     if (!node) throw new Error('key not found');
@@ -132,28 +157,52 @@ export class LFU<V = any> extends BaseCache<V> implements Cache<V> {
     }
   }
 
+  /**
+   * List of values in the cache
+   */
   get values() {
     return Object.keys(this._keys).map((k) => this._keys[k].data);
   }
 
+  /**
+   * List of keys in the cache
+   */
   get keys() {
     return Object.keys(this._keys);
   }
 
+  /**
+   * Current number of entries in the cache
+   */
   get size() {
     return this._size;
   }
 
+  /**
+   * Get the value to a key __without__ manipulating the cache
+   *
+   * @param key The entries key
+   * @returns The element with given key or undefined if the key is unknown
+   */
   peek(key: Key) {
     const node = this._keys[key];
     if (node == undefined) return undefined;
     return node.data;
   }
 
+  /**
+   * Checks if a given key is in the cache
+   *
+   * @param key The key to check
+   * @returns True if the cache has the key
+   */
   has(key: Key) {
     return this._keys[key] ? true : false;
   }
 
+  /**
+   * Reset the cache
+   */
   clear() {
     this._keys = {};
     this.frequency = {};

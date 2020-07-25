@@ -4,6 +4,9 @@ import { getTypedArray } from '../utils/typedArray.ts';
 import { Key } from '../models/key.ts';
 import { Cache } from '../models/Cache.ts';
 
+/**
+ * Random Replacement Cache
+ */
 export class RR<V = any> extends BaseCache<V> implements Cache<V> {
   private storage: { [key in Key]: V | undefined };
   private _keys: (Key | undefined)[];
@@ -26,6 +29,12 @@ export class RR<V = any> extends BaseCache<V> implements Cache<V> {
     }
   }
 
+  /**
+   * Inserts a new entry into the cache
+   *
+   * @param key The entries key
+   * @param value The entries value
+   */
   set(key: Key, value: V) {
     if (this.storage[key]) {
       this.storage[key] = value;
@@ -57,43 +66,83 @@ export class RR<V = any> extends BaseCache<V> implements Cache<V> {
     return key;
   }
 
+  /**
+   * Gets the value for a given key
+   *
+   * @param key The entries key
+   * @returns The element with given key or undefined if the key is unknown
+   */
   get(key: Key) {
     return this.storage[key];
   }
 
+  /**
+   * Removes the cache entry with given key
+   *
+   * @param key The entries key
+   */
   remove(key: Key) {
     this._keys.splice(this._keys.indexOf(key), 1);
     delete this.storage[key];
   }
 
+  /**
+   * Array like forEach, iterating over all entries in the cache
+   *
+   * @param callback function to call on each item
+   */
   forEach(callback: (item: { key: Key; value: V }, index: number) => void) {
     Object.keys(this.storage).forEach((key, i) => {
       callback.call(this, { key, value: this.storage[key]! }, i);
     });
   }
 
+  /**
+   * Checks if a given key is in the cache
+   *
+   * @param key The key to check
+   * @returns True if the cache has the key
+   */
   has(key: Key) {
     return this.storage[key] ? true : false;
   }
 
+  /**
+   * Get the value to a key __without__ manipulating the cache
+   *
+   * @param key The entries key
+   * @returns The element with given key or undefined if the key is unknown
+   */
   peek(key: Key) {
     return this.get(key);
   }
 
+  /**
+   * List of keys in the cache
+   */
   get keys() {
     return Object.keys(this.storage);
   }
 
+  /**
+   * List of values in the cache
+   */
   get values() {
     return Object.keys(this.storage)
       .filter((k) => this.storage[k] !== undefined)
       .map((k) => this.storage[k]!);
   }
 
+  /**
+   * Current number of entries in the cache
+   */
   get size() {
     return this._size;
   }
 
+  /**
+   * Reset the cache
+   */
   clear() {
     this._size = 0;
     this._keys = [];
