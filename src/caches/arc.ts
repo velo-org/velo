@@ -283,7 +283,7 @@ class ARCList<V> {
     let p = this.items[key];
 
     if (!p) {
-      p = this.pointers.newPointer();
+      p = this.pointers.newPointer()!;
       this.pointers.pushFront(p);
       this.keys[p] = key;
       this.items[key] = p;
@@ -312,14 +312,14 @@ class ARCList<V> {
   }
 
   size() {
-    return this.pointers.size();
+    return this.pointers.size;
   }
 
   forEach(
     start: number,
     callback: (item: { key: Key; value: V }, index: number) => void
   ) {
-    let p: number | undefined = this.pointers.nextOf(this.pointers.root);
+    let p: number | undefined = this.pointers.nextOf(this.pointers.front);
 
     for (let i = start; p !== undefined; i++) {
       callback({ key: this.keys[p]!, value: this.values[p] }, i);

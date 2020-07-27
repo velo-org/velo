@@ -20,7 +20,7 @@ let filterRegex: RegExp | undefined;
 
 if (Deno.args.length > 0 && Deno.args[0] !== 'md') {
   const skip = CACHES.filter(
-    (name) => !Deno.args[0].split(',').includes(name)
+    (name) => !Deno.args[0].toUpperCase().split(',').includes(name)
   ).map((name) => `^${name}`);
 
   filterRegex = skip.length > 0 ? new RegExp(skip.join('|')) : undefined;

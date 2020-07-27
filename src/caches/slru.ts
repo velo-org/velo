@@ -200,7 +200,7 @@ class SLRUList<V> {
 
     // The cache is not yet full
     if (!this.pointers.isFull()) {
-      pointer = this.pointers.newPointer();
+      pointer = this.pointers.newPointer()!;
     }
 
     // Cache is full, we need to drop the last value
@@ -212,7 +212,7 @@ class SLRUList<V> {
         value: this.values[pointer],
       };
       delete this.items[this.keys[pointer]!];
-      pointer = this.pointers.newPointer();
+      pointer = this.pointers.newPointer()!;
     }
 
     // Storing key & value
@@ -232,14 +232,14 @@ class SLRUList<V> {
   }
 
   size() {
-    return this.pointers.size();
+    return this.pointers.size;
   }
 
   forEach(
     start: number,
     callback: (item: { key: Key; value: V }, index: number) => void
   ) {
-    let p: number | undefined = this.pointers.nextOf(this.pointers.root);
+    let p: number | undefined = this.pointers.nextOf(this.pointers.front);
 
     for (let i = start; p !== undefined; i++) {
       callback({ key: this.keys[p]!, value: this.values[p] }, i);

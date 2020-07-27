@@ -39,14 +39,14 @@ export class LRU<V = any> extends BaseCache<V> implements Cache<V> {
 
     // The cache is not yet full
     if (!this.pointers.isFull()) {
-      pointer = this.pointers.newPointer();
+      pointer = this.pointers.newPointer()!;
     }
 
     // Cache is full, we need to drop the last value
     else {
       pointer = this.pointers.removeBack();
       delete this.items[this._keys[pointer]!];
-      pointer = this.pointers.newPointer();
+      pointer = this.pointers.newPointer()!;
     }
 
     // Storing key & value
@@ -119,7 +119,7 @@ export class LRU<V = any> extends BaseCache<V> implements Cache<V> {
    * Current number of entries in the cache
    */
   get size() {
-    return this.pointers.size();
+    return this.pointers.size;
   }
 
   /**
@@ -145,10 +145,10 @@ export class LRU<V = any> extends BaseCache<V> implements Cache<V> {
     callback: (item: { key: Key; value: V }, index: number) => void,
     reverse: boolean = false
   ) {
-    let p: number | undefined = this.pointers.nextOf(this.pointers.root);
+    let p: number | undefined = this.pointers.nextOf(this.pointers.front);
 
     for (
-      let i = reverse ? this.pointers.size(true) : 0;
+      let i = reverse ? this.pointers.size : 0;
       p !== undefined;
       reverse ? i-- : i++
     ) {

@@ -28,7 +28,8 @@ Deno.test('LRU get non-existent entry, should return undefined', () => {
   lruCache.set('4', 4);
   assertEquals(lruCache.get('key'), undefined);
 });
-Deno.test('LRU remove entry, should return undefined', () => {
+
+Deno.test('LRU get removed entry, should return undefined', () => {
   const lruCache = new LRU({ capacity: 5 });
   lruCache.set('1', 1);
   lruCache.set('2', 2);
@@ -66,14 +67,14 @@ Deno.test(
   }
 );
 
-Deno.test('LRU clear should reset cache', () => {
-  const lruCache = new LRU({ capacity: 5 });
+Deno.test('LRU set double the allowed capacity, should evict all keys', () => {
+  const lruCache = new LRU({ capacity: 3 });
   lruCache.set('1', 1);
   lruCache.set('2', 2);
   lruCache.set('3', 3);
   lruCache.set('4', 4);
   lruCache.set('5', 5);
-  lruCache.clear();
-  assertEquals(lruCache.peek('3'), undefined);
-  assertEquals(lruCache.size, 0);
+  lruCache.set('6', 6);
+
+  assertEquals(lruCache.keys, ['4', '5', '6']);
 });
