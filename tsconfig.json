@@ -12,7 +12,7 @@
 
     /* Additional Checks */
     //"noUnusedLocals": true,
-    "noImplicitReturns": true,
+    "noImplicitReturns": false,
     "noFallthroughCasesInSwitch": true
     //"lib": ["es2017", "DOM"]
   },

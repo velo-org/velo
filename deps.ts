@@ -1,4 +1,5 @@
 import * as Log from 'https://deno.land/std/log/mod.ts';
+import { platform } from 'https://deno.land/std/node/os.ts';
 import {
   runBenchmarks,
   bench,
@@ -9,7 +10,15 @@ import {
   assertEquals,
 } from 'https://deno.land/std@0.60.0/testing/asserts.ts';
 
-export { Log, runBenchmarks, bench, BenchmarkResult, assert, assertEquals };
+export {
+  Log,
+  runBenchmarks,
+  bench,
+  BenchmarkResult,
+  assert,
+  assertEquals,
+  platform,
+};
 
 import {
   prettyBenchmarkResult,

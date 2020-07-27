@@ -91,7 +91,6 @@ lfuc.set('2', { hello: 'asdf' }); // sets 2
 lfuc.set('3', { hello: 'asdf' }); // sets 3
 lfuc.set('4', { hello: 'asdf' }); // sets 4
 lfuc.set('5', { hello: 'asdf' }); // sets 5
-console.log(lfuc.Keys, lfuc.Values);
 console.log(lfuc.get('1')); // gets 2 second Chance gets activated
 lfuc.set('6', { hello: 'asdfdd' }); // sets 6 removes 2
 
