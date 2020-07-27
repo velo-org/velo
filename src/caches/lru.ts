@@ -11,7 +11,7 @@ export class LRU<V = any> extends BaseCache<V> implements Cache<V> {
   private _keys: Array<Key>;
   private _values: Array<V>;
   private items: { [key in Key]: number };
-  pointers: PointerList;
+  private pointers: PointerList;
 
   constructor(options: Options) {
     super(options);

@@ -6,7 +6,7 @@ bench:
 	deno run -c tsconfig.json --allow-hrtime --allow-write --allow-read --unstable --allow-env --allow-run ./benchmark/runBenchmarks.ts $(filter) $(out)
 
 utest:
-	deno test ./test
+	deno test --unstable --allow-read --allow-env ./test
 
 format:
 	deno fmt

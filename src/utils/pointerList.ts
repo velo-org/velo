@@ -183,7 +183,7 @@ export class PointerList {
    * Clears the list
    */
   clear() {
-    this._size = 0;
+    this._size = 1;
     this.next = getTypedArray(this._capacity);
     this.prev = getTypedArray(this._capacity);
   }
