@@ -80,7 +80,7 @@ Deno.test('LFU set double the allowed capacity, should evict all keys', () => {
   assertEquals(lfuCache.keys, ['4', '5', '6']);
 });
 Deno.test('LFU use with ttl', async () => {
-  const lfuCache = new LFU({ capacity: 5, ttl: 500 });
+  const lfuCache = new LFU({ capacity: 5, stdTTL: 500 });
   lfuCache.set('1', 1);
   lfuCache.set('2', 2);
   lfuCache.set('3', 3);
@@ -92,7 +92,7 @@ Deno.test('LFU use with ttl', async () => {
 });
 
 Deno.test('LFU use with ttl, oveLFUide ttl for specific set', async () => {
-  const lfuCache = new LFU({ capacity: 5, ttl: 500 });
+  const lfuCache = new LFU({ capacity: 5, stdTTL: 500 });
   lfuCache.set('1', 1);
   lfuCache.set('2', 2);
   lfuCache.set('3', 3);
