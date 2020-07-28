@@ -1,5 +1,6 @@
 import { RR } from '../src/caches/rr.ts';
 import { assertEquals } from '../deps.ts';
+import { sleep } from '../src/utils/sleep.ts';
 
 Deno.test('RR create Cache, should create a new empty cache', () => {
   const rrCache = new RR({ capacity: 5 });
@@ -61,4 +62,29 @@ Deno.test('RR clear should reset cache', () => {
   rrCache.clear();
   assertEquals(rrCache.peek('3'), undefined);
   assertEquals(rrCache.size, 0);
+});
+
+Deno.test('RR use with ttl', async () => {
+  const rrCache = new RR({ capacity: 5, ttl: 500 });
+  rrCache.set('1', 1);
+  rrCache.set('2', 2);
+  rrCache.set('3', 3);
+  rrCache.set('4', 4);
+  rrCache.set('5', 5);
+  await sleep(600);
+  assertEquals(rrCache.size, 0);
+  assertEquals(rrCache.keys, []);
+});
+
+Deno.test('RR use with ttl, override ttl for specific set', async () => {
+  const rrCache = new RR({ capacity: 5, ttl: 500 });
+  rrCache.set('1', 1);
+  rrCache.set('2', 2);
+  rrCache.set('3', 3);
+  rrCache.set('4', 4);
+  rrCache.set('5', 5, 1000);
+  await sleep(600);
+  assertEquals(rrCache.size, 1);
+  assertEquals(rrCache.keys, ['5']);
+  await sleep(400);
 });

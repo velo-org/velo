@@ -2,12 +2,11 @@ import { BaseCache } from './base.ts';
 import { Options } from '../models/options.ts';
 import { Node, DoublyLinkedList } from '../utils/doublyLinkedList.ts';
 import { Key } from '../models/key.ts';
-import { Cache } from '../models/Cache.ts';
 
 /**
  * Least Frequently Used Cache
  */
-export class LFU<V = any> extends BaseCache<V> implements Cache<V> {
+export class LFU<V = any> extends BaseCache<V> {
   private _keys: { [key in Key]: Node<V> };
   private frequency: { [key: number]: DoublyLinkedList };
   private _size: number;
@@ -26,8 +25,10 @@ export class LFU<V = any> extends BaseCache<V> implements Cache<V> {
    *
    * @param key The entries key
    * @param value The entries value
+   * @param ttl The max time to live in ms
    */
-  set(key: Key, value: V) {
+  set(key: Key, value: V, ttl?: number) {
+    this.checkForTtl(key, ttl);
     let node = this._keys[key];
 
     // if node doesnt exist in _keys then add it
@@ -144,6 +145,7 @@ export class LFU<V = any> extends BaseCache<V> implements Cache<V> {
     const node = this._keys[key];
     if (!node) throw new Error('key not found');
     else {
+      this._size--;
       const oldFrequencyCount = node.frequencyCount;
       this.frequency[oldFrequencyCount].removeNode(node);
       delete this._keys[key];

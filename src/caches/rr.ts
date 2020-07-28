@@ -2,12 +2,11 @@ import { BaseCache } from './base.ts';
 import { Options } from '../models/options.ts';
 import { getTypedArray } from '../utils/typedArray.ts';
 import { Key } from '../models/key.ts';
-import { Cache } from '../models/Cache.ts';
 
 /**
  * Random Replacement Cache
  */
-export class RR<V = any> extends BaseCache<V> implements Cache<V> {
+export class RR<V = any> extends BaseCache<V> {
   private storage: { [key in Key]: V | undefined };
   private _keys: (Key | undefined)[];
   private freeMemory: number;
@@ -34,8 +33,10 @@ export class RR<V = any> extends BaseCache<V> implements Cache<V> {
    *
    * @param key The entries key
    * @param value The entries value
+   * @param ttl The max time to live in ms
    */
-  set(key: Key, value: V) {
+  set(key: Key, value: V, ttl?: number) {
+    this.checkForTtl(key, ttl);
     if (this.storage[key]) {
       this.storage[key] = value;
       return;
@@ -83,6 +84,7 @@ export class RR<V = any> extends BaseCache<V> implements Cache<V> {
    */
   remove(key: Key) {
     this._keys.splice(this._keys.indexOf(key), 1);
+    this._size--;
     delete this.storage[key];
   }
 

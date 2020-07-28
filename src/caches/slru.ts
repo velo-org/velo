@@ -1,13 +1,12 @@
 import { BaseCache } from './base.ts';
 import { SLRUOptions } from '../models/slruOptions.ts';
 import { Key } from '../models/key.ts';
-import { Cache } from '../models/Cache.ts';
 import { PointerList } from '../utils/pointerList.ts';
 
 /**
  * Segmented LRU Cache
  */
-export class SLRU<V = any> extends BaseCache<V> implements Cache<V> {
+export class SLRU<V = any> extends BaseCache<V> {
   private protectedPartition: SLRUList<V>;
   private probationaryPartition: SLRUList<V>;
   private items: { [key in Key]: V };
@@ -17,6 +16,7 @@ export class SLRU<V = any> extends BaseCache<V> implements Cache<V> {
   constructor(options: SLRUOptions) {
     super({
       capacity: options.probationaryCache + options.protectedCache,
+      ttl: options.ttl,
     });
     this.protectedCache = options.protectedCache;
     this.probationaryCache = options.probationaryCache;
@@ -30,8 +30,10 @@ export class SLRU<V = any> extends BaseCache<V> implements Cache<V> {
    *
    * @param key The entries key
    * @param value The entries value
+   * @param ttl The max time to live in ms
    */
-  set(key: Key, value: V) {
+  set(key: Key, value: V, ttl?: number) {
+    this.checkForTtl(key, ttl);
     this.probationaryPartition.setPop(key, value);
   }
 

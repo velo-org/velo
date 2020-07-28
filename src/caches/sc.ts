@@ -2,14 +2,13 @@ import { BaseCache } from './base.ts';
 import { Options } from '../models/options.ts';
 import { getTypedArray } from '../utils/typedArray.ts';
 import { Key } from '../models/key.ts';
-import { Cache } from '../models/Cache.ts';
 
 //TODO: delete single entry
 
 /**
  * Second Chance Cache
  */
-export class SC<V = any> extends BaseCache<V> implements Cache<V> {
+export class SC<V = any> extends BaseCache<V> {
   private head: number;
   private tail: number;
   private arrayMap: { key: Key; value: V; sChance: boolean }[];
@@ -33,8 +32,10 @@ export class SC<V = any> extends BaseCache<V> implements Cache<V> {
    *
    * @param key The entries key
    * @param value The entries value
+   * @param ttl The max time to live in ms
    */
-  set(key: Key, value: V) {
+  set(key: Key, value: V, ttl?: number) {
+    this.checkForTtl(key, ttl);
     let pointer = this.items[key];
     if (pointer !== undefined) {
       this.arrayMap[pointer].value = value;

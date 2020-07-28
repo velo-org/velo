@@ -2,12 +2,11 @@ import { BaseCache } from './base.ts';
 import { Options } from '../models/options.ts';
 import { Key } from '../models/key.ts';
 import { PointerList } from '../utils/pointerList.ts';
-import { Cache } from '../models/Cache.ts';
 
 /**
  * Adaptive Replacement Cache
  */
-export class ARC<V = any> extends BaseCache<V> implements Cache<V> {
+export class ARC<V = any> extends BaseCache<V> {
   private partition = 0;
 
   private t1: ARCList<V>;
@@ -43,8 +42,10 @@ export class ARC<V = any> extends BaseCache<V> implements Cache<V> {
    *
    * @param key The entries key
    * @param value The entries value
+   * @param ttl The max time to live in ms
    */
-  set(key: Key, value: V) {
+  set(key: Key, value: V, ttl?: number) {
+    this.checkForTtl(key, ttl);
     // in frequent set
     if (this.t2.has(key)) {
       this.t2.insert(key, value);

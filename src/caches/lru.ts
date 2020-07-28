@@ -2,14 +2,13 @@ import { BaseCache } from './base.ts';
 import { Options } from '../models/options.ts';
 import { Key } from '../models/key.ts';
 import { PointerList } from '../utils/pointerList.ts';
-import { Cache } from '../models/Cache.ts';
 
 /**
  * Least Recently Used Cache
  */
-export class LRU<V = any> extends BaseCache<V> implements Cache<V> {
-  private _keys: Array<Key>;
-  private _values: Array<V>;
+export class LRU<V = any> extends BaseCache<V> {
+  private _keys: Array<Key | undefined>;
+  private _values: Array<V | undefined>;
   private items: { [key in Key]: number };
   private pointers: PointerList;
 
@@ -26,8 +25,10 @@ export class LRU<V = any> extends BaseCache<V> implements Cache<V> {
    *
    * @param key The entries key
    * @param value The entries value
+   * @param ttl The max time to live in ms
    */
-  set(key: Key, value: V) {
+  set(key: Key, value: V, ttl?: number) {
+    this.checkForTtl(key, ttl);
     let pointer = this.items[key];
 
     if (pointer) {
@@ -75,6 +76,8 @@ export class LRU<V = any> extends BaseCache<V> implements Cache<V> {
   remove(key: Key) {
     const pointer = this.items[key];
     this.pointers.remove(pointer);
+    this._keys[pointer] = undefined;
+    this._values[pointer] = undefined;
     delete this.items[key];
   }
 
@@ -126,14 +129,14 @@ export class LRU<V = any> extends BaseCache<V> implements Cache<V> {
    * List of keys in the cache
    */
   get keys() {
-    return this._keys;
+    return this._keys.filter((k) => k !== undefined);
   }
 
   /**
    * List of values in the cache
    */
   get values() {
-    return this._values;
+    return this._values.filter((v) => v !== undefined);
   }
 
   /**
@@ -152,7 +155,7 @@ export class LRU<V = any> extends BaseCache<V> implements Cache<V> {
       p !== undefined;
       reverse ? i-- : i++
     ) {
-      callback({ key: this._keys[p]!, value: this._values[p] }, i);
+      callback({ key: this._keys[p]!, value: this._values[p]! }, i);
       p = reverse ? this.pointers.prevOf(p) : this.pointers.nextOf(p);
     }
   }
