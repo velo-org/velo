@@ -45,7 +45,8 @@ export class ARC<V = any> extends BaseCache<V> {
    * @param ttl The max time to live in ms
    */
   set(key: Key, value: V, ttl?: number) {
-    this.checkForTtl(key, ttl);
+    this.applyTTL(key, ttl);
+
     // in frequent set
     if (this.t2.has(key)) {
       this.t2.insert(key, value);

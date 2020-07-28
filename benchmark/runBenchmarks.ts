@@ -40,6 +40,7 @@ runBenchmarks({ silent: true, skip: filterRegex }, prettyBenchmarkProgress())
 
 async function generateMarkdown(results: BenchmarkResult[]) {
   const encoder = new TextEncoder();
+
   let res;
   if (platform() === 'linux') {
     res = await systemSpecLinux();
@@ -109,6 +110,7 @@ async function systemSpecLinux() {
     stdout: 'piped',
     stderr: 'piped',
   });
+
   const outputCPUInfo = await cpuInfo.output(); // "piped" must be set
   const outputMemory = await memory.output();
   const outputCores = await cores.output();
@@ -119,6 +121,7 @@ async function systemSpecLinux() {
   cores.close();
   cpuInfo.close();
   memory.close();
+
   return {
     cpu: `${cpuInfoStr} x ${coreStr}`,
     memory: formatBytes(Number(memStr.match(/(\d+)/)![0]) * 1024),
@@ -144,12 +147,14 @@ async function systemSpecsWindows() {
     stdout: 'piped',
     stderr: 'piped',
   });
+
   const outputCPUInfo = await cpuInfo.output(); // "piped" must be set
   const outputMemory = await memory.output();
   const outputCores = await cores.output();
   const cpuInfoStr = new TextDecoder().decode(outputCPUInfo);
   const coreStr = new TextDecoder().decode(outputCores);
   const memStr = new TextDecoder().decode(outputMemory);
+
   let memSize = memStr.split('\n');
   let memRes = 0;
   memSize.shift();

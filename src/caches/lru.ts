@@ -28,7 +28,8 @@ export class LRU<V = any> extends BaseCache<V> {
    * @param ttl The max time to live in ms
    */
   set(key: Key, value: V, ttl?: number) {
-    this.checkForTtl(key, ttl);
+    this.applyTTL(key, ttl);
+
     let pointer = this.items[key];
 
     if (pointer) {

@@ -11,16 +11,16 @@ export abstract class BaseCache<V> {
    *  Maximum time to live in ms
    *
    */
-  readonly ttl?: number;
+  readonly stdTTL?: number;
 
   constructor(options: Options) {
     this.capacity = options.capacity;
-    this.ttl = options.ttl;
+    this.stdTTL = options.stdTTL;
   }
 
   abstract remove(key: Key): void;
   abstract get(key: Key): V | undefined;
-  abstract set(key: Key, value: V): void;
+  abstract set(key: Key, value: V, ttl?: number): void;
   abstract peek(key: Key): V | undefined;
   abstract has(key: Key): boolean;
   abstract clear(): void;
@@ -41,15 +41,25 @@ export abstract class BaseCache<V> {
     return value;
   }
 
-  checkForTtl(key: Key, ttl?: number) {
+  /**
+   * Adds a TTL to given key. Does however __not__ override any existing TTLs.
+   *
+   * @param key The key to set a TTL for
+   * @param ttl Time to live in milliseconds
+   */
+  setTTL(key: Key, ttl: number) {
+    this.applyTTL(key, ttl);
+  }
+
+  protected applyTTL(key: Key, ttl?: number) {
     if (ttl) {
       setTimeout(() => {
         this.remove(key);
       }, ttl);
-    } else if (this.ttl) {
+    } else if (this.stdTTL) {
       setTimeout(() => {
         this.remove(key);
-      }, this.ttl);
+      }, this.stdTTL);
     }
   }
 }
