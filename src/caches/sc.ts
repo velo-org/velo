@@ -160,7 +160,7 @@ export class SC<V = any> extends BaseCache<V> {
    * @returns True if the cache has the key
    */
   has(key: Key) {
-    return this.items[key] ? true : false;
+    return this.items[key] !== undefined ? true : false;
   }
 
   /**

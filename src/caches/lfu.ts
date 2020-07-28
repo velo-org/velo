@@ -199,7 +199,7 @@ export class LFU<V = any> extends BaseCache<V> {
    * @returns True if the cache has the key
    */
   has(key: Key) {
-    return this._keys[key] ? true : false;
+    return this._keys[key] !== undefined ? true : false;
   }
 
   /**

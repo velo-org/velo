@@ -246,7 +246,7 @@ class ARCList<V> {
   }
 
   has(key: Key) {
-    return this.items[key] ? true : false;
+    return this.items[key] !== undefined ? true : false;
   }
 
   get(key: Key): V | undefined {

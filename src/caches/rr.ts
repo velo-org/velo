@@ -106,7 +106,7 @@ export class RR<V = any> extends BaseCache<V> {
    * @returns True if the cache has the key
    */
   has(key: Key) {
-    return this.storage[key] ? true : false;
+    return this.storage[key] !== undefined ? true : false;
   }
 
   /**
