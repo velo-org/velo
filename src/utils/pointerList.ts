@@ -22,10 +22,10 @@ export class PointerList {
   /** Index of the root */
   private _root = 0;
 
-  /** Internal actual capacity (including the _root) */
+  /** The capacity of the list */
   private readonly _capacity: number;
 
-  /** Internal actual size (including the _root, therefore initialized with 1)*/
+  /** The size*/
   private _size = 0;
 
   /** Keeps track of the freed indices */
@@ -36,7 +36,7 @@ export class PointerList {
 
   /**
    * Creates an instance of PointerList
-   * @param capacity The fixed size of the list / amount of pointers
+   * @param capacity The fixed maximum size of the list
    */
   constructor(capacity: number) {
     this._capacity = capacity;
@@ -44,9 +44,7 @@ export class PointerList {
     this.prev = getTypedArray(this._capacity);
   }
 
-  /**
-   * The capacity of the list (exluding the _root)
-   */
+  /** The capacity of the list */
   get capacity() {
     return this._capacity;
   }
@@ -61,9 +59,7 @@ export class PointerList {
     return this.prev[this._root];
   }
 
-  /**
-   * The size of the list
-   */
+  /** The size of the list */
   get size() {
     return this._size;
   }
@@ -155,7 +151,7 @@ export class PointerList {
   }
 
   /**
-   * Removes a non-_root pointer from the list
+   * Removes a pointer from the list
    *
    * @param pointer The pointer to remove
    * @returns The removed pointer
