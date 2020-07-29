@@ -16,7 +16,6 @@ export class RR<V = any> extends BaseCache<V> {
 
   constructor(options: Options) {
     super(options);
-    if (!this.capacity) throw new Error('Please provide a Maximum Cache');
     this.storage = {};
     this._keys = [];
     this.freeMemory = -1;

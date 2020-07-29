@@ -2,6 +2,7 @@ import { BaseCache } from './base.ts';
 import { Options } from '../models/options.ts';
 import { getTypedArray, TypedArray } from '../utils/typedArray.ts';
 import { Key } from '../models/key.ts';
+import { PointerList } from '../utils/pointerList.ts';
 
 //TODO: delete single entry
 
@@ -11,19 +12,24 @@ import { Key } from '../models/key.ts';
 export class SC<V = any> extends BaseCache<V> {
   private head: number;
   private tail: number;
-  private arrayMap: { key: Key; value: V; sChance: boolean }[];
+  private arrayMap: {
+    key: Key | undefined;
+    value: V | undefined;
+    sChance: boolean;
+  }[];
   private backward: TypedArray;
+  private pointers: PointerList;
   private items: { [key in Key]: number };
   private _size: number;
 
   constructor(options: Options) {
     super(options);
-    if (!this.capacity) throw new Error('Please provide a Maximum Cache');
     this.backward = getTypedArray(this.capacity);
     this.head = 0;
     this._size = 0;
     this.tail = 0;
     this.items = {};
+    this.pointers = new PointerList(this.capacity);
     this.arrayMap = new Array(this.capacity);
   }
 
@@ -46,55 +52,36 @@ export class SC<V = any> extends BaseCache<V> {
 
     if (this._size < this.capacity!) {
       pointer = this._size++;
+      if (!this.pointers.isFull()) {
+        pointer = this.pointers.newPointer()!;
+      }
       this.items[key] = pointer;
       this.arrayMap[pointer] = { key, value, sChance: false };
 
       // Moving the item at the end of the list
-      this.backward[this.tail] = pointer;
-      this.backward[pointer] = this.head;
-      this.tail = pointer;
+      this.pointers.pushBack(pointer);
     } else {
-      let i = this.backward[this.tail];
+      let p = this.pointers.front;
       let found = false;
-      while (i != this.tail) {
-        if (!this.arrayMap[i].sChance) {
-          delete this.items[this.arrayMap[i].key];
-          this.items[key] = i;
-          this.arrayMap[i] = { key, value, sChance: false };
-          this.toBottom(i);
+      for (let i = 0; p != undefined; i++) {
+        if (!this.arrayMap[p].sChance) {
+          delete this.items[this.arrayMap[p].key!];
+          this.items[key] = p;
+          this.arrayMap[p] = { key, value, sChance: false };
+          this.pointers.moveToBack(p);
           found = true;
           break;
         }
         this.arrayMap[i].sChance = false;
-        i = this.backward[i];
+        p = this.pointers.nextOf(p)!;
       }
       if (!found) {
-        delete this.items[this.arrayMap[0].key];
-        this.items[key] = 0;
-        this.arrayMap[0] = { key, value, sChance: false };
-        this.toBottom(0);
+        delete this.items[this.arrayMap[this.pointers.front].key!];
+        this.items[key] = this.pointers.front;
+        this.arrayMap[this.pointers.front] = { key, value, sChance: false };
+        this.pointers.moveToBack(this.pointers.front);
       }
     }
-  }
-
-  private toBottom(pointer: number) {
-    if (this.tail === pointer) return;
-
-    const previous = this.backward[pointer];
-
-    if (this.head === pointer) {
-      this.head = previous;
-    } else if (this.backward[this.head] == pointer) {
-      this.backward[this.head] = previous;
-    } else {
-      this.backward[pointer - 1] = previous;
-    }
-
-    this.backward[this.tail] = pointer;
-    this.tail = pointer;
-    this.backward[this.tail] = this.head;
-
-    return;
   }
 
   /**
@@ -128,9 +115,11 @@ export class SC<V = any> extends BaseCache<V> {
    * @param callback function to call on each item
    */
   forEach(callback: (item: { key: Key; value: V }, index: number) => void) {
-    this.arrayMap.forEach((val, i) => {
-      callback.call(this, { key: val.key, value: val.value }, i);
-    });
+    this.arrayMap
+      .filter((am) => am.key != undefined)
+      .forEach((val, i) => {
+        callback.call(this, { key: val.key!, value: val.value! }, i);
+      });
   }
 
   /**
@@ -152,6 +141,11 @@ export class SC<V = any> extends BaseCache<V> {
    */
   remove(key: Key) {
     const pointer = this.items[key];
+    this.pointers.remove(pointer);
+    this.arrayMap[pointer].key = undefined;
+    this.arrayMap[pointer].value = undefined;
+    this.arrayMap[pointer].sChance = false;
+    delete this.items[key];
   }
 
   /**
@@ -168,14 +162,16 @@ export class SC<V = any> extends BaseCache<V> {
    * List of keys in the cache
    */
   get keys() {
-    return this.arrayMap.map((v) => v.key);
+    return this.arrayMap.filter((am) => am.key != undefined).map((v) => v.key);
   }
 
   /**
    * List of values in the cache
    */
   get values() {
-    return this.arrayMap.map((v) => v.value);
+    return this.arrayMap
+      .filter((am) => am.key != undefined)
+      .map((v) => v.value);
   }
 
   /**

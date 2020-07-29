@@ -149,6 +149,9 @@ export class PointerList {
    */
   moveToBack(pointer: number) {
     this.move(pointer, this.prev[this._root]);
+    if (pointer === this._root) {
+      this._root = this.next[pointer];
+    }
   }
 
   /**

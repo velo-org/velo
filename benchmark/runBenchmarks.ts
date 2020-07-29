@@ -95,7 +95,11 @@ async function systemSpecLinux() {
     stderr: 'piped',
   });
   const cores = Deno.run({
-    cmd: ['bash', '-c', 'cat /proc/cpuinfo | grep processor | wc -l '],
+    cmd: [
+      'bash',
+      '-c',
+      'cat /proc/cpuinfo | grep "cpu cores" | uniq | cut -d ":" -f2 ',
+    ],
     stdin: 'piped',
     stdout: 'piped',
     stderr: 'piped',
