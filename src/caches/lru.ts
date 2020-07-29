@@ -143,16 +143,17 @@ export class LRU<V = any> extends BaseCache<V> {
    * Array like forEach, iterating over all entries in the cache
    *
    * @param callback function to call on each item
+   * @param reverse if true iterates through the list starting from the back
    */
   forEach(
     callback: (item: { key: Key; value: V }, index: number) => void,
     reverse: boolean = false
   ) {
-    let p: number | undefined = this.pointers.nextOf(this.pointers.front);
+    let p: number | undefined = this.pointers.front;
 
     for (
       let i = reverse ? this.pointers.size : 0;
-      p !== undefined;
+      p != undefined;
       reverse ? i-- : i++
     ) {
       callback({ key: this._keys[p]!, value: this._values[p]! }, i);

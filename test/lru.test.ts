@@ -79,6 +79,22 @@ Deno.test('LRU set double the allowed capacity, should evict all keys', () => {
 
   assertEquals(lruCache.keys, ['4', '5', '6']);
 });
+
+Deno.test('LRU forEach should print out the right key value pairs', () => {
+  const lruCache = new LRU({ capacity: 5 });
+  lruCache.set('1', 1);
+  lruCache.set('2', 2);
+  lruCache.set('3', 3);
+  lruCache.set('4', 4);
+  lruCache.set('5', 5);
+  lruCache.remove('5');
+  const testKeys = [];
+  lruCache.forEach((i, index) => {
+    testKeys.push(i.key);
+  });
+  assertEquals(testKeys.length, 4);
+});
+
 Deno.test('LRU use with ttl', async () => {
   const lruCache = new LRU({ capacity: 5, ttl: 500 });
   lruCache.set('1', 1);

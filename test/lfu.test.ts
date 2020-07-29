@@ -90,6 +90,20 @@ Deno.test('LFU use with ttl', async () => {
   assertEquals(lfuCache.size, 0);
   assertEquals(lfuCache.keys, []);
 });
+Deno.test('LFU forEach should print out the right key value pairs', () => {
+  const lfuCache = new LFU({ capacity: 5 });
+  lfuCache.set('1', 1);
+  lfuCache.set('2', 2);
+  lfuCache.set('3', 3);
+  lfuCache.set('4', 4);
+  lfuCache.set('5', 5);
+  lfuCache.remove('5');
+  const testKeys = [];
+  lfuCache.forEach((i, index) => {
+    testKeys.push(i.key);
+  });
+  assertEquals(testKeys.length, 4);
+});
 
 Deno.test('LFU use with ttl, oveLFUide ttl for specific set', async () => {
   const lfuCache = new LFU({ capacity: 5, ttl: 500 });
