@@ -88,3 +88,17 @@ Deno.test('RR use with ttl, override ttl for specific set', async () => {
   assertEquals(rrCache.keys, ['5']);
   await sleep(400);
 });
+Deno.test('RR forEach should print out the right key value pairs', () => {
+  const rrCache = new RR({ capacity: 5 });
+  rrCache.set('1', 1);
+  rrCache.set('2', 2);
+  rrCache.set('3', 3);
+  rrCache.set('4', 4);
+  rrCache.set('5', 5);
+  rrCache.remove('5');
+  const testKeys = [];
+  rrCache.forEach((i, index) => {
+    testKeys.push(i.key);
+  });
+  assertEquals(testKeys.length, 4);
+});

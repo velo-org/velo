@@ -50,11 +50,11 @@ export class SLRU<V = any> extends BaseCache<V> {
     if (cObjectProtected) return cObjectProtected;
     else {
       const cObject = this.protectedPartition.setPop(key, cObjectProbationary!);
-      if (!cObject) {
-        this.probationaryPartition.remove(key);
+      this.probationaryPartition.remove(key);
+      if (!cObject || cObject.evicted === false) {
         return cObjectProbationary!;
       }
-      this.probationaryPartition.setPop(key, cObject.value!);
+      this.probationaryPartition.setPop(cObject.key!, cObject.value!);
       return cObjectProbationary;
     }
   }
@@ -115,16 +115,18 @@ export class SLRU<V = any> extends BaseCache<V> {
    * List of keys in the cache
    */
   get keys() {
-    return this.probationaryPartition.keys.concat(this.protectedPartition.keys);
+    return this.probationaryPartition.keys
+      .concat(this.protectedPartition.keys)
+      .filter((k) => k != undefined);
   }
 
   /**
    * List of values in the cache
    */
   get values() {
-    return this.probationaryPartition.values.concat(
-      this.protectedPartition.values
-    );
+    return this.probationaryPartition.values
+      .concat(this.protectedPartition.values)
+      .filter((v) => v != undefined);
   }
 
   /**
@@ -143,7 +145,7 @@ export class SLRU<V = any> extends BaseCache<V> {
   remove(key: Key) {
     const propationaryObj = this.probationaryPartition.peek(key);
     const protectedObj = this.protectedPartition.peek(key);
-    if (!propationaryObj && !protectedObj) throw new Error('Key not found');
+    if (!propationaryObj && !protectedObj) return undefined;
     else if (propationaryObj) {
       this.probationaryPartition.remove(key);
     } else {
@@ -155,38 +157,40 @@ export class SLRU<V = any> extends BaseCache<V> {
 /** An LRU with some special functions */
 class SLRUList<V> {
   private items: { [key in Key]: number } = {};
-  keys: Array<Key>;
+  keys: Array<Key | undefined>;
   private pointers: PointerList;
-  values: Array<V>;
+  values: Array<V | undefined>;
 
   constructor(capacity: number) {
-    this.keys = new Array<Key>(capacity);
+    this.keys = [];
     this.pointers = new PointerList(capacity);
-    this.values = new Array<V>();
+    this.values = [];
   }
 
   has(key: Key) {
-    return this.items[key] ? true : false;
+    return this.items[key] != undefined ? true : false;
   }
 
   get(key: Key): V | undefined {
     const p = this.items[key];
-    if (!p) return undefined;
+    if (p === undefined) return undefined;
     this.pointers.moveToFront(p);
     return this.values[p];
   }
 
   peek(key: Key): V | undefined {
     const p = this.items[key];
-    if (!p) return undefined;
+    if (p === undefined) return undefined;
     return this.values[p];
   }
 
   remove(key: Key) {
     const p = this.items[key];
-    if (p) {
+    if (p != undefined) {
       delete this.items[key];
       this.pointers.remove(p);
+      this.values[p] = undefined;
+      this.keys[p] = undefined;
     }
   }
 
@@ -194,7 +198,7 @@ class SLRUList<V> {
     let pointer = this.items[key];
     let entry = null;
 
-    if (pointer) {
+    if (pointer != undefined) {
       this.pointers.moveToFront(pointer);
       this.values[pointer] = value;
       return { key: key, value: value, evicted: false };
@@ -241,10 +245,11 @@ class SLRUList<V> {
     start: number,
     callback: (item: { key: Key; value: V }, index: number) => void
   ) {
-    let p: number | undefined = this.pointers.nextOf(this.pointers.front);
+    if (!this.pointers.back && !this.pointers.front) return;
+    let p: number | undefined = this.pointers.front;
 
-    for (let i = start; p !== undefined; i++) {
-      callback({ key: this.keys[p]!, value: this.values[p] }, i);
+    for (let i = 0; p !== undefined; i++) {
+      callback({ key: this.keys[p]!, value: this.values[p]! }, i);
       p = this.pointers.nextOf(p);
     }
   }
