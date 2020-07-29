@@ -97,7 +97,7 @@ Deno.test('LRU forEach should print out the right key value pairs', () => {
 });
 
 Deno.test('LRU use with ttl', async () => {
-  const lruCache = new LRU({ capacity: 5, ttl: 500 });
+  const lruCache = new LRU({ capacity: 5, stdTTL: 500 });
   lruCache.set('1', 1);
   lruCache.set('2', 2);
   lruCache.set('3', 3);
@@ -109,7 +109,7 @@ Deno.test('LRU use with ttl', async () => {
 });
 
 Deno.test('LRU use with ttl, oveLRUide ttl for specific set', async () => {
-  const lruCache = new LRU({ capacity: 5, ttl: 500 });
+  const lruCache = new LRU({ capacity: 5, stdTTL: 500 });
   lruCache.set('1', 1);
   lruCache.set('2', 2);
   lruCache.set('3', 3);

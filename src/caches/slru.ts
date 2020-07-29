@@ -9,20 +9,18 @@ import { PointerList } from '../utils/pointerList.ts';
 export class SLRU<V = any> extends BaseCache<V> {
   private protectedPartition: SLRUList<V>;
   private probationaryPartition: SLRUList<V>;
-  private items: { [key in Key]: V };
   private protectedCache: number;
   private probationaryCache: number;
 
   constructor(options: SLRUOptions) {
     super({
       capacity: options.probationaryCache + options.protectedCache,
-      ttl: options.ttl,
+      stdTTL: options.stdTTL,
     });
     this.protectedCache = options.protectedCache;
     this.probationaryCache = options.probationaryCache;
     this.protectedPartition = new SLRUList<V>(this.protectedCache);
     this.probationaryPartition = new SLRUList<V>(this.probationaryCache);
-    this.items = {};
   }
 
   /**
@@ -33,7 +31,7 @@ export class SLRU<V = any> extends BaseCache<V> {
    * @param ttl The max time to live in ms
    */
   set(key: Key, value: V, ttl?: number) {
-    this.checkForTtl(key, ttl);
+    this.applyTTL(key, ttl);
     this.probationaryPartition.setPop(key, value);
   }
 
@@ -168,7 +166,7 @@ class SLRUList<V> {
   }
 
   has(key: Key) {
-    return this.items[key] != undefined ? true : false;
+    return this.items[key] !== undefined ? true : false;
   }
 
   get(key: Key): V | undefined {

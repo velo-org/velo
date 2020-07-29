@@ -1,6 +1,6 @@
 import { BaseCache } from './base.ts';
 import { Options } from '../models/options.ts';
-import { getTypedArray } from '../utils/typedArray.ts';
+import { getTypedArray, TypedArray } from '../utils/typedArray.ts';
 import { Key } from '../models/key.ts';
 
 /**
@@ -12,7 +12,7 @@ export class RR<V = any> extends BaseCache<V> {
   private freeMemory: number;
   private counter: number;
   private _size: number;
-  private randomArr: Float64Array | Uint8Array | Uint16Array | Uint32Array;
+  private randomArr: TypedArray;
 
   constructor(options: Options) {
     super(options);
@@ -36,7 +36,8 @@ export class RR<V = any> extends BaseCache<V> {
    * @param ttl The max time to live in ms
    */
   set(key: Key, value: V, ttl?: number) {
-    this.checkForTtl(key, ttl);
+    this.applyTTL(key, ttl);
+
     if (this.storage[key]) {
       this.storage[key] = value;
       return;
@@ -106,7 +107,7 @@ export class RR<V = any> extends BaseCache<V> {
    * @returns True if the cache has the key
    */
   has(key: Key) {
-    return this.storage[key] ? true : false;
+    return this.storage[key] !== undefined ? true : false;
   }
 
   /**

@@ -68,7 +68,7 @@ Deno.test('SLRU use with ttl', async () => {
   const slruCache = new SLRU({
     probationaryCache: 3,
     protectedCache: 3,
-    ttl: 500,
+    stdTTL: 500,
   });
   slruCache.set('1', 1);
   slruCache.set('2', 2);
@@ -84,7 +84,7 @@ Deno.test('SLRU use with ttl, oveSLRUide ttl for specific set', async () => {
   const slruCache = new SLRU({
     probationaryCache: 3,
     protectedCache: 3,
-    ttl: 500,
+    stdTTL: 500,
   });
   slruCache.set('1', 1);
   slruCache.set('2', 2);

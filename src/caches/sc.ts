@@ -1,6 +1,6 @@
 import { BaseCache } from './base.ts';
 import { Options } from '../models/options.ts';
-import { getTypedArray } from '../utils/typedArray.ts';
+import { getTypedArray, TypedArray } from '../utils/typedArray.ts';
 import { Key } from '../models/key.ts';
 
 //TODO: delete single entry
@@ -12,7 +12,7 @@ export class SC<V = any> extends BaseCache<V> {
   private head: number;
   private tail: number;
   private arrayMap: { key: Key; value: V; sChance: boolean }[];
-  private backward: Float64Array | Uint8Array | Uint16Array | Uint32Array;
+  private backward: TypedArray;
   private items: { [key in Key]: number };
   private _size: number;
 
@@ -35,7 +35,8 @@ export class SC<V = any> extends BaseCache<V> {
    * @param ttl The max time to live in ms
    */
   set(key: Key, value: V, ttl?: number) {
-    this.checkForTtl(key, ttl);
+    this.applyTTL(key, ttl);
+
     let pointer = this.items[key];
     if (pointer !== undefined) {
       this.arrayMap[pointer].value = value;
@@ -160,7 +161,7 @@ export class SC<V = any> extends BaseCache<V> {
    * @returns True if the cache has the key
    */
   has(key: Key) {
-    return this.items[key] ? true : false;
+    return this.items[key] !== undefined ? true : false;
   }
 
   /**
