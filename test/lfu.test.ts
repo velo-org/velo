@@ -105,7 +105,7 @@ Deno.test('LFU forEach should print out the right key value pairs', () => {
   assertEquals(testKeys.length, 4);
 });
 
-Deno.test('LFU use with ttl, oveLFUide ttl for specific set', async () => {
+Deno.test('LFU use with ttl, override ttl for specific set', async () => {
   const lfuCache = new LFU({ capacity: 5, stdTTL: 500 });
   lfuCache.set('1', 1);
   lfuCache.set('2', 2);

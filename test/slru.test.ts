@@ -80,7 +80,7 @@ Deno.test('SLRU use with ttl', async () => {
   assertEquals(slruCache.keys, []);
 });
 
-Deno.test('SLRU use with ttl, oveSLRUide ttl for specific set', async () => {
+Deno.test('SLRU use with ttl, override ttl for specific set', async () => {
   const slruCache = new SLRU({
     probationaryCache: 3,
     protectedCache: 3,

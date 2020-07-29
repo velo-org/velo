@@ -2,6 +2,7 @@ import { BaseCache } from './base.ts';
 import { Options } from '../models/options.ts';
 import { Key } from '../models/key.ts';
 import { PointerList } from '../utils/pointerList.ts';
+import { sleep } from '../utils/sleep.ts';
 
 /**
  * Adaptive Replacement Cache
@@ -237,8 +238,8 @@ export class ARC<V = any> extends BaseCache<V> {
 class ARCList<V> {
   private items: { [key in Key]: number } = {};
   keys: Array<Key>;
-  private pointers: PointerList;
   values: Array<V>;
+  private pointers: PointerList;
 
   constructor(capacity: number) {
     this.keys = new Array<Key>(capacity);
@@ -252,7 +253,7 @@ class ARCList<V> {
 
   get(key: Key): V | undefined {
     const p = this.items[key];
-    if (!p) return undefined;
+    if (p === undefined) return undefined;
     this.pointers.moveToFront(p);
     return this.values[p];
   }
@@ -265,8 +266,10 @@ class ARCList<V> {
 
   remove(key: Key) {
     const p = this.items[key];
-    if (p) {
+    if (p !== undefined) {
       delete this.items[key];
+      delete this.keys[p];
+      delete this.values[p];
       this.pointers.remove(p);
     }
   }
@@ -274,7 +277,7 @@ class ARCList<V> {
   removeWithValue(key: Key): V | undefined {
     const p = this.items[key];
 
-    if (!p) return undefined;
+    if (p === undefined) return undefined;
 
     delete this.items[key];
     this.pointers.remove(p);
@@ -284,7 +287,7 @@ class ARCList<V> {
   insert(key: Key, value: V) {
     let p = this.items[key];
 
-    if (!p) {
+    if (p === undefined) {
       p = this.pointers.newPointer()!;
       this.pointers.pushFront(p);
       this.keys[p] = key;
@@ -321,11 +324,15 @@ class ARCList<V> {
     start: number,
     callback: (item: { key: Key; value: V }, index: number) => void
   ) {
-    let p: number | undefined = this.pointers.nextOf(this.pointers.front);
+    let p: number | undefined = this.pointers.front;
 
     for (let i = start; p !== undefined; i++) {
-      callback({ key: this.keys[p]!, value: this.values[p] }, i);
-      p = this.pointers.nextOf(p);
+      if (this.keys[p]) {
+        callback({ key: this.keys[p], value: this.values[p] }, i);
+        p = this.pointers.nextOf(p);
+      } else {
+        break;
+      }
     }
   }
 }
