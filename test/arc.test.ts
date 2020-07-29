@@ -117,6 +117,7 @@ Deno.test('ARC use with ttl, override ttl for specific set', async () => {
   arcCache.set('5', 5, 1000);
   await sleep(600);
   assertEquals(arcCache.keys, ['5']);
+  await sleep(600);
 });
 
 Deno.test('ARC getting entry from t1, should move it to t2', async () => {
@@ -141,7 +142,7 @@ Deno.test(
     assertEquals(arcCache.recentlyEvicted.keys, ['1']);
     arcCache.set('1', 1);
     assertEquals(arcCache.recentlyEvicted.keys, ['2']);
-    assertEquals(arcCache.recentlySet.keys, ['3', '4', '5', '6']);
+    assertEquals(arcCache.recentlySet.keys, ['6', '3', '4', '5']);
     assertEquals(arcCache.frequentlySet.keys, ['1']);
   }
 );

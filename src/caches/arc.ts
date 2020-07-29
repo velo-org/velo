@@ -2,7 +2,6 @@ import { BaseCache } from './base.ts';
 import { Options } from '../models/options.ts';
 import { Key } from '../models/key.ts';
 import { PointerList } from '../utils/pointerList.ts';
-import { sleep } from '../utils/sleep.ts';
 
 /**
  * Adaptive Replacement Cache
@@ -237,14 +236,14 @@ export class ARC<V = any> extends BaseCache<V> {
  */
 class ARCList<V> {
   private items: { [key in Key]: number } = {};
-  keys: Array<Key>;
-  values: Array<V>;
+  _keys: Array<Key | undefined>;
+  _values: Array<V | undefined>;
   private pointers: PointerList;
 
   constructor(capacity: number) {
-    this.keys = new Array<Key>(capacity);
+    this._keys = new Array<Key>();
+    this._values = new Array<V>();
     this.pointers = new PointerList(capacity);
-    this.values = new Array<V>();
   }
 
   has(key: Key) {
@@ -255,21 +254,21 @@ class ARCList<V> {
     const p = this.items[key];
     if (p === undefined) return undefined;
     this.pointers.moveToFront(p);
-    return this.values[p];
+    return this._values[p];
   }
 
   peek(key: Key): V | undefined {
     const p = this.items[key];
     if (!p) return undefined;
-    return this.values[p];
+    return this._values[p];
   }
 
   remove(key: Key) {
     const p = this.items[key];
     if (p !== undefined) {
       delete this.items[key];
-      delete this.keys[p];
-      delete this.values[p];
+      this._keys[p] = undefined;
+      this._values[p] = undefined;
       this.pointers.remove(p);
     }
   }
@@ -279,9 +278,12 @@ class ARCList<V> {
 
     if (p === undefined) return undefined;
 
+    const value = this._values[p];
     delete this.items[key];
+    this._keys[p] = undefined;
+    this._values[p] = undefined;
     this.pointers.remove(p);
-    return this.values[p];
+    return value;
   }
 
   insert(key: Key, value: V) {
@@ -290,11 +292,11 @@ class ARCList<V> {
     if (p === undefined) {
       p = this.pointers.newPointer()!;
       this.pointers.pushFront(p);
-      this.keys[p] = key;
+      this._keys[p] = key;
       this.items[key] = p;
     }
 
-    this.values[p] = value;
+    this._values[p] = value;
   }
 
   moveToFront(key: Key) {
@@ -304,15 +306,17 @@ class ARCList<V> {
 
   removeBack(): Key {
     const p = this.pointers.removeBack();
-    const key = this.keys[p];
+    const key = this._keys[p]!;
     delete this.items[key];
+    this._keys[p] = undefined;
+    this._values[p] = undefined;
     return key;
   }
 
   clear() {
     this.items = {};
-    this.keys = [];
-    this.values = [];
+    this._keys = [];
+    this._values = [];
     this.pointers.clear();
   }
 
@@ -327,12 +331,20 @@ class ARCList<V> {
     let p: number | undefined = this.pointers.front;
 
     for (let i = start; p !== undefined; i++) {
-      if (this.keys[p]) {
-        callback({ key: this.keys[p], value: this.values[p] }, i);
+      if (this._keys[p]) {
+        callback({ key: this._keys[p]!, value: this._values[p]! }, i);
         p = this.pointers.nextOf(p);
       } else {
         break;
       }
     }
+  }
+
+  get keys() {
+    return this._keys.filter((k) => k !== undefined);
+  }
+
+  get values() {
+    return this._values.filter((v) => v !== undefined);
   }
 }
