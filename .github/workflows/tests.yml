@@ -1,8 +1,16 @@
-steps:
-  - uses: actions/checkout@v2
-  - uses: denolib/setup-deno@v2
-    with:
-      deno-version: v1.x
-  - run: |
-      deno --version
-      make utest
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-16.04
+    strategy:
+      matrix:
+        deno: ["v1.x"]
+    name: Testing with Deno ${{ matrix.deno }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Deno
+        uses: denolib/setup-deno@v2
+        with:
+          deno-version: ${{ matrix.deno }}
+      - run: make utests
