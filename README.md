@@ -4,6 +4,14 @@
 <h1 align="center">Velo</h1>
 <blockquote align="center">Performant caching for Deno</blockquote>
 </p>
+<p align="center">
+<a href="https://github.com/velo-org/velo/actions?query=workflow%3Atests">
+    <img src="https://github.com/velo-org/velo/workflows/tests/badge.svg">
+  </a>
+  <a href="https://github.com/velo-org/velo/releases">
+    <img src="https://img.shields.io/github/v/tag/velo-org/velo?label=version">
+  </a>
+</p>
 
 ## Table of Contents
 
