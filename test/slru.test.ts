@@ -108,7 +108,6 @@ Deno.test('SLRU forEach should print out the right key value pairs', () => {
   slruCache.forEach((i, index) => {
     testKeys.push(i.key);
   });
-  console.log(testKeys);
   assertEquals(testKeys.length, 2);
 });
 Deno.test('SLRU when in protected cache, item will not be deleted', () => {

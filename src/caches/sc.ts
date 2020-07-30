@@ -145,6 +145,7 @@ export class SC<V = any> extends BaseCache<V> {
     this.arrayMap[pointer].key = undefined;
     this.arrayMap[pointer].value = undefined;
     this.arrayMap[pointer].sChance = false;
+    this._size--;
     delete this.items[key];
   }
 

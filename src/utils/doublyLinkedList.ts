@@ -13,7 +13,7 @@ export class DoublyLinkedList<V = any> {
     this.size = 0;
   }
 
-  insertAtHead(node: Node<V>) {
+  insertAtHead(node: Node) {
     // set current head as new node's next
     node.next = this.head.next;
     this.head.next!.prev = node;

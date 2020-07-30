@@ -92,7 +92,6 @@ Deno.test('LRU forEach should print out the right key value pairs', () => {
   lruCache.forEach((i, index) => {
     testKeys.push(i.key);
   });
-  console.log(testKeys);
   assertEquals(testKeys.length, 4);
 });
 
