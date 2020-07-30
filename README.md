@@ -24,8 +24,8 @@ For Examples on how to use our caches please refer to the [examples folder](./ex
 
 ## Contributing
 
-If you want to contribute to our project please read through our [contributing guidelines](./CONTRIBUTING).
+If you want to contribute to our project please read through our [contributing guidelines](./CONTRIBUTING.md).
 
 ## Benchmarks
 
-Check out our Benchmarks [here](./benchmark/results).
+Check out our Benchmarks [here](./benchmark/results.md).
