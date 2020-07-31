@@ -34,6 +34,7 @@ export class LFU<V = any> extends BaseCache<V> {
 
     // if node doesnt exist in _keys then add it
     if (node == undefined) {
+      this._stats.misses++;
       // create new node and store in _keys
       node = new Node(key, value);
       this._keys[key] = node;
@@ -63,6 +64,7 @@ export class LFU<V = any> extends BaseCache<V> {
       // aka new node was referenced once
       this.minFrequency = 1;
     } else {
+      this._stats.hits++;
       // else node exists so we need to get it and move it to the new linked list
 
       // save the old frequency of the node and increment (also update data)

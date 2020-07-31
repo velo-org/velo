@@ -1,5 +1,6 @@
 import { Options } from "../models/options.ts";
 import { Key } from "../models/key.ts";
+import { CacheStatistics } from "../models/cacheStatistics.ts";
 import { EventEmitter } from "../../deps.ts";
 
 export declare interface BaseCache<V> {
@@ -42,6 +43,11 @@ export abstract class BaseCache<V> extends EventEmitter {
    */
   removeEvent?: boolean;
 
+  protected _stats: CacheStatistics = {
+    hits: 0,
+    misses: 0,
+  };
+
   constructor(options: Options) {
     super();
     this.capacity = options.capacity;
@@ -63,13 +69,21 @@ export abstract class BaseCache<V> extends EventEmitter {
   ): void;
 
   /**
+   * Cache statistics containing amount of keys, total hits and total
+   * misses
+   */
+  get stats(): CacheStatistics {
+    return this.stats;
+  }
+
+  /**
    * Returns the value for a given key while removing this key from the cache.
    * Equal to calling _get_ and _remove_.
    *
    * @param key The entries key (will be removed from the cache)
    * @returns The value of given key or undefined if the key is unknown
    */
-  take(key: Key) {
+  take(key: Key): V | undefined {
     const value = this.get(key);
     this.remove(key);
     return value;

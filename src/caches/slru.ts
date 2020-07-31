@@ -37,7 +37,12 @@ export class SLRU<V = any> extends BaseCache<V> {
   set(key: Key, value: V, ttl?: number) {
     this.applyTTL(key, ttl);
     this.applySetEvent(key, value);
-    this.probationaryPartition.setPop(key, value);
+    const entry = this.probationaryPartition.setPop(key, value);
+    if (entry?.evicted) {
+      this._stats.hits++;
+    } else {
+      this._stats.misses++;
+    }
   }
 
   /**

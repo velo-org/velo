@@ -40,8 +40,12 @@ export class RR<V = any> extends BaseCache<V> {
 
     if (this.storage[key]) {
       this.storage[key] = value;
+      this._stats.hits++;
       return;
     }
+
+    this._stats.misses++;
+
     if (this._size >= this.capacity) {
       const prop = this.randomProperty()!;
       delete this.storage[prop];
@@ -56,6 +60,7 @@ export class RR<V = any> extends BaseCache<V> {
     }
     this.storage[key] = value;
   }
+
   private randomProperty() {
     let num = this.randomArr[this.counter];
     this.counter++;

@@ -51,6 +51,7 @@ export class ARC<V = any> extends BaseCache<V> {
     // in frequent set
     if (this.t2.has(key)) {
       this.t2.insert(key, value);
+      this._stats.hits++;
       return;
     }
 
@@ -58,6 +59,7 @@ export class ARC<V = any> extends BaseCache<V> {
     if (this.t1.has(key)) {
       this.t1.remove(key);
       this.t2.insert(key, value);
+      this._stats.hits++;
       return;
     }
 
@@ -79,6 +81,8 @@ export class ARC<V = any> extends BaseCache<V> {
 
       this.b2.remove(key);
       this.t2.insert(key, value);
+      this._stats.misses++;
+
       return;
     }
 
@@ -100,6 +104,8 @@ export class ARC<V = any> extends BaseCache<V> {
 
       this.b1.remove(key);
       this.t2.insert(key, value);
+      this._stats.misses++;
+
       return;
     }
 
@@ -117,6 +123,7 @@ export class ARC<V = any> extends BaseCache<V> {
       this.b2.removeBack();
     }
 
+    this._stats.misses++;
     this.t1.insert(key, value);
   }
 

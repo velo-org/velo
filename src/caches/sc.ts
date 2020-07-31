@@ -48,6 +48,7 @@ export class SC<V = any> extends BaseCache<V> {
     if (pointer !== undefined) {
       this.arrayMap[pointer].value = value;
       this.arrayMap[pointer].sChance = true;
+      this._stats.hits++;
       return;
     }
 
@@ -83,6 +84,8 @@ export class SC<V = any> extends BaseCache<V> {
         this.pointers.moveToBack(this.pointers.front);
       }
     }
+
+    this._stats.misses++;
   }
 
   /**

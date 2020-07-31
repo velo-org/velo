@@ -7,3 +7,4 @@ export { ARC } from "./src/caches/arc.ts";
 export { Key } from "./src/models/key.ts";
 export { Options } from "./src/models/options.ts";
 export { SLRUOptions } from "./src/models/slruOptions.ts";
+export { CacheStatistics } from "./src/models/cacheStatistics.ts";

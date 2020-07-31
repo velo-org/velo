@@ -37,7 +37,7 @@ export class LRU<V = any> extends BaseCache<V> {
     if (pointer) {
       this.pointers.moveToFront(pointer);
       this._values[pointer] = value;
-
+      this._stats.hits++;
       return;
     }
 
@@ -59,6 +59,7 @@ export class LRU<V = any> extends BaseCache<V> {
     this._values[pointer] = value;
 
     this.pointers.pushFront(pointer);
+    this._stats.misses++;
   }
 
   /**
