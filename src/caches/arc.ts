@@ -1,7 +1,7 @@
-import { BaseCache } from './base.ts';
-import { Options } from '../models/options.ts';
-import { Key } from '../models/key.ts';
-import { PointerList } from '../utils/pointerList.ts';
+import { BaseCache } from "./base.ts";
+import { Options } from "../models/options.ts";
+import { Key } from "../models/key.ts";
+import { PointerList } from "../utils/pointerList.ts";
 
 /**
  * Adaptive Replacement Cache
@@ -45,6 +45,7 @@ export class ARC<V = any> extends BaseCache<V> {
    * @param ttl The max time to live in ms
    */
   set(key: Key, value: V, ttl?: number) {
+    this.applySetEvent(key, value);
     this.applyTTL(key, ttl);
 
     // in frequent set
@@ -170,6 +171,7 @@ export class ARC<V = any> extends BaseCache<V> {
     this.t2.remove(key);
     this.b1.remove(key);
     this.b2.remove(key);
+    this.applyRemoveEvent(key, this.peek(key)!);
   }
 
   /**
@@ -181,6 +183,7 @@ export class ARC<V = any> extends BaseCache<V> {
     this.t2.clear();
     this.b1.clear();
     this.b2.clear();
+    this.applyClearEvent();
   }
 
   /**

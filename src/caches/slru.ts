@@ -1,7 +1,7 @@
-import { BaseCache } from './base.ts';
-import { SLRUOptions } from '../models/slruOptions.ts';
-import { Key } from '../models/key.ts';
-import { PointerList } from '../utils/pointerList.ts';
+import { BaseCache } from "./base.ts";
+import { SLRUOptions } from "../models/slruOptions.ts";
+import { Key } from "../models/key.ts";
+import { PointerList } from "../utils/pointerList.ts";
 
 /**
  * Segmented LRU Cache
@@ -16,6 +16,10 @@ export class SLRU<V = any> extends BaseCache<V> {
     super({
       capacity: options.probationaryCache + options.protectedCache,
       stdTTL: options.stdTTL,
+      setEvent: options.setEvent,
+      clearEvent: options.clearEvent,
+      removeEvent: options.removeEvent,
+      expiredEvent: options.expiredEvent,
     });
     this.protectedCache = options.protectedCache;
     this.probationaryCache = options.probationaryCache;
@@ -32,6 +36,7 @@ export class SLRU<V = any> extends BaseCache<V> {
    */
   set(key: Key, value: V, ttl?: number) {
     this.applyTTL(key, ttl);
+    this.applySetEvent(key, value);
     this.probationaryPartition.setPop(key, value);
   }
 
@@ -133,6 +138,7 @@ export class SLRU<V = any> extends BaseCache<V> {
   clear() {
     this.probationaryPartition.clear();
     this.protectedPartition.clear();
+    this.applyClearEvent();
   }
 
   /**
@@ -145,8 +151,10 @@ export class SLRU<V = any> extends BaseCache<V> {
     const protectedObj = this.protectedPartition.peek(key);
     if (!propationaryObj && !protectedObj) return undefined;
     else if (propationaryObj) {
+      this.applyRemoveEvent(key, propationaryObj);
       this.probationaryPartition.remove(key);
     } else {
+      this.applyRemoveEvent(key, protectedObj!);
       this.protectedPartition.remove(key);
     }
   }

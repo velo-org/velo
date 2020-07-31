@@ -2,6 +2,14 @@ import { Options } from "../models/options.ts";
 import { Key } from "../models/key.ts";
 import { EventEmitter } from "../../deps.ts";
 
+export declare interface BaseCache<V> {
+  on(event: "remove", listener: (key: Key, value: V) => void): this;
+  on(event: "set", listener: (key: Key, value: V) => void): this;
+  on(event: "clear", listener: () => void): this;
+  on(event: "expired", listener: (key: Key, value: V) => void): this;
+  on(event: string, listener: Function): this;
+}
+
 export abstract class BaseCache<V> extends EventEmitter {
   /**
    * Maximum number of entries in the cache
@@ -14,10 +22,31 @@ export abstract class BaseCache<V> extends EventEmitter {
    */
   readonly stdTTL?: number;
 
+  /**
+   * emits an event when a key gets added
+   */
+  setEvent?: boolean;
+  /**
+   * emits an event when the cache gets cleared
+   */
+  clearEvent?: boolean;
+  /**
+   * emits an event when a key expires
+   */
+  expiredEvent?: boolean;
+  /**
+   * emits an event when a key gets removed
+   */
+  removeEvent?: boolean;
+
   constructor(options: Options) {
     super();
     this.capacity = options.capacity;
     this.stdTTL = options.stdTTL;
+    this.setEvent = options.setEvent;
+    this.clearEvent = options.clearEvent;
+    this.expiredEvent = options.expiredEvent;
+    this.removeEvent = options.removeEvent;
   }
 
   abstract remove(key: Key): void;
@@ -56,12 +85,35 @@ export abstract class BaseCache<V> extends EventEmitter {
   protected applyTTL(key: Key, ttl?: number) {
     if (ttl) {
       setTimeout(() => {
+        this.applyExpiredEvent(key, this.peek(key)!);
         this.remove(key);
       }, ttl);
     } else if (this.stdTTL) {
       setTimeout(() => {
+        this.applyExpiredEvent(key, this.peek(key)!);
         this.remove(key);
       }, this.stdTTL);
+    }
+  }
+
+  protected applySetEvent(key: Key, value: V) {
+    if (this.setEvent) {
+      this.emit("set", key, value);
+    }
+  }
+  protected applyRemoveEvent(key: Key, value: V) {
+    if (this.removeEvent) {
+      this.emit("remove", key, value);
+    }
+  }
+  protected applyExpiredEvent(key: Key, value: V) {
+    if (this.expiredEvent) {
+      this.emit("expired", key, value);
+    }
+  }
+  protected applyClearEvent() {
+    if (this.clearEvent) {
+      this.emit("clear");
     }
   }
 }

@@ -1,7 +1,7 @@
-import { BaseCache } from './base.ts';
-import { Options } from '../models/options.ts';
-import { Key } from '../models/key.ts';
-import { PointerList } from '../utils/pointerList.ts';
+import { BaseCache } from "./base.ts";
+import { Options } from "../models/options.ts";
+import { Key } from "../models/key.ts";
+import { PointerList } from "../utils/pointerList.ts";
 
 /**
  * Least Recently Used Cache
@@ -28,6 +28,8 @@ export class LRU<V = any> extends BaseCache<V> {
    * @param ttl The max time to live in ms
    */
   set(key: Key, value: V, ttl?: number) {
+    this.applySetEvent(key, value);
+
     this.applyTTL(key, ttl);
 
     let pointer = this.items[key];
@@ -67,6 +69,7 @@ export class LRU<V = any> extends BaseCache<V> {
     this._keys = [];
     this._values = [];
     this.pointers.clear();
+    this.applyClearEvent();
   }
 
   /**
@@ -76,9 +79,12 @@ export class LRU<V = any> extends BaseCache<V> {
    */
   remove(key: Key) {
     const pointer = this.items[key];
+    if (pointer === undefined) return;
     this.pointers.remove(pointer);
+    this.applyRemoveEvent(key, this._values[pointer]!);
     this._keys[pointer] = undefined;
     this._values[pointer] = undefined;
+
     delete this.items[key];
   }
 

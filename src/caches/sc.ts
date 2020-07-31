@@ -1,8 +1,8 @@
-import { BaseCache } from './base.ts';
-import { Options } from '../models/options.ts';
-import { getTypedArray, TypedArray } from '../utils/typedArray.ts';
-import { Key } from '../models/key.ts';
-import { PointerList } from '../utils/pointerList.ts';
+import { BaseCache } from "./base.ts";
+import { Options } from "../models/options.ts";
+import { getTypedArray, TypedArray } from "../utils/typedArray.ts";
+import { Key } from "../models/key.ts";
+import { PointerList } from "../utils/pointerList.ts";
 
 //TODO: delete single entry
 
@@ -42,6 +42,7 @@ export class SC<V = any> extends BaseCache<V> {
    */
   set(key: Key, value: V, ttl?: number) {
     this.applyTTL(key, ttl);
+    this.applySetEvent(key, value);
 
     let pointer = this.items[key];
     if (pointer !== undefined) {
@@ -132,6 +133,7 @@ export class SC<V = any> extends BaseCache<V> {
     this.tail = 0;
     this.items = {};
     this.arrayMap = new Array(this.capacity);
+    this.applyClearEvent();
   }
 
   /**
@@ -142,6 +144,7 @@ export class SC<V = any> extends BaseCache<V> {
   remove(key: Key) {
     const pointer = this.items[key];
     this.pointers.remove(pointer);
+    this.applyRemoveEvent(key, this.arrayMap[pointer].value!);
     this.arrayMap[pointer].key = undefined;
     this.arrayMap[pointer].value = undefined;
     this.arrayMap[pointer].sChance = false;

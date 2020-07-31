@@ -1,5 +1,5 @@
 run:
-	deno run -c tsconfig.json mod.ts
+	deno run -c tsconfig.json examples/rr.example.ts
 
 #usage: make bench filter=LRU out=md
 bench:
