@@ -1,4 +1,4 @@
-import { SLRU } from '../mod.ts';
+import { SLRU } from "../mod.ts";
 
 /*
  * https://en.wikipedia.org/wiki/Cache_replacement_policies#Segmented_LRU_(SLRU)
@@ -21,12 +21,12 @@ const slruc = new SLRU<Hello>({
   probationaryCache: 5,
 });
 
-slruc.set('1', { hello: 'asdf' }); // sets 1
-slruc.set('2', { hello: 'asdf' }); // sets 2
-slruc.set('3', { hello: 'asdf' }); // sets 3
-slruc.set('4', { hello: 'asdf' }); // sets 4
-slruc.set('5', { hello: 'asdf' }); // sets 5
+slruc.set("1", { hello: "asdf" }); // sets 1
+slruc.set("2", { hello: "asdf" }); // sets 2
+slruc.set("3", { hello: "asdf" }); // sets 3
+slruc.set("4", { hello: "asdf" }); // sets 4
+slruc.set("5", { hello: "asdf" }); // sets 5
 
-slruc.get('1'); // returns value for key 1 adds 1 to the protected segment
+slruc.get("1"); // returns value for key 1 adds 1 to the protected segment
 
-slruc.set('6', { hello: 'asdfdd' }); // sets 6
+slruc.set("6", { hello: "asdfdd" }); // sets 6

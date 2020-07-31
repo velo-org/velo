@@ -1,4 +1,4 @@
-import { SC } from '../mod.ts';
+import { SC } from "../mod.ts";
 
 /*
  * https://www.geeksforgeeks.org/second-chance-or-clock-page-replacement-policy/
@@ -16,13 +16,13 @@ interface Hello {
 
 const scc = new SC<Hello>({ capacity: 5 }); // init Second Chance Cache with max 5 key-value pairs
 
-scc.set('1', { hello: 'asdf' }); // sets 1
-scc.set('2', { hello: 'asdf' }); // sets 2
-scc.set('3', { hello: 'asdf' }); // sets 3
-scc.set('4', { hello: 'asdf' }); // sets 4
-scc.set('5', { hello: 'asdf' }); // sets 5
+scc.set("1", { hello: "asdf" }); // sets 1
+scc.set("2", { hello: "asdf" }); // sets 2
+scc.set("3", { hello: "asdf" }); // sets 3
+scc.set("4", { hello: "asdf" }); // sets 4
+scc.set("5", { hello: "asdf" }); // sets 5
 
-scc.get('1'); // gets 2 second Chance gets activated
+scc.get("1"); // gets 2 second Chance gets activated
 
-scc.set('6', { hello: 'asdfdd' }); // sets 6 removes 2
-scc.set('7', { hello: 'asdfdd' }); // sets 7 remove 1
+scc.set("6", { hello: "asdfdd" }); // sets 6 removes 2
+scc.set("7", { hello: "asdfdd" }); // sets 7 remove 1

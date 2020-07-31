@@ -2,7 +2,6 @@ import { BaseCache } from "./base.ts";
 import { Options } from "../models/options.ts";
 import { getTypedArray, TypedArray } from "../utils/typedArray.ts";
 import { Key } from "../models/key.ts";
-import { EventEmitter } from "../../deps.ts";
 
 /**
  * Random Replacement Cache

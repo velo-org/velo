@@ -23,19 +23,22 @@ export abstract class BaseCache<V> extends EventEmitter {
   readonly stdTTL?: number;
 
   /**
-   * emits an event when a key gets added
+   * True if the cache emits an event when a key gets added
    */
   setEvent?: boolean;
+
   /**
-   * emits an event when the cache gets cleared
+   * True if the cache emits an event when the cache gets cleared
    */
   clearEvent?: boolean;
+
   /**
-   * emits an event when a key expires
+   * True if the cache emits an event when a key expires
    */
   expiredEvent?: boolean;
+
   /**
-   * emits an event when a key gets removed
+   * True if the cache emits an event when a key gets removed
    */
   removeEvent?: boolean;
 

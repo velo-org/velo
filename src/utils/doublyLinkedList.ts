@@ -1,4 +1,4 @@
-import { Key } from '../models/key.ts';
+import { Key } from "../models/key.ts";
 
 export class DoublyLinkedList<V = any> {
   head: Node;
@@ -6,8 +6,8 @@ export class DoublyLinkedList<V = any> {
   size: number;
 
   constructor() {
-    this.head = new Node('head', null);
-    this.tail = new Node('tail', null);
+    this.head = new Node("head", null);
+    this.tail = new Node("tail", null);
     this.head.next = this.tail;
     this.tail.prev = this.head;
     this.size = 0;
