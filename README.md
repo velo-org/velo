@@ -24,31 +24,48 @@
 
 ## Introduction
 
-This library aims to bring you in memory caching, while trying to be as performant as possible for a high level language. It also features several caching policies like LRU(least-recently-used) or LFU(least-frequently-used).
+This library aims to bring you in memory caching, while trying to be as performant as possible for a high level language. Several caching policies are supported. Keys can have a timeout (ttl) after which they expire and are deleted from the cache. And the events can be emitted for different cache opterations.
 
 ## Quick start
 
-With Deno it's very easy to use third party libraries. Just import any cache you like with the following syntax:
+With Deno it's very easy to use third party libraries. Just add the following to your `deps.ts`
 
-`import {<Cache Name>} from 'https://deno.land/x/velo/mod.ts'`
+`export { [cache-name] } from 'https://deno.land/x/velo@v0.1.0/mod.ts'`;
+
+or simply import it directly:
+
+`import { [cache-name] } from 'https://deno.land/x/velo@v0.1.0/mod.ts'`
 
 ## Caches
 
+- ARC Cache (adaptive-replacement-cache)
+- LFU Cache (least-frequently-used)
+- LRU Cache (least-recently-used)
 - RR Cache (random-replacement)
 - SC Cache (second-chance)
-- LRU Cache (least-recently-used)
-- LFU Cache (least-frequently-used)
 - SLRU Cache (segmented-least-recently-used)
-- ARC Cache (adaptive-replacement-cache)
 
 ## Usage
 
-For Examples on how to use our caches please refer to the [examples folder](./examples).
+All caches share the same set of methods.
+
+```ts
+import { LRU } from "https://deno.land/x/velo@v0.1.0/mod.ts";
+
+const lru = new LRU({ capacity: 5 });
+
+lru.set(1, 1);
+lru.get(1);
+lru.delete(1);
+```
+
+For more detailed examples take a look at the [examples folder](./examples).
 
 ## Contributing
 
-If you want to contribute to our project please read through our [contributing guidelines](./CONTRIBUTING.md).
+If you want to contribute to the project please read through our [contributing guidelines](./CONTRIBUTING.md).
 
 ## Benchmarks
 
-Check out our Benchmarks [here](./benchmark/results.md).
+- [Velo Benchmarks](./benchmark/results.md)
+- [Velo LRU compared to other Deno LRU Caches]()
