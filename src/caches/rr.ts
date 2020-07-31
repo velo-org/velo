@@ -1,7 +1,8 @@
-import { BaseCache } from './base.ts';
-import { Options } from '../models/options.ts';
-import { getTypedArray, TypedArray } from '../utils/typedArray.ts';
-import { Key } from '../models/key.ts';
+import { BaseCache } from "./base.ts";
+import { Options } from "../models/options.ts";
+import { getTypedArray, TypedArray } from "../utils/typedArray.ts";
+import { Key } from "../models/key.ts";
+import { EventEmitter } from "../../deps.ts";
 
 /**
  * Random Replacement Cache
@@ -85,6 +86,7 @@ export class RR<V = any> extends BaseCache<V> {
   remove(key: Key) {
     this._keys.splice(this._keys.indexOf(key), 1);
     this._size--;
+    this.emit("remove");
     delete this.storage[key];
   }
 

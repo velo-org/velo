@@ -1,6 +1,6 @@
-import { bench } from '../../deps.ts';
-import { RUNS, MAX_KEYS, EVICT, DATA_1, DATA_2 } from '../benchmark.config.ts';
-import { LFU } from '../../src/caches/lfu.ts';
+import { bench } from "../../dev_deps.ts";
+import { RUNS, MAX_KEYS, EVICT, DATA_1, DATA_2 } from "../benchmark.config.ts";
+import { LFU } from "../../src/caches/lfu.ts";
 
 const cache = new LFU({ capacity: MAX_KEYS });
 

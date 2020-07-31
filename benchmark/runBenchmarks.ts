@@ -1,34 +1,34 @@
+import { formatBytes } from "../src/utils/formatBytes.ts";
 import {
   runBenchmarks,
-  BenchmarkResult,
   prettyBenchmarkProgress,
   prettyBenchmarkResult,
+  BenchmarkResult,
   platform,
-} from '../deps.ts';
-import { CACHES, MARKDOWN_OUT, MAX_KEYS, RUNS } from './benchmark.config.ts';
+} from "../dev_deps.ts";
+import { CACHES, MARKDOWN_OUT, MAX_KEYS, RUNS } from "./benchmark.config.ts";
 
 // benches
-import './benches/lru.bench.ts';
-import './benches/rr.bench.ts';
-import './benches/sc.bench.ts';
-import './benches/lfu.bench.ts';
-import './benches/slru.bench.ts';
-import './benches/arc.bench.ts';
-import { formatBytes } from '../src/utils/formatBytes.ts';
+import "./benches/lru.bench.ts";
+import "./benches/rr.bench.ts";
+import "./benches/sc.bench.ts";
+import "./benches/lfu.bench.ts";
+import "./benches/slru.bench.ts";
+import "./benches/arc.bench.ts";
 
 let filterRegex: RegExp | undefined;
 
-if (Deno.args.length > 0 && Deno.args[0] !== 'md') {
+if (Deno.args.length > 0 && Deno.args[0] !== "md") {
   const skip = CACHES.filter(
-    (name) => !Deno.args[0].toUpperCase().split(',').includes(name)
+    (name) => !Deno.args[0].toUpperCase().split(",").includes(name)
   ).map((name) => `^${name}`);
 
-  filterRegex = skip.length > 0 ? new RegExp(skip.join('|')) : undefined;
+  filterRegex = skip.length > 0 ? new RegExp(skip.join("|")) : undefined;
 }
 
 runBenchmarks({ silent: true, skip: filterRegex }, prettyBenchmarkProgress())
   .then((b) => {
-    if (Deno.args.length > 0 && Deno.args.includes('md')) {
+    if (Deno.args.length > 0 && Deno.args.includes("md")) {
       generateMarkdown(b.results);
     }
     return b;
@@ -42,7 +42,7 @@ async function generateMarkdown(results: BenchmarkResult[]) {
   const encoder = new TextEncoder();
 
   let res;
-  if (platform() === 'linux') {
+  if (platform() === "linux") {
     res = await systemSpecLinux();
   } else {
     res = await systemSpecsWindows();
@@ -86,33 +86,33 @@ async function generateMarkdown(results: BenchmarkResult[]) {
 async function systemSpecLinux() {
   const cpuInfo = Deno.run({
     cmd: [
-      'bash',
-      '-c',
+      "bash",
+      "-c",
       'cat /proc/cpuinfo | grep "model name" | uniq | cut -d ":" -f2 ',
     ],
-    stdin: 'piped',
-    stdout: 'piped',
-    stderr: 'piped',
+    stdin: "piped",
+    stdout: "piped",
+    stderr: "piped",
   });
   const cores = Deno.run({
     cmd: [
-      'bash',
-      '-c',
+      "bash",
+      "-c",
       'cat /proc/cpuinfo | grep "cpu cores" | uniq | cut -d ":" -f2 ',
     ],
-    stdin: 'piped',
-    stdout: 'piped',
-    stderr: 'piped',
+    stdin: "piped",
+    stdout: "piped",
+    stderr: "piped",
   });
   const memory = Deno.run({
     cmd: [
-      'bash',
-      '-c',
+      "bash",
+      "-c",
       'cat /proc/meminfo | grep MemTotal | uniq | cut -d ":" -f2 ',
     ],
-    stdin: 'piped',
-    stdout: 'piped',
-    stderr: 'piped',
+    stdin: "piped",
+    stdout: "piped",
+    stderr: "piped",
   });
 
   const outputCPUInfo = await cpuInfo.output(); // "piped" must be set
@@ -134,22 +134,22 @@ async function systemSpecLinux() {
 
 async function systemSpecsWindows() {
   const cpuInfo = Deno.run({
-    cmd: ['wmic', 'cpu get Name /Format:List'],
-    stdin: 'piped',
-    stdout: 'piped',
-    stderr: 'piped',
+    cmd: ["wmic", "cpu get Name /Format:List"],
+    stdin: "piped",
+    stdout: "piped",
+    stderr: "piped",
   });
   const cores = Deno.run({
-    cmd: ['wmic', 'cpu get NumberOfCores /Format:List'],
-    stdin: 'piped',
-    stdout: 'piped',
-    stderr: 'piped',
+    cmd: ["wmic", "cpu get NumberOfCores /Format:List"],
+    stdin: "piped",
+    stdout: "piped",
+    stderr: "piped",
   });
   const memory = Deno.run({
-    cmd: ['wmic', 'MemoryChip get Capacity'],
-    stdin: 'piped',
-    stdout: 'piped',
-    stderr: 'piped',
+    cmd: ["wmic", "MemoryChip get Capacity"],
+    stdin: "piped",
+    stdout: "piped",
+    stderr: "piped",
   });
 
   const outputCPUInfo = await cpuInfo.output(); // "piped" must be set
@@ -159,7 +159,7 @@ async function systemSpecsWindows() {
   const coreStr = new TextDecoder().decode(outputCores);
   const memStr = new TextDecoder().decode(outputMemory);
 
-  let memSize = memStr.split('\n');
+  let memSize = memStr.split("\n");
   let memRes = 0;
   memSize.shift();
   memSize.forEach((val) => {
@@ -170,7 +170,7 @@ async function systemSpecsWindows() {
 
   const memorySizeString = formatBytes(memRes);
   return {
-    cpu: `${cpuInfoStr.split('=')[1]} x ${coreStr.split('=')[1]}`,
+    cpu: `${cpuInfoStr.split("=")[1]} x ${coreStr.split("=")[1]}`,
     memory: memorySizeString,
   };
 }

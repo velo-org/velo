@@ -1,6 +1,6 @@
-import { bench } from '../../deps.ts';
-import { RUNS, MAX_KEYS, EVICT, DATA_1, DATA_2 } from '../benchmark.config.ts';
-import { RR } from '../../src/caches/rr.ts';
+import { bench } from "../../dev_deps.ts";
+import { RUNS, MAX_KEYS, EVICT, DATA_1, DATA_2 } from "../benchmark.config.ts";
+import { RR } from "../../src/caches/rr.ts";
 
 const cache = new RR({ capacity: MAX_KEYS });
 

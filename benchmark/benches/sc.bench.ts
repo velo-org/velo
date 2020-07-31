@@ -1,6 +1,6 @@
-import { bench } from '../../deps.ts';
-import { RUNS, MAX_KEYS, EVICT, DATA_1, DATA_2 } from '../benchmark.config.ts';
-import { SC } from '../../src/caches/sc.ts';
+import { bench } from "../../dev_deps.ts";
+import { RUNS, MAX_KEYS, EVICT, DATA_1, DATA_2 } from "../benchmark.config.ts";
+import { SC } from "../../src/caches/sc.ts";
 
 const cache = new SC({ capacity: MAX_KEYS });
 

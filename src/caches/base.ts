@@ -1,7 +1,8 @@
-import { Options } from '../models/options.ts';
-import { Key } from '../models/key.ts';
+import { Options } from "../models/options.ts";
+import { Key } from "../models/key.ts";
+import { EventEmitter } from "../../deps.ts";
 
-export abstract class BaseCache<V> {
+export abstract class BaseCache<V> extends EventEmitter {
   /**
    * Maximum number of entries in the cache
    */
@@ -14,6 +15,7 @@ export abstract class BaseCache<V> {
   readonly stdTTL?: number;
 
   constructor(options: Options) {
+    super();
     this.capacity = options.capacity;
     this.stdTTL = options.stdTTL;
   }
