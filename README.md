@@ -28,13 +28,21 @@ This library aims to bring you in memory caching, while trying to be as performa
 
 ## Quick start
 
-With Deno it's very easy to use third party libraries. Just add the following to your `deps.ts`
+With Deno it's very easy to use third party libraries. Just import from one of the following urls.
 
-`export { [cache-name] } from 'https://deno.land/x/velo@v0.1.0/mod.ts'`;
+- from `deno.land/x`
 
-or simply import it directly:
+```ts
+import { [cache-name] } from "https://deno.land/x/velo@v0.1.2/mod.ts";
+```
 
-`import { [cache-name] } from 'https://deno.land/x/velo@v0.1.0/mod.ts'`
+- from `nest.land`
+
+[![nest badge](https://nest.land/badge.svg)](https://nest.land/package/velo)
+
+```ts
+import { [cache-name] } from "https://x.nest.land/velo@0.1.2/mod.ts";
+```
 
 ## Caches
 
@@ -50,13 +58,20 @@ or simply import it directly:
 All caches share the same set of methods.
 
 ```ts
-import { LRU } from "https://deno.land/x/velo@v0.1.0/mod.ts";
+import { LRU } from "https://deno.land/x/velo@v0.1.2/mod.ts";
 
 const lru = new LRU({ capacity: 5 });
 
 lru.set(1, 1);
 lru.get(1);
 lru.delete(1);
+
+lru.set(2, 2, 60000); // with ttl
+
+// event
+lru.on("expired", (k, v) => {
+  console.log(k, v);
+});
 ```
 
 For more detailed examples take a look at the [examples folder](./examples).

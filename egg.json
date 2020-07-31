@@ -1,0 +1,8 @@
+{
+  "name": "velo",
+  "description": "Velo provides performant Cache imlementations for Deno. Supports LRU, LFU, ARC and other caching policies.",
+  "repository": "https://github.com/velo-org/velo",
+  "stable": true,
+  "version": "0.1.2",
+  "files": ["./src/**/*", "mod.ts", "deps.ts", "README.md", "./media/*"]
+}
