@@ -83,4 +83,4 @@ If you want to contribute to the project please read through our [contributing g
 ## Benchmarks
 
 - [Velo Benchmarks](./benchmark/results.md)
-- [Velo LRU compared to other Deno in memory caches Caches](https://github.com/velo-org/velo-benchmarks)
+- [Velo LRU compared to other Deno in memory caches Caches](https://github.com/velo-org/velo-benchmarks#readme)
