@@ -11,6 +11,9 @@
   <a href="https://github.com/velo-org/velo/releases">
     <img src="https://img.shields.io/github/v/tag/velo-org/velo?label=version">
   </a>
+  <a href="https://doc.deno.land/https/deno.land/x/velo@0.1.3/mod.ts">
+    <img src="https://img.shields.io/badge/%E2%80%8E-docs-blue.svg?logo=deno">
+  </a>
 </p>
 
 ## Table of Contents
@@ -21,7 +24,6 @@
 - [Usage](#usage)
 - [Contributing](#contributing)
 - [Benchmarks](#benchmarks)
-
 
 ## Introduction
 
@@ -34,7 +36,7 @@ With Deno it's very easy to use third party libraries. Just import from one of t
 - from `deno.land/x`
 
 ```ts
-import { [cache-name] } from "https://deno.land/x/velo@v0.1.3/mod.ts";
+import { [cache-name] } from "https://deno.land/x/velo@0.1.3/mod.ts";
 ```
 
 - from `nest.land`
