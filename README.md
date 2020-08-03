@@ -1,5 +1,5 @@
 <p align="center">
-<img src="./media/velo-logo.svg" width="200">
+<img src="https://raw.githubusercontent.com/velo-org/velo/master/media/velo-logo.svg" width="200">
 
 <h1 align="center">Velo</h1>
 <blockquote align="center">Performant caching for Deno</blockquote>
@@ -33,7 +33,7 @@ With Deno it's very easy to use third party libraries. Just import from one of t
 - from `deno.land/x`
 
 ```ts
-import { [cache-name] } from "https://deno.land/x/velo@v0.1.2/mod.ts";
+import { [cache-name] } from "https://deno.land/x/velo@v0.1.3/mod.ts";
 ```
 
 - from `nest.land`
@@ -41,7 +41,7 @@ import { [cache-name] } from "https://deno.land/x/velo@v0.1.2/mod.ts";
 [![nest badge](https://nest.land/badge.svg)](https://nest.land/package/velo)
 
 ```ts
-import { [cache-name] } from "https://x.nest.land/velo@0.1.2/mod.ts";
+import { [cache-name] } from "https://x.nest.land/velo@0.1.3/mod.ts";
 ```
 
 ## Caches
@@ -58,7 +58,7 @@ import { [cache-name] } from "https://x.nest.land/velo@0.1.2/mod.ts";
 All caches share the same set of methods.
 
 ```ts
-import { LRU } from "https://deno.land/x/velo@v0.1.2/mod.ts";
+import { LRU } from "https://deno.land/x/velo@v0.1.3/mod.ts";
 
 const lru = new LRU({ capacity: 5 });
 
