@@ -21,6 +21,20 @@ const slruc = new SLRU<Hello>({
   probationaryCache: 5,
 });
 
+slruc.on("remove", (key, value) => {
+  console.log(key, value);
+});
+slruc.on("clear", () => {
+  console.log("cache cleared");
+});
+
+slruc.on("set", (key, value) => {
+  console.log(key, value);
+});
+slruc.on("expired", (key, value) => {
+  console.log(key, value);
+});
+
 slruc.set("1", { hello: "asdf" }); // sets 1
 slruc.set("2", { hello: "asdf" }); // sets 2
 slruc.set("3", { hello: "asdf" }); // sets 3
@@ -30,3 +44,8 @@ slruc.set("5", { hello: "asdf" }); // sets 5
 slruc.get("1"); // returns value for key 1 adds 1 to the protected segment
 
 slruc.set("6", { hello: "asdfdd" }); // sets 6
+slruc.set("7", { hello: "asdfdd" }); // sets 6 removes 2
+slruc.peek("4"); // returns value for key 4 without changing the queue
+slruc.forEach((item, index) => console.log(item, index)); // Array like forEach
+slruc.remove("4"); // remove key 4
+slruc.clear(); // clear cache

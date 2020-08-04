@@ -11,6 +11,20 @@ import { Person } from "./common/Person.ts";
  */
 
 const arc = new ARC<Person>({ capacity: 5 });
+arc.on("remove", (key, value) => {
+  console.log(key, value);
+});
+arc.on("clear", () => {
+  console.log("cache cleared");
+});
+
+arc.on("set", (key, value) => {
+  console.log(key, value);
+});
+
+arc.on("expired", (key, value) => {
+  console.log(key, value);
+});
 
 arc.set(1, { name: "Leon", age: 35 });
 arc.set(2, { name: "Daniel", age: 40 });
@@ -32,3 +46,8 @@ arc.set(6, { name: "Tracy", age: 45 }); // inserted into recent_set (t1), pushes
 arc.set(1, { name: "Leon", age: 36 }); // removes this key from b1 and inserts it in t2
 
 // the cache has 2 keys in recent set t1 (keys: 3,6) and 3 in frequently set t2 (keys: 4,5,1)
+
+arc.peek("4"); // returns value for key 4 without changing the queue
+arc.forEach((item, index) => console.log(item, index)); // Array like forEach
+arc.remove("4"); // remove key 4
+arc.clear(); // clear cache

@@ -26,22 +26,22 @@ export abstract class BaseCache<V> extends EventEmitter {
   /**
    * True if the cache emits an event when a key gets added
    */
-  setEvent?: boolean;
+  readonly setEvent?: boolean;
 
   /**
    * True if the cache emits an event when the cache gets cleared
    */
-  clearEvent?: boolean;
+  readonly clearEvent?: boolean;
 
   /**
    * True if the cache emits an event when a key expires
    */
-  expiredEvent?: boolean;
+  readonly expiredEvent?: boolean;
 
   /**
    * True if the cache emits an event when a key gets removed
    */
-  removeEvent?: boolean;
+  readonly removeEvent?: boolean;
 
   protected _stats: CacheStatistics = {
     hits: 0,
