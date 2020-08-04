@@ -11,16 +11,16 @@ Feature requests are welcome. But take a moment to find out whether your idea fi
 
 ## Pull Requests
 
-Please **ask first** before embarking on any significant pull request (e.g. implementing features, refactoring code), otherwise you risk spending a lot of time working on something that the project's developers might not want to merge into the project.
+Please **ask first** before embarking on any significant pull request (e.g. implementing features, refactoring code), otherwise you risk spending a lot of time working on something that we might not want to merge into the project.
 
 1. [Fork](https://help.github.com/articles/fork-a-repo/) the project, clone your fork, and configure the remotes:
    ```bash
    # Clone your fork of the repo into the current directory
-   git clone https://github.com/<your-username>/deno-drash.git
+   git clone https://github.com/<your-username>/velo.git
    # Navigate to the newly cloned directory
-   cd deno-drash
+   cd velo
    # Assign the original repo to a remote called "upstream"
-   git remote add upstream https://github.com/drashland/deno-drash.git
+   git remote add upstream https://github.com/velo-org/velo.git
    ```
 2. If you cloned a while ago, get the latest changes from upstream:
    ```bash
@@ -37,13 +37,9 @@ Please **ask first** before embarking on any significant pull request (e.g. impl
    ```
 5. [Open a Pull Request](https://help.github.com/articles/about-pull-requests/) with a clear title and description against the `master` branch.
 
-**_Note:_** It is recommended that you _"clean up"_ your commits before opening a pull request. Maybe take a look at `git rebase --interactive` to do this.
-
 ## Code Guidelines
 
-- Code should follow [Deno Style Guide](https://deno.land/manual/contributing/style_guide).
-
-- As a rule of thumb, always format your code using `deno fmt` before opening your pull request. Run this as your last single commit. If you forgot to correctly format it, just add a commit with the message _deno fmt_ (`git commit -m "deno fmt"`).
+- Format your code with prettier using the prettier config in the project root
 
 ## License
 
