@@ -7,7 +7,7 @@ If you want to report a bug, click [here](https://github.com/velo-org/velo/issue
 
 ## Feature Requests
 
-Feature requests are welcome. But take a moment to find out whether your idea fits with the scope and aims of the project. It's up to _you_ to make a strong case to convince the project developer of the merits of this feature. Please provide as much detail and context as possible. If you want to request a feature, click [here](https://github.com/drashland/deno-drash/issues/new?assignees=&labels=enhancement&template=feature_request.md&title=).
+Feature requests are welcome. But take a moment to find out whether your idea fits with the scope and aims of the project. It's up to _you_ to make a strong case to convince the project developer of the merits of this feature. Please provide as much detail and context as possible. If you want to request a feature, click [here](https://github.com/velo-org/velo/issues/new?assignees=&labels=enhancement&template=feature_request.md&title=).
 
 ## Pull Requests
 
