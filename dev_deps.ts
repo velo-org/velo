@@ -12,7 +12,7 @@ import {
 import {
   prettyBenchmarkResult,
   prettyBenchmarkProgress,
-} from "https://deno.land/x/pretty_benching@v0.1.1/mod.ts";
+} from "https://deno.land/x/pretty_benching@v0.2.2/mod.ts";
 
 export {
   prettyBenchmarkProgress,
