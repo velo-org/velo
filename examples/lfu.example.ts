@@ -11,6 +11,20 @@ interface Hello {
 }
 
 const lfuc = new LFU<Hello>({ capacity: 5 }); // inits a Least frequently used Cache with a max of 5 key-value pairs
+lfuc.on("remove", (key, value) => {
+  console.log(key, value);
+});
+lfuc.on("clear", () => {
+  console.log("cache cleared");
+});
+
+lfuc.on("set", (key, value) => {
+  console.log(key, value);
+});
+
+lfuc.on("expired", (key, value) => {
+  console.log(key, value);
+});
 
 lfuc.set(1, { hello: "asdf" }); //sets 1
 lfuc.set("2", { hello: "asdf" }); // sets 2
@@ -22,4 +36,7 @@ lfuc.get("2"); // gets 2 and increment frequency
 
 lfuc.set("6", { hello: "asdfdd" }); // removes 1 sets 6
 lfuc.set("7", { hello: "asdfdd" }); // removes 3 sets 7
-lfuc.set(8, { hello: "asdfdd" }); // removes 4 sets 8
+lfuc.peek("4"); // returns value for key 4 without changing the queue
+lfuc.forEach((item, index) => console.log(item, index)); // Array like forEach
+lfuc.remove("4"); // remove key 4
+lfuc.clear(); // clear cache

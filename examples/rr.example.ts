@@ -22,6 +22,10 @@ rrc.on("set", (key, value) => {
   console.log(key, value);
 });
 
+rrc.on("expired", (key, value) => {
+  console.log(key, value);
+});
+
 rrc.set("1", { hello: "asdf" }); // sets 1
 rrc.set("2", { hello: "asdf" }); // sets 2
 rrc.set("3", { hello: "asdf" }); // sets 3
@@ -30,6 +34,7 @@ rrc.set("5", { hello: "asdf" }); // sets 5
 
 rrc.set("6", { hello: "asdfdd" }); // sets 6 removes random entry
 rrc.get("6"); // returns value for key 6
-
-rrc.remove("4");
-rrc.clear();
+rrc.peek("4"); // returns value for key 4 without changing the queue
+rrc.forEach((item, index) => console.log(item, index)); // Array like forEach
+rrc.remove("4"); // remove key 4
+rrc.clear(); // clear cache
