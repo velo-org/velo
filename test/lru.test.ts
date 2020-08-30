@@ -1,5 +1,5 @@
 import { LRU } from "../src/caches/lru.ts";
-import { assert, assertEquals } from "../dev_deps.ts";
+import { assert, assertEquals } from "../test_deps.ts";
 import { sleep } from "../src/utils/sleep.ts";
 
 Deno.test("LRU create cache, should create a new empty cache", () => {

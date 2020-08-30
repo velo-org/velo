@@ -1,5 +1,5 @@
 import { ARC } from "../src/caches/arc.ts";
-import { assert, assertEquals } from "../dev_deps.ts";
+import { assert, assertEquals } from "../test_deps.ts";
 import { sleep } from "../src/utils/sleep.ts";
 import { Key } from "../src/models/key.ts";
 

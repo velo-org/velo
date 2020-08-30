@@ -24,7 +24,6 @@ import "./benches/arc.bench.ts";
 import {
   defaultColumns,
   prettyBenchmarkDown,
-  thresholdsColumn,
 } from "https://deno.land/x/pretty_benching@v0.2.2/pretty_benchmark_down.ts";
 
 let filterRegex: RegExp | undefined;

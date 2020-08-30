@@ -3,11 +3,7 @@ import {
   runBenchmarks,
   bench,
   BenchmarkResult,
-} from "https://deno.land/std@0.67.0/testing/bench.ts";
-import {
-  assert,
-  assertEquals,
-} from "https://deno.land/std@0.67.0/testing/asserts.ts";
+} from "https://deno.land/std@0.66.0/testing/bench.ts";
 
 import {
   prettyBenchmarkResult,
@@ -21,6 +17,4 @@ export {
   runBenchmarks,
   bench,
   BenchmarkResult,
-  assert,
-  assertEquals,
 };
