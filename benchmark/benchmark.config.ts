@@ -12,6 +12,6 @@ for (let i = 0; i < EVICT; i++) {
 
 const CACHES = ["ARC", "LFU", "LRU", "RR", "SC", "SLRU"];
 
-const MARKDOWN_OUT = "./benchmark/results.md";
+const MARKDOWN_OUT = "./benchmark/README.md";
 
 export { MAX_KEYS, EVICT, RUNS, DATA_1, DATA_2, CACHES, MARKDOWN_OUT };

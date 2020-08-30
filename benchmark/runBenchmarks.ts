@@ -1,9 +1,9 @@
 import { formatBytes } from "../src/utils/formatBytes.ts";
 import {
   runBenchmarks,
+  BenchmarkResult,
   prettyBenchmarkProgress,
   prettyBenchmarkResult,
-  BenchmarkResult,
   platform,
 } from "../dev_deps.ts";
 import { CACHES, MARKDOWN_OUT, MAX_KEYS, RUNS } from "./benchmark.config.ts";
@@ -15,6 +15,11 @@ import "./benches/sc.bench.ts";
 import "./benches/lfu.bench.ts";
 import "./benches/slru.bench.ts";
 import "./benches/arc.bench.ts";
+import {
+  defaultColumns,
+  prettyBenchmarkDown,
+  thresholdsColumn,
+} from "https://deno.land/x/pretty_benching@v0.2.2/pretty_benchmark_down.ts";
 
 let filterRegex: RegExp | undefined;
 
@@ -27,9 +32,30 @@ if (Deno.args.length > 0 && Deno.args[0] !== "md") {
 }
 
 runBenchmarks({ silent: true, skip: filterRegex }, prettyBenchmarkProgress())
-  .then((b) => {
+  .then(async (b) => {
     if (Deno.args.length > 0 && Deno.args.includes("md")) {
-      generateMarkdown(b.results);
+      const description = await generateDescription();
+
+      prettyBenchmarkDown(
+        (md) => {
+          Deno.writeTextFileSync(MARKDOWN_OUT, md);
+        },
+        {
+          title: "Benchmark Results",
+          description: description,
+          columns: [
+            ...defaultColumns,
+            {
+              title: "Avg. Operations per ms",
+              align: "left",
+              toFixed: 0,
+              formatter: (b: BenchmarkResult) => {
+                return Math.floor(MAX_KEYS / b.measuredRunsAvgMs).toString();
+              },
+            },
+          ],
+        }
+      )(b);
     }
     return b;
   })
@@ -38,9 +64,7 @@ runBenchmarks({ silent: true, skip: filterRegex }, prettyBenchmarkProgress())
     console.log(e);
   });
 
-async function generateMarkdown(results: BenchmarkResult[]) {
-  const encoder = new TextEncoder();
-
+async function generateDescription() {
   let res;
   if (platform() === "linux") {
     res = await systemSpecLinux();
@@ -48,39 +72,9 @@ async function generateMarkdown(results: BenchmarkResult[]) {
     res = await systemSpecsWindows();
   }
 
-  Deno.writeTextFileSync(
-    MARKDOWN_OUT,
-    `# Benchmark Results\n\nConfig:\n\`\`\`bash\nKEYS: ${MAX_KEYS}\nRUNS: ${RUNS}\nOS: ${platform()}\nCPU: ${
-      res.cpu
-    }\nRAM: ${res.memory}\n\`\`\``
-  );
-
-  CACHES.forEach((c) => {
-    Deno.writeFileSync(
-      MARKDOWN_OUT,
-      encoder.encode(
-        `\n## ${c}\n|Name|Runs|Total (ms)|Average (ms)|Avg. Operations per ms|\n|---|---|---|---|---|\n`
-      ),
-      {
-        append: true,
-      }
-    );
-
-    const nameRegex = new RegExp(`^${c}`);
-
-    results
-      .filter((r) => r.name.match(nameRegex))
-      .forEach((r) => {
-        const totalMs = r.totalMs.toFixed(3);
-        const avgMs = r.measuredRunsAvgMs.toFixed(3);
-        const opsPerMs = Math.floor(MAX_KEYS / r.measuredRunsAvgMs);
-        const row = `|${r.name}|${r.runsCount}|${totalMs}|${avgMs}|${opsPerMs}|\n`;
-
-        Deno.writeFileSync(MARKDOWN_OUT, encoder.encode(row), {
-          append: true,
-        });
-      });
-  });
+  return `\`\`\`bash\nKEYS: ${MAX_KEYS}\nRUNS: ${RUNS}\nOS: ${platform()}\nCPU: ${
+    res.cpu
+  }\nRAM: ${res.memory}\n\`\`\``;
 }
 
 async function systemSpecLinux() {
