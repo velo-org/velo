@@ -3,11 +3,11 @@ import {
   runBenchmarks,
   bench,
   BenchmarkResult,
-} from "https://deno.land/std/testing/bench.ts";
+} from "https://deno.land/std@0.67.0/testing/bench.ts";
 import {
   assert,
   assertEquals,
-} from "https://deno.land/std@0.60.0/testing/asserts.ts";
+} from "https://deno.land/std@0.67.0/testing/asserts.ts";
 
 import {
   prettyBenchmarkResult,
