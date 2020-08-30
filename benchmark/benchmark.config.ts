@@ -14,4 +14,21 @@ const CACHES = ["ARC", "LFU", "LRU", "RR", "SC", "SLRU"];
 
 const MARKDOWN_OUT = "./benchmark/README.md";
 
-export { MAX_KEYS, EVICT, RUNS, DATA_1, DATA_2, CACHES, MARKDOWN_OUT };
+const MARKDOWN_GROUPS = CACHES.map((c) => {
+  return {
+    include: new RegExp(`^${c}`),
+    name: c,
+    description: `https://github.com/velo-org/velo/blob/master/src/caches/${c.toLowerCase()}.ts`,
+  };
+});
+
+export {
+  MAX_KEYS,
+  EVICT,
+  RUNS,
+  DATA_1,
+  DATA_2,
+  CACHES,
+  MARKDOWN_OUT,
+  MARKDOWN_GROUPS,
+};

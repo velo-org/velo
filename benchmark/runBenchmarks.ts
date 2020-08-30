@@ -6,7 +6,13 @@ import {
   prettyBenchmarkResult,
   platform,
 } from "../dev_deps.ts";
-import { CACHES, MARKDOWN_OUT, MAX_KEYS, RUNS } from "./benchmark.config.ts";
+import {
+  CACHES,
+  MARKDOWN_GROUPS,
+  MARKDOWN_OUT,
+  MAX_KEYS,
+  RUNS,
+} from "./benchmark.config.ts";
 
 // benches
 import "./benches/lru.bench.ts";
@@ -54,6 +60,7 @@ runBenchmarks({ silent: true, skip: filterRegex }, prettyBenchmarkProgress())
               },
             },
           ],
+          groups: MARKDOWN_GROUPS,
         }
       )(b);
     }
