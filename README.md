@@ -5,7 +5,7 @@
 <blockquote align="center">Performant caching for Deno</blockquote>
 </p>
 <p align="center">
-<a href="https://github.com/velo-org/velo/actions?query=workflow%3Atests">
+  <a href="https://github.com/velo-org/velo/actions?query=workflow%3Atests">
     <img src="https://github.com/velo-org/velo/workflows/tests/badge.svg">
   </a>
   <a href="https://github.com/velo-org/velo/releases">

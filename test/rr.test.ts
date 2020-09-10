@@ -1,5 +1,5 @@
 import { RR } from "../src/caches/rr.ts";
-import { assertEquals } from "../test_deps.ts";
+import { assertEquals } from "../dev_deps.ts";
 import { sleep } from "../src/utils/sleep.ts";
 
 Deno.test("RR create Cache, should create a new empty cache", () => {

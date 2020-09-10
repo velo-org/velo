@@ -4,6 +4,8 @@ import {
   BenchmarkResult,
   prettyBenchmarkProgress,
   prettyBenchmarkResult,
+  prettyBenchmarkDown,
+  defaultColumns,
   platform,
 } from "../dev_deps.ts";
 import {
@@ -21,10 +23,6 @@ import "./benches/sc.bench.ts";
 import "./benches/lfu.bench.ts";
 import "./benches/slru.bench.ts";
 import "./benches/arc.bench.ts";
-import {
-  defaultColumns,
-  prettyBenchmarkDown,
-} from "https://deno.land/x/pretty_benching@v0.2.2/pretty_benchmark_down.ts";
 
 let filterRegex: RegExp | undefined;
 
