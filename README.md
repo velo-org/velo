@@ -11,7 +11,7 @@
   <a href="https://github.com/velo-org/velo/releases">
     <img src="https://img.shields.io/github/v/tag/velo-org/velo?label=version">
   </a>
-  <a href="https://doc.deno.land/https/deno.land/x/velo@0.1.3/mod.ts">
+  <a href="https://doc.deno.land/https/deno.land/x/velo@0.1.4/mod.ts">
     <img src="https://img.shields.io/badge/%E2%80%8E-docs-blue.svg?logo=deno">
   </a>
 </p>
@@ -36,7 +36,7 @@ With Deno it's very easy to use third party libraries. Just import from one of t
 - from `deno.land/x`
 
 ```ts
-import { [cache-name] } from "https://deno.land/x/velo@0.1.3/mod.ts";
+import { [cache-name] } from "https://deno.land/x/velo@0.1.4/mod.ts";
 ```
 
 - from `nest.land`
@@ -44,7 +44,7 @@ import { [cache-name] } from "https://deno.land/x/velo@0.1.3/mod.ts";
 [![nest badge](https://nest.land/badge.svg)](https://nest.land/package/velo)
 
 ```ts
-import { [cache-name] } from "https://x.nest.land/velo@0.1.3/mod.ts";
+import { [cache-name] } from "https://x.nest.land/velo@0.1.4/mod.ts";
 ```
 
 ## Caches
@@ -61,7 +61,7 @@ import { [cache-name] } from "https://x.nest.land/velo@0.1.3/mod.ts";
 All caches share the same set of methods.
 
 ```ts
-import { LRU } from "https://deno.land/x/velo@v0.1.3/mod.ts";
+import { LRU } from "https://deno.land/x/velo@0.1.4/mod.ts";
 
 const lru = new LRU({ capacity: 5 });
 
