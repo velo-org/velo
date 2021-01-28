@@ -1,31 +1,29 @@
 import { platform } from "https://deno.land/std/node/os.ts";
 import {
-  runBenchmarks,
   bench,
-  BenchmarkResult,
-} from "https://deno.land/std@0.67.0/testing/bench.ts";
+  runBenchmarks,
+} from "https://deno.land/std@0.84.0/testing/bench.ts";
 
 import {
-  prettyBenchmarkResult,
-  prettyBenchmarkProgress,
-  prettyBenchmarkDown,
   defaultColumns,
-} from "https://deno.land/x/pretty_benching@v0.2.3/mod.ts";
+  prettyBenchmarkDown,
+  prettyBenchmarkProgress,
+  prettyBenchmarkResult,
+} from "https://deno.land/x/pretty_benching@v0.3.2/mod.ts";
 
 export {
-  prettyBenchmarkProgress,
-  prettyBenchmarkResult,
-  prettyBenchmarkDown,
+  bench,
   defaultColumns,
   platform,
+  prettyBenchmarkDown,
+  prettyBenchmarkProgress,
+  prettyBenchmarkResult,
   runBenchmarks,
-  bench,
-  BenchmarkResult,
 };
 
 import {
   assert,
   assertEquals,
-} from "https://deno.land/std@0.67.0/testing/asserts.ts";
+} from "https://deno.land/std@0.84.0/testing/asserts.ts";
 
 export { assert, assertEquals };
