@@ -65,7 +65,7 @@ export abstract class BaseCache<V> extends EventEmitter {
   abstract has(key: Key): boolean;
   abstract clear(): void;
   abstract forEach(
-    callback: (item: { key: Key; value: V }, index: number) => void
+    callback: (item: { key: Key; value: V }, index: number) => void,
   ): void;
 
   /**

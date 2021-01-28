@@ -19,7 +19,7 @@ Deno.test(
   () => {
     const arcCache = new ARC({ capacity: 5 });
     assertEquals(arcCache.get("key"), undefined);
-  }
+  },
 );
 
 Deno.test("ARC get non-existent entry, should return undefined", () => {
@@ -52,7 +52,7 @@ Deno.test(
     arcCache.set("5", 5);
     arcCache.set("6", 6);
     assertEquals(arcCache.size, 5);
-  }
+  },
 );
 
 Deno.test(
@@ -66,7 +66,7 @@ Deno.test(
     arcCache.set("5", 5);
     arcCache.set("6", 6);
     assert(!arcCache.has("1"));
-  }
+  },
 );
 
 Deno.test("ARC set double the allowed capacity, should evict all keys", () => {
@@ -144,5 +144,5 @@ Deno.test(
     assertEquals(arcCache.recentlyEvicted.keys, ["2"]);
     assertEquals(arcCache.recentlySet.keys, ["6", "3", "4", "5"]);
     assertEquals(arcCache.frequentlySet.keys, ["1"]);
-  }
+  },
 );

@@ -336,7 +336,7 @@ class ARCList<V> {
 
   forEach(
     start: number,
-    callback: (item: { key: Key; value: V }, index: number) => void
+    callback: (item: { key: Key; value: V }, index: number) => void,
   ) {
     let p: number | undefined = this.pointers.front;
 

@@ -1,6 +1,6 @@
 import { BaseCache } from "./base.ts";
 import { Options } from "../models/options.ts";
-import { Node, DoublyLinkedList } from "../utils/doublyLinkedList.ts";
+import { DoublyLinkedList, Node } from "../utils/doublyLinkedList.ts";
 import { Key } from "../models/key.ts";
 
 /**
@@ -42,8 +42,9 @@ export class LFU<V = any> extends BaseCache<V> {
       // if we have space for node then try to add it to linked list with frequency 1
       if (this._size !== this.capacity) {
         // if linked list for frequency 1 doesnt exist then create it
-        if (this.frequency[1] == undefined)
+        if (this.frequency[1] == undefined) {
           this.frequency[1] = new DoublyLinkedList();
+        }
 
         // add new node and increment _size of frequency 1
         this.frequency[1].insertAtHead(node);
@@ -54,8 +55,9 @@ export class LFU<V = any> extends BaseCache<V> {
         delete this._keys[oldTail!.key];
 
         // if we deleted frequency 1 then add it back before adding new node
-        if (this.frequency[1] === undefined)
+        if (this.frequency[1] === undefined) {
           this.frequency[1] = new DoublyLinkedList();
+        }
 
         this.frequency[1].insertAtHead(node);
       }
@@ -76,8 +78,9 @@ export class LFU<V = any> extends BaseCache<V> {
       this.frequency[oldFrequencyCount].removeNode(node);
 
       // if new list doesnt exist then make it now
-      if (this.frequency[node.frequencyCount] === undefined)
+      if (this.frequency[node.frequencyCount] === undefined) {
         this.frequency[node.frequencyCount] = new DoublyLinkedList();
+      }
 
       // now add node to new linked list with the incremented freqCount
       this.frequency[node.frequencyCount].insertAtHead(node);
@@ -111,8 +114,9 @@ export class LFU<V = any> extends BaseCache<V> {
     // remove node from old frequency list and create new one if next one doesnt exist
     // before adding the node to the next list at the head
     this.frequency[oldFrequencyCount].removeNode(node);
-    if (this.frequency[node.frequencyCount] === undefined)
+    if (this.frequency[node.frequencyCount] === undefined) {
       this.frequency[node.frequencyCount] = new DoublyLinkedList();
+    }
 
     this.frequency[node.frequencyCount].insertAtHead(node);
 

@@ -27,11 +27,15 @@
 
 ## Introduction
 
-This library aims to bring you in memory caching, while trying to be as performant as possible for a high level language. Several caching policies are supported. Keys can have a timeout (ttl) after which they expire and are deleted from the cache. And the events can be emitted for different cache opterations.
+This library aims to bring you in memory caching, while trying to be as
+performant as possible for a high level language. Several caching policies are
+supported. Keys can have a timeout (ttl) after which they expire and are deleted
+from the cache. And the events can be emitted for different cache opterations.
 
 ## Quick start
 
-With Deno it's very easy to use third party libraries. Just import from one of the following urls.
+With Deno it's very easy to use third party libraries. Just import from one of
+the following urls.
 
 - from `deno.land/x`
 
@@ -81,9 +85,11 @@ For more detailed examples take a look at the [examples folder](./examples).
 
 ## Contributing
 
-If you want to contribute to the project please read through our [contributing guidelines](./CONTRIBUTING.md).
+If you want to contribute to the project please read through our
+[contributing guidelines](./CONTRIBUTING.md).
 
 ## Benchmarks
 
 - [Velo Benchmarks](./benchmark/results.md)
-- [Velo LRU compared to other Deno in memory caches](https://github.com/velo-org/velo-benchmarks#readme)
+- [Velo LRU compared to other Deno in memory
+  caches](https://github.com/velo-org/velo-benchmarks#readme)

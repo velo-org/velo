@@ -17,7 +17,7 @@ Deno.test(
   () => {
     const slruCache = new SLRU({ probationaryCache: 3, protectedCache: 3 });
     assertEquals(slruCache.get("key"), undefined);
-  }
+  },
 );
 
 Deno.test("SLRU get non-existent entry, should return undefined", () => {
@@ -49,7 +49,7 @@ Deno.test(
     slruCache.set("5", 5);
     slruCache.set("6", 6);
     assertEquals(slruCache.size, 3);
-  }
+  },
 );
 
 Deno.test("SLRU clear should reset cache", () => {
@@ -143,5 +143,5 @@ Deno.test(
 
     assertEquals(slruCache.size, 6);
     assertEquals(slruCache.PropationaryPartition.peek("1"), 1);
-  }
+  },
 );

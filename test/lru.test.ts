@@ -18,7 +18,7 @@ Deno.test(
   () => {
     const lruCache = new LRU({ capacity: 5 });
     assertEquals(lruCache.get("key"), undefined);
-  }
+  },
 );
 
 Deno.test("LRU get non-existent entry, should return undefined", () => {
@@ -51,7 +51,7 @@ Deno.test(
     lruCache.set("5", 5);
     lruCache.set("6", 6);
     assertEquals(lruCache.size, 5);
-  }
+  },
 );
 
 Deno.test(
@@ -65,7 +65,7 @@ Deno.test(
     lruCache.set("5", 5);
     lruCache.set("6", 6);
     assert(!lruCache.has("1"));
-  }
+  },
 );
 
 Deno.test("LRU set double the allowed capacity, should evict all keys", () => {
