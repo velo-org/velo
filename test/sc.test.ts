@@ -17,7 +17,7 @@ Deno.test(
   () => {
     const scCache = new SC({ capacity: 5 });
     assertEquals(scCache.get("key"), undefined);
-  }
+  },
 );
 
 Deno.test("SC get non-existent entry, should return undefined", () => {
@@ -49,7 +49,7 @@ Deno.test(
     scCache.set("5", 5);
     scCache.set("6", 6);
     assertEquals(scCache.size, 5);
-  }
+  },
 );
 
 Deno.test("SC clear should reset cache", () => {
@@ -115,7 +115,7 @@ Deno.test(
     scCache.get("1");
     scCache.set("6", 6);
     assertEquals(scCache.peek("2"), undefined);
-  }
+  },
 );
 Deno.test(
   "SC when getting value it receives a second chance, but should be deleted after two turns",
@@ -130,5 +130,5 @@ Deno.test(
     scCache.set("6", 6);
     scCache.set("7", 7);
     assertEquals(scCache.peek("1"), undefined);
-  }
+  },
 );

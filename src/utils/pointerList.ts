@@ -1,4 +1,4 @@
-import { TypedArray, getTypedArray } from "./typedArray.ts";
+import { getTypedArray, TypedArray } from "./typedArray.ts";
 
 /**
  * Implements a fixed size doubly linked list. This implementation relies on a

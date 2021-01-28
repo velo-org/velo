@@ -1,12 +1,11 @@
 import { formatBytes } from "../src/utils/formatBytes.ts";
 import {
-  runBenchmarks,
-  BenchmarkResult,
-  prettyBenchmarkProgress,
-  prettyBenchmarkResult,
-  prettyBenchmarkDown,
   defaultColumns,
   platform,
+  prettyBenchmarkDown,
+  prettyBenchmarkProgress,
+  prettyBenchmarkResult,
+  runBenchmarks,
 } from "../dev_deps.ts";
 import {
   CACHES,
@@ -28,7 +27,7 @@ let filterRegex: RegExp | undefined;
 
 if (Deno.args.length > 0 && Deno.args[0] !== "md") {
   const skip = CACHES.filter(
-    (name) => !Deno.args[0].toUpperCase().split(",").includes(name)
+    (name) => !Deno.args[0].toUpperCase().split(",").includes(name),
   ).map((name) => `^${name}`);
 
   filterRegex = skip.length > 0 ? new RegExp(skip.join("|")) : undefined;
@@ -47,18 +46,18 @@ runBenchmarks({ silent: true, skip: filterRegex }, prettyBenchmarkProgress())
           title: "Benchmark Results",
           description: description,
           columns: [
-            ...defaultColumns,
+            ...defaultColumns(),
             {
               title: "Avg. Operations per ms",
               align: "left",
               toFixed: 0,
-              formatter: (b: BenchmarkResult) => {
+              formatter: (b) => {
                 return Math.floor(MAX_KEYS / b.measuredRunsAvgMs).toString();
               },
             },
           ],
           groups: MARKDOWN_GROUPS,
-        }
+        },
       )(b);
     }
     return b;
@@ -76,9 +75,7 @@ async function generateDescription() {
     res = await systemSpecsWindows();
   }
 
-  return `\`\`\`bash\nKEYS: ${MAX_KEYS}\nRUNS: ${RUNS}\nOS: ${platform()}\nCPU: ${
-    res.cpu
-  }\nRAM: ${res.memory}\n\`\`\``;
+  return `\`\`\`bash\nKEYS: ${MAX_KEYS}\nRUNS: ${RUNS}\nOS: ${platform()}\nCPU: ${res.cpu}\nRAM: ${res.memory}\n\`\`\``;
 }
 
 async function systemSpecLinux() {

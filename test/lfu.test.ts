@@ -18,7 +18,7 @@ Deno.test(
   () => {
     const lfuCache = new LFU({ capacity: 5 });
     assertEquals(lfuCache.get("key"), undefined);
-  }
+  },
 );
 
 Deno.test("LFU get non-existent entry, should return undefined", () => {
@@ -51,7 +51,7 @@ Deno.test(
     lfuCache.set("5", 5);
     lfuCache.set("6", 6);
     assertEquals(lfuCache.size, 5);
-  }
+  },
 );
 
 Deno.test(
@@ -65,7 +65,7 @@ Deno.test(
     lfuCache.set("5", 5);
     lfuCache.set("6", 6);
     assert(!lfuCache.has("1"));
-  }
+  },
 );
 
 Deno.test("LFU set double the allowed capacity, should evict all keys", () => {

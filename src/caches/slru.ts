@@ -76,7 +76,7 @@ export class SLRU<V = any> extends BaseCache<V> {
     this.protectedPartition.forEach(0, callback);
     this.probationaryPartition.forEach(
       this.protectedPartition.size(),
-      callback
+      callback,
     );
   }
 
@@ -218,9 +218,7 @@ class SLRUList<V> {
     // The cache is not yet full
     if (!this.pointers.isFull()) {
       pointer = this.pointers.newPointer()!;
-    }
-
-    // Cache is full, we need to drop the last value
+    } // Cache is full, we need to drop the last value
     else {
       pointer = this.pointers.removeBack();
       entry = {
@@ -254,7 +252,7 @@ class SLRUList<V> {
 
   forEach(
     start: number,
-    callback: (item: { key: Key; value: V }, index: number) => void
+    callback: (item: { key: Key; value: V }, index: number) => void,
   ) {
     if (!this.pointers.back && !this.pointers.front) return;
     let p: number | undefined = this.pointers.front;

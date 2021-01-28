@@ -17,7 +17,7 @@ Deno.test(
   () => {
     const rrCache = new RR({ capacity: 5 });
     assertEquals(rrCache.get("key"), undefined);
-  }
+  },
 );
 
 Deno.test("RR get non-existent entry, should return undefined", () => {
@@ -49,7 +49,7 @@ Deno.test(
     rrCache.set("5", 5);
     rrCache.set("6", 6);
     assertEquals(rrCache.size, 5);
-  }
+  },
 );
 
 Deno.test("RR clear should reset cache", () => {

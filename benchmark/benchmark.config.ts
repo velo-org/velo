@@ -18,17 +18,18 @@ const MARKDOWN_GROUPS = CACHES.map((c) => {
   return {
     include: new RegExp(`^${c}`),
     name: c,
-    description: `https://github.com/velo-org/velo/blob/master/src/caches/${c.toLowerCase()}.ts`,
+    description:
+      `https://github.com/velo-org/velo/blob/master/src/caches/${c.toLowerCase()}.ts`,
   };
 });
 
 export {
-  MAX_KEYS,
-  EVICT,
-  RUNS,
+  CACHES,
   DATA_1,
   DATA_2,
-  CACHES,
-  MARKDOWN_OUT,
+  EVICT,
   MARKDOWN_GROUPS,
+  MARKDOWN_OUT,
+  MAX_KEYS,
+  RUNS,
 };
