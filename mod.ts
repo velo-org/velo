@@ -4,7 +4,3 @@ export { SC } from "./src/caches/sc.ts";
 export { LFU } from "./src/caches/lfu.ts";
 export { SLRU } from "./src/caches/slru.ts";
 export { ARC } from "./src/caches/arc.ts";
-export { Key } from "./src/models/key.ts";
-export { Options } from "./src/models/options.ts";
-export { SLRUOptions } from "./src/models/slruOptions.ts";
-export { CacheStatistics } from "./src/models/cacheStatistics.ts";
