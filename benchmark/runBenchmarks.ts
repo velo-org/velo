@@ -27,7 +27,7 @@ let filterRegex: RegExp | undefined;
 
 if (Deno.args.length > 0 && Deno.args[0] !== "md") {
   const skip = CACHES.filter(
-    (name) => !Deno.args[0].toUpperCase().split(",").includes(name),
+    (name) => !Deno.args[0].toUpperCase().split(",").includes(name)
   ).map((name) => `^${name}`);
 
   filterRegex = skip.length > 0 ? new RegExp(skip.join("|")) : undefined;
@@ -57,7 +57,7 @@ runBenchmarks({ silent: true, skip: filterRegex }, prettyBenchmarkProgress())
             },
           ],
           groups: MARKDOWN_GROUPS,
-        },
+        }
       )(b);
     }
     return b;
@@ -75,7 +75,9 @@ async function generateDescription() {
     res = await systemSpecsWindows();
   }
 
-  return `\`\`\`bash\nKEYS: ${MAX_KEYS}\nRUNS: ${RUNS}\nOS: ${platform()}\nCPU: ${res.cpu}\nRAM: ${res.memory}\n\`\`\``;
+  return `\`\`\`bash\nKEYS: ${MAX_KEYS}\nRUNS: ${RUNS}\nOS: ${platform()}\nCPU: ${
+    res.cpu
+  }\nRAM: ${res.memory}\n\`\`\``;
 }
 
 async function systemSpecLinux() {
@@ -129,43 +131,27 @@ async function systemSpecLinux() {
 
 async function systemSpecsWindows() {
   const cpuInfo = Deno.run({
-    cmd: ["wmic", "cpu get Name /Format:List"],
-    stdin: "piped",
+    cmd: [
+      "powershell",
+      "Get-CimInstance -ClassName CIM_Processor | Select Name",
+    ],
     stdout: "piped",
-    stderr: "piped",
   });
-  const cores = Deno.run({
-    cmd: ["wmic", "cpu get NumberOfCores /Format:List"],
-    stdin: "piped",
+  const memoryInfo = Deno.run({
+    cmd: [
+      "powershell",
+      "(systeminfo | Select-String 'Total Physical Memory:').ToString().Split(':')[1].Trim()",
+    ],
     stdout: "piped",
-    stderr: "piped",
-  });
-  const memory = Deno.run({
-    cmd: ["wmic", "MemoryChip get Capacity"],
-    stdin: "piped",
-    stdout: "piped",
-    stderr: "piped",
   });
 
-  const outputCPUInfo = await cpuInfo.output(); // "piped" must be set
-  const outputMemory = await memory.output();
-  const outputCores = await cores.output();
+  const outputCPUInfo = await cpuInfo.output();
+  const outputMemoryInfo = await memoryInfo.output();
   const cpuInfoStr = new TextDecoder().decode(outputCPUInfo);
-  const coreStr = new TextDecoder().decode(outputCores);
-  const memStr = new TextDecoder().decode(outputMemory);
+  const memoryInfoStr = new TextDecoder().decode(outputMemoryInfo);
 
-  let memSize = memStr.split("\n");
-  let memRes = 0;
-  memSize.shift();
-  memSize.forEach((val) => {
-    if (!isNaN(Number(val))) {
-      memRes += Number(val);
-    }
-  });
-
-  const memorySizeString = formatBytes(memRes);
   return {
-    cpu: `${cpuInfoStr.split("=")[1]} x ${coreStr.split("=")[1]}`,
-    memory: memorySizeString,
+    cpu: `${cpuInfoStr.split("\n")[3]}`,
+    memory: memoryInfoStr,
   };
 }
