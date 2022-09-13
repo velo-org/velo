@@ -19,7 +19,6 @@ export abstract class BaseCache<V> extends EventEmitter {
 
   /**
    *  Maximum time to live in ms
-   *
    */
   readonly stdTTL?: number;
 

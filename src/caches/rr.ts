@@ -22,7 +22,7 @@ export class RR<V = any> extends BaseCache<V> {
     this.counter = 0;
     this._size = 0;
     this.randomArr = getTypedArray(this.capacity);
-    for (var i = this.capacity; i > 0; i--) {
+    for (let i = this.capacity; i > 0; i--) {
       this.randomArr[i] = (this.capacity * Math.random()) | 0;
     }
   }

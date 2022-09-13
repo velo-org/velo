@@ -8,6 +8,11 @@ and this project adheres to
 
 ## unreleased
 
+## [0.1.6]
+
+- Bump deno/std to 0.155.0
+- Use deno v1.25.2
+
 ## [0.1.5]
 
 - Fix [#4](https://github.com/velo-org/velo/issues/4)
