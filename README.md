@@ -18,8 +18,9 @@
 
 ## Table of Contents
 
+- [Table of Contents](#table-of-contents)
 - [Introduction](#introduction)
-- [Quick Start](#quick-start)
+- [Quick start](#quick-start)
 - [Caches](#caches)
 - [Usage](#usage)
 - [Contributing](#contributing)
@@ -40,7 +41,7 @@ the following urls.
 - from `deno.land/x`
 
 ```ts
-import { [cache-name] } from "https://deno.land/x/velo@0.1.4/mod.ts";
+import { [cache-name] } from "https://deno.land/x/velo@0.1.6/mod.ts";
 ```
 
 - from `nest.land`
@@ -48,7 +49,7 @@ import { [cache-name] } from "https://deno.land/x/velo@0.1.4/mod.ts";
 [![nest badge](https://nest.land/badge.svg)](https://nest.land/package/velo)
 
 ```ts
-import { [cache-name] } from "https://x.nest.land/velo@0.1.4/mod.ts";
+import { [cache-name] } from "https://x.nest.land/velo@0.1.6/mod.ts";
 ```
 
 ## Caches
@@ -65,7 +66,7 @@ import { [cache-name] } from "https://x.nest.land/velo@0.1.4/mod.ts";
 All caches share the same set of methods.
 
 ```ts
-import { LRU } from "https://deno.land/x/velo@0.1.4/mod.ts";
+import { LRU } from "https://deno.land/x/velo@0.1.6/mod.ts";
 
 const lru = new LRU({ capacity: 5 });
 
