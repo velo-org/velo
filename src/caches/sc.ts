@@ -9,7 +9,7 @@ import { PointerList } from "../utils/pointerList.ts";
 /**
  * Second Chance Cache
  */
-export class SC<V = any> extends BaseCache<V> {
+export class SC<V> extends BaseCache<V> {
   private head: number;
   private tail: number;
   private arrayMap: {
@@ -42,7 +42,7 @@ export class SC<V = any> extends BaseCache<V> {
    */
   set(key: Key, value: V, ttl?: number) {
     this.applyTTL(key, ttl);
-    this.applySetEvent(key, value);
+    this.fireSetEvent(key, value);
 
     let pointer = this.items[key];
     if (pointer !== undefined) {
@@ -136,7 +136,7 @@ export class SC<V = any> extends BaseCache<V> {
     this.tail = 0;
     this.items = {};
     this.arrayMap = new Array(this.capacity);
-    this.applyClearEvent();
+    this.fireClearEvent();
   }
 
   /**
@@ -147,7 +147,7 @@ export class SC<V = any> extends BaseCache<V> {
   remove(key: Key) {
     const pointer = this.items[key];
     this.pointers.remove(pointer);
-    this.applyRemoveEvent(key, this.arrayMap[pointer].value!);
+    this.fireRemoveEvent(key, this.arrayMap[pointer].value!);
     this.arrayMap[pointer].key = undefined;
     this.arrayMap[pointer].value = undefined;
     this.arrayMap[pointer].sChance = false;

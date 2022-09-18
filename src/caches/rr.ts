@@ -6,7 +6,7 @@ import { Key } from "../models/key.ts";
 /**
  * Random Replacement Cache
  */
-export class RR<V = any> extends BaseCache<V> {
+export class RR<V> extends BaseCache<V> {
   private storage: { [key in Key]: V | undefined };
   private _keys: (Key | undefined)[];
   private freeMemory: number;
@@ -35,7 +35,7 @@ export class RR<V = any> extends BaseCache<V> {
    * @param ttl The max time to live in ms
    */
   set(key: Key, value: V, ttl?: number) {
-    this.applySetEvent(key, value);
+    this.fireSetEvent(key, value);
     this.applyTTL(key, ttl);
 
     if (this.storage[key]) {
@@ -91,7 +91,7 @@ export class RR<V = any> extends BaseCache<V> {
   remove(key: Key) {
     this._keys.splice(this._keys.indexOf(key), 1);
     this._size--;
-    this.applyRemoveEvent(key, this.storage[key]!);
+    this.fireRemoveEvent(key, this.storage[key]!);
     delete this.storage[key];
   }
 
@@ -158,6 +158,6 @@ export class RR<V = any> extends BaseCache<V> {
     this.freeMemory = -1;
     this.counter = 0;
     this.storage = {};
-    this.applyClearEvent();
+    this.fireClearEvent();
   }
 }

@@ -2,13 +2,18 @@ import { Options } from "../models/options.ts";
 import { Key } from "../models/key.ts";
 import { CacheStatistics } from "../models/cacheStatistics.ts";
 import { EventEmitter } from "../../deps.ts";
+import {
+  EmptyEventFunction,
+  EventFunction,
+  KeyValueEventFunction,
+} from "../models/events.ts";
 
-export declare interface BaseCache<V> {
-  on(event: "remove", listener: (key: Key, value: V) => void): this;
-  on(event: "set", listener: (key: Key, value: V) => void): this;
-  on(event: "clear", listener: () => void): this;
-  on(event: "expired", listener: (key: Key, value: V) => void): this;
-  on(event: string, listener: Function): this;
+export declare interface BaseCache<V, K = Key> {
+  on(event: "remove", listener: KeyValueEventFunction<V, K>): this;
+  on(event: "set", listener: KeyValueEventFunction<V, K>): this;
+  on(event: "clear", listener: EmptyEventFunction): this;
+  on(event: "expired", listener: KeyValueEventFunction<V, K>): this;
+  on(event: string, listener: EventFunction<V, K>): this;
 }
 
 export abstract class BaseCache<V> extends EventEmitter {
@@ -20,22 +25,12 @@ export abstract class BaseCache<V> extends EventEmitter {
   /**
    *  Maximum time to live in ms
    */
-  readonly stdTTL?: number;
+  readonly defaultTTL?: number;
 
   /**
-   * True if the cache emits an event when a key gets added
+   * True if the cache should emit events
    */
-  readonly setEvent?: boolean;
-
-  /**
-   * True if the cache emits an event when the cache gets cleared
-   */
-  readonly clearEvent?: boolean;
-
-  /**
-   * True if the cache emits an event when a key expires
-   */
-  readonly expiredEvent?: boolean;
+  readonly events?: boolean;
 
   /**
    * True if the cache emits an event when a key gets removed
@@ -47,24 +42,30 @@ export abstract class BaseCache<V> extends EventEmitter {
     misses: 0,
   };
 
+  protected _timeouts: Map<Key, number>;
+
   constructor(options: Options) {
     super();
     this.capacity = options.capacity;
-    this.stdTTL = options.stdTTL;
-    this.setEvent = options.setEvent;
-    this.clearEvent = options.clearEvent;
-    this.expiredEvent = options.expiredEvent;
-    this.removeEvent = options.removeEvent;
+    this.defaultTTL = options.defaultTTL;
+    this.events = options.events;
+    this._timeouts = new Map();
   }
 
   abstract remove(key: Key): void;
+
   abstract get(key: Key): V | undefined;
+
   abstract set(key: Key, value: V, ttl?: number): void;
+
   abstract peek(key: Key): V | undefined;
+
   abstract has(key: Key): boolean;
+
   abstract clear(): void;
+
   abstract forEach(
-    callback: (item: { key: Key; value: V }, index: number) => void,
+    callback: (item: { key: Key; value: V }, index: number) => void
   ): void;
 
   /**
@@ -76,8 +77,13 @@ export abstract class BaseCache<V> extends EventEmitter {
   }
 
   /**
+   * The number of keys currently in the cache.
+   */
+  abstract get size(): number;
+
+  /**
    * Returns the value for a given key while removing this key from the cache.
-   * Equal to calling _get_ and _remove_.
+   * Equal to calling {@link get} and {@link remove}.
    *
    * @param key The entries key (will be removed from the cache)
    * @returns The value of given key or undefined if the key is unknown
@@ -89,46 +95,51 @@ export abstract class BaseCache<V> extends EventEmitter {
   }
 
   /**
-   * Adds a TTL to given key. Does however __not__ override any existing TTLs.
+   * Sets for TTL for given key, overwriting any existing TTL. Use {@link Options.defaultTTL}
+   * to set a default TTL.
    *
    * @param key The key to set a TTL for
    * @param ttl Time to live in milliseconds
    */
   setTTL(key: Key, ttl: number) {
+    if (this._timeouts.has(key)) {
+      clearTimeout(this._timeouts.get(key));
+    }
     this.applyTTL(key, ttl);
   }
 
   protected applyTTL(key: Key, ttl?: number) {
-    if (ttl) {
-      setTimeout(() => {
-        this.applyExpiredEvent(key, this.peek(key)!);
+    const time = ttl || this.defaultTTL;
+
+    if (time) {
+      const id = setTimeout(() => {
+        this.fireExpiredEvent(key, this.peek(key)!);
         this.remove(key);
       }, ttl);
-    } else if (this.stdTTL) {
-      setTimeout(() => {
-        this.applyExpiredEvent(key, this.peek(key)!);
-        this.remove(key);
-      }, this.stdTTL);
+      this._timeouts.set(key, id);
     }
   }
 
-  protected applySetEvent(key: Key, value: V) {
-    if (this.setEvent) {
+  protected fireSetEvent(key: Key, value: V) {
+    if (this.events) {
       this.emit("set", key, value);
     }
   }
-  protected applyRemoveEvent(key: Key, value: V) {
-    if (this.removeEvent) {
+
+  protected fireRemoveEvent(key: Key, value: V) {
+    if (this.events) {
       this.emit("remove", key, value);
     }
   }
-  protected applyExpiredEvent(key: Key, value: V) {
-    if (this.expiredEvent) {
+
+  protected fireExpiredEvent(key: Key, value: V) {
+    if (this.events) {
       this.emit("expired", key, value);
     }
   }
-  protected applyClearEvent() {
-    if (this.clearEvent) {
+
+  protected fireClearEvent() {
+    if (this.events) {
       this.emit("clear");
     }
   }

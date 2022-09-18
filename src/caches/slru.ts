@@ -6,7 +6,7 @@ import { PointerList } from "../utils/pointerList.ts";
 /**
  * Segmented LRU Cache
  */
-export class SLRU<V = any> extends BaseCache<V> {
+export class SLRU<V> extends BaseCache<V> {
   private protectedPartition: SLRUList<V>;
   private probationaryPartition: SLRUList<V>;
   private protectedCache: number;
@@ -15,11 +15,7 @@ export class SLRU<V = any> extends BaseCache<V> {
   constructor(options: SLRUOptions) {
     super({
       capacity: options.probationaryCache + options.protectedCache,
-      stdTTL: options.stdTTL,
-      setEvent: options.setEvent,
-      clearEvent: options.clearEvent,
-      removeEvent: options.removeEvent,
-      expiredEvent: options.expiredEvent,
+      ...options,
     });
     this.protectedCache = options.protectedCache;
     this.probationaryCache = options.probationaryCache;
@@ -36,7 +32,7 @@ export class SLRU<V = any> extends BaseCache<V> {
    */
   set(key: Key, value: V, ttl?: number) {
     this.applyTTL(key, ttl);
-    this.applySetEvent(key, value);
+    this.fireSetEvent(key, value);
     const entry = this.probationaryPartition.setPop(key, value);
     if (entry?.evicted) {
       this._stats.hits++;
@@ -73,11 +69,8 @@ export class SLRU<V = any> extends BaseCache<V> {
    * @param callback function to call on each item
    */
   forEach(callback: (item: { value: V; key: Key }, index: number) => void) {
-    this.protectedPartition.forEach(0, callback);
-    this.probationaryPartition.forEach(
-      this.protectedPartition.size(),
-      callback,
-    );
+    this.protectedPartition.forEach(callback);
+    this.probationaryPartition.forEach(callback);
   }
 
   /**
@@ -143,7 +136,7 @@ export class SLRU<V = any> extends BaseCache<V> {
   clear() {
     this.probationaryPartition.clear();
     this.protectedPartition.clear();
-    this.applyClearEvent();
+    this.fireClearEvent();
   }
 
   /**
@@ -156,10 +149,10 @@ export class SLRU<V = any> extends BaseCache<V> {
     const protectedObj = this.protectedPartition.peek(key);
     if (!propationaryObj && !protectedObj) return undefined;
     else if (propationaryObj) {
-      this.applyRemoveEvent(key, propationaryObj);
+      this.fireRemoveEvent(key, propationaryObj);
       this.probationaryPartition.remove(key);
     } else {
-      this.applyRemoveEvent(key, protectedObj!);
+      this.fireRemoveEvent(key, protectedObj!);
       this.protectedPartition.remove(key);
     }
   }
@@ -250,10 +243,7 @@ class SLRUList<V> {
     return this.pointers.size;
   }
 
-  forEach(
-    start: number,
-    callback: (item: { key: Key; value: V }, index: number) => void,
-  ) {
+  forEach(callback: (item: { key: Key; value: V }, index: number) => void) {
     if (!this.pointers.back && !this.pointers.front) return;
     let p: number | undefined = this.pointers.front;
 

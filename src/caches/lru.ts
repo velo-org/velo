@@ -28,7 +28,7 @@ export class LRU<V = any> extends BaseCache<V> {
    * @param ttl The max time to live in ms
    */
   set(key: Key, value: V, ttl?: number) {
-    this.applySetEvent(key, value);
+    this.fireSetEvent(key, value);
 
     this.applyTTL(key, ttl);
 
@@ -68,7 +68,7 @@ export class LRU<V = any> extends BaseCache<V> {
     this._keys = [];
     this._values = [];
     this.pointers.clear();
-    this.applyClearEvent();
+    this.fireClearEvent();
   }
 
   /**
@@ -80,7 +80,7 @@ export class LRU<V = any> extends BaseCache<V> {
     const pointer = this.items[key];
     if (pointer === undefined) return;
     this.pointers.remove(pointer);
-    this.applyRemoveEvent(key, this._values[pointer]!);
+    this.fireRemoveEvent(key, this._values[pointer]!);
     this._keys[pointer] = undefined;
     this._values[pointer] = undefined;
 
@@ -153,7 +153,7 @@ export class LRU<V = any> extends BaseCache<V> {
    */
   forEach(
     callback: (item: { key: Key; value: V }, index: number) => void,
-    reverse: boolean = false,
+    reverse?: boolean
   ) {
     let p: number | undefined = this.pointers.front;
 

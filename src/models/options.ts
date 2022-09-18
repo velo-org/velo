@@ -5,28 +5,12 @@ export interface Options {
   capacity: number;
 
   /**
-   * Optional Standard TTL in milliseconds. If set this will be used as fallback
-   * if keys are set without a specified ttl.
+   * TTL in milliseconds. If 0, entries will not timeout.
    */
-  stdTTL?: number;
+  defaultTTL?: number;
 
   /**
-   * True if the cache emits an event when a key gets added
+   * True if the cache should emit events.
    */
-  setEvent?: boolean;
-
-  /**
-   * True if the cache emits an event when the cache gets cleared
-   */
-  clearEvent?: boolean;
-
-  /**
-   * True if the cache emits an event when a key expires
-   */
-  expiredEvent?: boolean;
-
-  /**
-   * True if the cache emits an event when a key is removed
-   */
-  removeEvent?: boolean;
+  events?: boolean;
 }

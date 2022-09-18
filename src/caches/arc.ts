@@ -6,7 +6,7 @@ import { PointerList } from "../utils/pointerList.ts";
 /**
  * Adaptive Replacement Cache
  */
-export class ARC<V = any> extends BaseCache<V> {
+export class ARC<V> extends BaseCache<V> {
   private partition = 0;
 
   private t1: ARCList<V>;
@@ -45,7 +45,7 @@ export class ARC<V = any> extends BaseCache<V> {
    * @param ttl The max time to live in ms
    */
   set(key: Key, value: V, ttl?: number) {
-    this.applySetEvent(key, value);
+    this.fireSetEvent(key, value);
     this.applyTTL(key, ttl);
 
     // in frequent set
@@ -174,11 +174,14 @@ export class ARC<V = any> extends BaseCache<V> {
    * @param key The entries key
    */
   remove(key: Key) {
-    this.t1.remove(key);
-    this.t2.remove(key);
-    this.b1.remove(key);
-    this.b2.remove(key);
-    this.applyRemoveEvent(key, this.peek(key)!);
+    const value = this.peek(key);
+    if (value) {
+      this.t1.remove(key);
+      this.t2.remove(key);
+      this.b1.remove(key);
+      this.b2.remove(key);
+      this.fireRemoveEvent(key, value);
+    }
   }
 
   /**
@@ -190,7 +193,7 @@ export class ARC<V = any> extends BaseCache<V> {
     this.t2.clear();
     this.b1.clear();
     this.b2.clear();
-    this.applyClearEvent();
+    this.fireClearEvent();
   }
 
   /**
@@ -246,8 +249,8 @@ export class ARC<V = any> extends BaseCache<V> {
  */
 class ARCList<V> {
   private items: { [key in Key]: number } = {};
-  _keys: Array<Key | undefined>;
-  _values: Array<V | undefined>;
+  private _keys: Array<Key | undefined>;
+  private _values: Array<V | undefined>;
   private pointers: PointerList;
 
   constructor(capacity: number) {
@@ -269,7 +272,7 @@ class ARCList<V> {
 
   peek(key: Key): V | undefined {
     const p = this.items[key];
-    if (!p) return undefined;
+    if (p === undefined) return undefined;
     return this._values[p];
   }
 
@@ -336,7 +339,7 @@ class ARCList<V> {
 
   forEach(
     start: number,
-    callback: (item: { key: Key; value: V }, index: number) => void,
+    callback: (item: { key: Key; value: V }, index: number) => void
   ) {
     let p: number | undefined = this.pointers.front;
 

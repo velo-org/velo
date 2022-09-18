@@ -6,7 +6,7 @@ import { Key } from "../models/key.ts";
 /**
  * Least Frequently Used Cache
  */
-export class LFU<V = any> extends BaseCache<V> {
+export class LFU<V> extends BaseCache<V> {
   private _keys: { [key in Key]: Node<V> };
   private frequency: { [key: number]: DoublyLinkedList };
   private _size: number;
@@ -29,7 +29,7 @@ export class LFU<V = any> extends BaseCache<V> {
    */
   set(key: Key, value: V, ttl?: number) {
     this.applyTTL(key, ttl);
-    this.applySetEvent(key, value);
+    this.fireSetEvent(key, value);
     let node = this._keys[key];
 
     // if node doesnt exist in _keys then add it
@@ -152,7 +152,7 @@ export class LFU<V = any> extends BaseCache<V> {
     const node = this._keys[key];
     if (!node) return;
     else {
-      this.applyRemoveEvent(key, this._keys[key].data);
+      this.fireRemoveEvent(key, this._keys[key].data);
       this._size--;
       const oldFrequencyCount = node.frequencyCount;
       this.frequency[oldFrequencyCount].removeNode(node);
@@ -218,6 +218,6 @@ export class LFU<V = any> extends BaseCache<V> {
     this.frequency = {};
     this._size = 0;
     this.minFrequency = 1;
-    this.applyClearEvent();
+    this.fireClearEvent();
   }
 }
