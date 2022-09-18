@@ -6,7 +6,7 @@ import { PointerList } from "../utils/pointerList.ts";
 /**
  * Adaptive Replacement Cache
  */
-export class ARC<V> extends BaseCache<V> {
+export class ARC<K extends Key, V> extends BaseCache<V, K> {
   private partition = 0;
 
   private t1: ARCList<V>;

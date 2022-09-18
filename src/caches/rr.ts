@@ -6,7 +6,7 @@ import { Key } from "../models/key.ts";
 /**
  * Random Replacement Cache
  */
-export class RR<V> extends BaseCache<V> {
+export class RR<K extends Key, V> extends BaseCache<V, K> {
   private storage: { [key in Key]: V | undefined };
   private _keys: (Key | undefined)[];
   private freeMemory: number;

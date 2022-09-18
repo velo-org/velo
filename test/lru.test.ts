@@ -18,7 +18,7 @@ Deno.test(
   () => {
     const lruCache = new LRU({ capacity: 5 });
     assertEquals(lruCache.get("key"), undefined);
-  },
+  }
 );
 
 Deno.test("LRU get non-existent entry, should return undefined", () => {
@@ -51,7 +51,7 @@ Deno.test(
     lruCache.set("5", 5);
     lruCache.set("6", 6);
     assertEquals(lruCache.size, 5);
-  },
+  }
 );
 
 Deno.test(
@@ -65,7 +65,7 @@ Deno.test(
     lruCache.set("5", 5);
     lruCache.set("6", 6);
     assert(!lruCache.has("1"));
-  },
+  }
 );
 
 Deno.test("LRU set double the allowed capacity, should evict all keys", () => {
@@ -96,7 +96,7 @@ Deno.test("LRU forEach should print out the right key value pairs", () => {
 });
 
 Deno.test("LRU use with ttl", async () => {
-  const lruCache = new LRU({ capacity: 5, stdTTL: 500 });
+  const lruCache = new LRU({ capacity: 5, defaultTTL: 500 });
   lruCache.set("1", 1);
   lruCache.set("2", 2);
   lruCache.set("3", 3);
@@ -108,7 +108,7 @@ Deno.test("LRU use with ttl", async () => {
 });
 
 Deno.test("LRU use with ttl, override ttl for specific set", async () => {
-  const lruCache = new LRU({ capacity: 5, stdTTL: 500 });
+  const lruCache = new LRU({ capacity: 5, defaultTTL: 500 });
   lruCache.set("1", 1);
   lruCache.set("2", 2);
   lruCache.set("3", 3);

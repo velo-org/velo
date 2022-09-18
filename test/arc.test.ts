@@ -19,7 +19,7 @@ Deno.test(
   () => {
     const arcCache = new ARC({ capacity: 5 });
     assertEquals(arcCache.get("key"), undefined);
-  },
+  }
 );
 
 Deno.test("ARC get non-existent entry, should return undefined", () => {
@@ -52,7 +52,7 @@ Deno.test(
     arcCache.set("5", 5);
     arcCache.set("6", 6);
     assertEquals(arcCache.size, 5);
-  },
+  }
 );
 
 Deno.test(
@@ -66,7 +66,7 @@ Deno.test(
     arcCache.set("5", 5);
     arcCache.set("6", 6);
     assert(!arcCache.has("1"));
-  },
+  }
 );
 
 Deno.test("ARC set double the allowed capacity, should evict all keys", () => {
@@ -90,14 +90,14 @@ Deno.test("ARC forEach should print out the right key value pairs", () => {
   arcCache.set("5", 5);
   arcCache.remove("3");
   const testKeys: Key[] = [];
-  arcCache.forEach((e, index) => {
+  arcCache.forEach((e, _) => {
     testKeys.push(e.key);
   });
   assertEquals(testKeys, ["5", "4", "2", "1"]);
 });
 
 Deno.test("ARC use with ttl", async () => {
-  const arcCache = new ARC({ capacity: 5, stdTTL: 500 });
+  const arcCache = new ARC({ capacity: 5, defaultTTL: 500 });
   arcCache.set("1", 1);
   arcCache.set("2", 2);
   arcCache.set("3", 3);
@@ -109,7 +109,7 @@ Deno.test("ARC use with ttl", async () => {
 });
 
 Deno.test("ARC use with ttl, override ttl for specific set", async () => {
-  const arcCache = new ARC({ capacity: 5, stdTTL: 500 });
+  const arcCache = new ARC({ capacity: 5, defaultTTL: 500 });
   arcCache.set("1", 1);
   arcCache.set("2", 2);
   arcCache.set("3", 3);
@@ -120,7 +120,7 @@ Deno.test("ARC use with ttl, override ttl for specific set", async () => {
   await sleep(600);
 });
 
-Deno.test("ARC getting entry from t1, should move it to t2", async () => {
+Deno.test("ARC getting entry from t1, should move it to t2", () => {
   const arcCache = new ARC({ capacity: 5 });
   arcCache.set("1", 1);
   arcCache.set("2", 2);
@@ -131,7 +131,7 @@ Deno.test("ARC getting entry from t1, should move it to t2", async () => {
 
 Deno.test(
   "ARC setting entry that was evicted from t1, should remove it from b1 into t2 and also evict the last entry from t1 into b1",
-  async () => {
+  () => {
     const arcCache = new ARC({ capacity: 5 });
     arcCache.set("1", 1);
     arcCache.set("2", 2);
@@ -144,5 +144,5 @@ Deno.test(
     assertEquals(arcCache.recentlyEvicted.keys, ["2"]);
     assertEquals(arcCache.recentlySet.keys, ["6", "3", "4", "5"]);
     assertEquals(arcCache.frequentlySet.keys, ["1"]);
-  },
+  }
 );

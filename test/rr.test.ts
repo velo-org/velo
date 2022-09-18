@@ -17,7 +17,7 @@ Deno.test(
   () => {
     const rrCache = new RR({ capacity: 5 });
     assertEquals(rrCache.get("key"), undefined);
-  },
+  }
 );
 
 Deno.test("RR get non-existent entry, should return undefined", () => {
@@ -49,7 +49,7 @@ Deno.test(
     rrCache.set("5", 5);
     rrCache.set("6", 6);
     assertEquals(rrCache.size, 5);
-  },
+  }
 );
 
 Deno.test("RR clear should reset cache", () => {
@@ -65,7 +65,7 @@ Deno.test("RR clear should reset cache", () => {
 });
 
 Deno.test("RR use with ttl", async () => {
-  const rrCache = new RR({ capacity: 5, stdTTL: 500 });
+  const rrCache = new RR({ capacity: 5, defaultTTL: 500 });
   rrCache.set("1", 1);
   rrCache.set("2", 2);
   rrCache.set("3", 3);
@@ -77,7 +77,7 @@ Deno.test("RR use with ttl", async () => {
 });
 
 Deno.test("RR use with ttl, override ttl for specific set", async () => {
-  const rrCache = new RR({ capacity: 5, stdTTL: 500 });
+  const rrCache = new RR({ capacity: 5, defaultTTL: 500 });
   rrCache.set("1", 1);
   rrCache.set("2", 2);
   rrCache.set("3", 3);

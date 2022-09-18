@@ -10,7 +10,7 @@ interface Hello {
   hello: string;
 }
 
-const lfuc = new LFU<Hello>({ capacity: 5 }); // inits a Least frequently used Cache with a max of 5 key-value pairs
+const lfuc = new LFU<string, Hello>({ capacity: 5 }); // inits a Least frequently used Cache with a max of 5 key-value pairs
 lfuc.on("remove", (key, value) => {
   console.log(key, value);
 });

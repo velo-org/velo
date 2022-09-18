@@ -17,7 +17,7 @@ Deno.test(
   () => {
     const scCache = new SC({ capacity: 5 });
     assertEquals(scCache.get("key"), undefined);
-  },
+  }
 );
 
 Deno.test("SC get non-existent entry, should return undefined", () => {
@@ -49,7 +49,7 @@ Deno.test(
     scCache.set("5", 5);
     scCache.set("6", 6);
     assertEquals(scCache.size, 5);
-  },
+  }
 );
 
 Deno.test("SC clear should reset cache", () => {
@@ -65,7 +65,7 @@ Deno.test("SC clear should reset cache", () => {
 });
 
 Deno.test("SC use with ttl", async () => {
-  const scCache = new SC({ capacity: 5, stdTTL: 500 });
+  const scCache = new SC({ capacity: 5, defaultTTL: 500 });
   scCache.set("1", 1);
   scCache.set("2", 2);
   scCache.set("3", 3);
@@ -77,7 +77,7 @@ Deno.test("SC use with ttl", async () => {
 });
 
 Deno.test("SC use with ttl, override ttl for specific set", async () => {
-  const scCache = new SC({ capacity: 5, stdTTL: 500 });
+  const scCache = new SC({ capacity: 5, defaultTTL: 500 });
   scCache.set("1", 1);
   scCache.set("2", 2);
   scCache.set("3", 3);
@@ -97,7 +97,7 @@ Deno.test("SC forEach should print out the right key value pairs", () => {
   scCache.set("5", 5);
   scCache.remove("5");
   const testKeys = [];
-  scCache.forEach((i, index) => {
+  scCache.forEach((i, _) => {
     testKeys.push(i.key);
   });
   assertEquals(testKeys.length, 4);
@@ -115,7 +115,7 @@ Deno.test(
     scCache.get("1");
     scCache.set("6", 6);
     assertEquals(scCache.peek("2"), undefined);
-  },
+  }
 );
 Deno.test(
   "SC when getting value it receives a second chance, but should be deleted after two turns",
@@ -130,5 +130,5 @@ Deno.test(
     scCache.set("6", 6);
     scCache.set("7", 7);
     assertEquals(scCache.peek("1"), undefined);
-  },
+  }
 );

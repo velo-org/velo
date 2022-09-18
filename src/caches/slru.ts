@@ -6,7 +6,7 @@ import { PointerList } from "../utils/pointerList.ts";
 /**
  * Segmented LRU Cache
  */
-export class SLRU<V> extends BaseCache<V> {
+export class SLRU<K extends Key, V> extends BaseCache<V, K> {
   private protectedPartition: SLRUList<V>;
   private probationaryPartition: SLRUList<V>;
   private protectedCache: number;

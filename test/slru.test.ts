@@ -17,7 +17,7 @@ Deno.test(
   () => {
     const slruCache = new SLRU({ probationaryCache: 3, protectedCache: 3 });
     assertEquals(slruCache.get("key"), undefined);
-  },
+  }
 );
 
 Deno.test("SLRU get non-existent entry, should return undefined", () => {
@@ -28,6 +28,7 @@ Deno.test("SLRU get non-existent entry, should return undefined", () => {
   slruCache.set("4", 4);
   assertEquals(slruCache.get("key"), undefined);
 });
+
 Deno.test("SLRU remove entry, should return undefined", () => {
   const slruCache = new SLRU({ probationaryCache: 3, protectedCache: 3 });
   slruCache.set("1", 1);
@@ -49,7 +50,7 @@ Deno.test(
     slruCache.set("5", 5);
     slruCache.set("6", 6);
     assertEquals(slruCache.size, 3);
-  },
+  }
 );
 
 Deno.test("SLRU clear should reset cache", () => {
@@ -68,7 +69,7 @@ Deno.test("SLRU use with ttl", async () => {
   const slruCache = new SLRU({
     probationaryCache: 3,
     protectedCache: 3,
-    stdTTL: 500,
+    defaultTTL: 500,
   });
   slruCache.set("1", 1);
   slruCache.set("2", 2);
@@ -84,7 +85,7 @@ Deno.test("SLRU use with ttl, override ttl for specific set", async () => {
   const slruCache = new SLRU({
     probationaryCache: 3,
     protectedCache: 3,
-    stdTTL: 500,
+    defaultTTL: 500,
   });
   slruCache.set("1", 1);
   slruCache.set("2", 2);
@@ -96,6 +97,7 @@ Deno.test("SLRU use with ttl, override ttl for specific set", async () => {
   assertEquals(slruCache.keys, ["5"]);
   await sleep(400);
 });
+
 Deno.test("SLRU forEach should print out the right key value pairs", () => {
   const slruCache = new SLRU({ probationaryCache: 3, protectedCache: 3 });
   slruCache.set("1", 1);
@@ -104,12 +106,13 @@ Deno.test("SLRU forEach should print out the right key value pairs", () => {
   slruCache.set("4", 4);
   slruCache.set("5", 5);
   slruCache.remove("5");
-  const testKeys: any[] = [];
-  slruCache.forEach((i, index) => {
+  const testKeys = [];
+  slruCache.forEach((i, _) => {
     testKeys.push(i.key);
   });
   assertEquals(testKeys.length, 2);
 });
+
 Deno.test("SLRU when in protected cache, item will not be deleted", () => {
   const slruCache = new SLRU({ probationaryCache: 3, protectedCache: 3 });
   slruCache.set("1", 1);
@@ -143,5 +146,5 @@ Deno.test(
 
     assertEquals(slruCache.size, 6);
     assertEquals(slruCache.PropationaryPartition.peek("1"), 1);
-  },
+  }
 );

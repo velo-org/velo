@@ -10,7 +10,7 @@ interface Hello {
   hello: string;
 }
 
-const rrc = new RR<Hello>({ capacity: 5 }); // init Random Replacement Cache with max 5 key-value pairs
+const rrc = new RR<string, Hello>({ capacity: 5 }); // init Random Replacement Cache with max 5 key-value pairs
 rrc.on("remove", (key, value) => {
   console.log(key, value);
 });

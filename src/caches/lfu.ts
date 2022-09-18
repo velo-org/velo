@@ -6,7 +6,7 @@ import { Key } from "../models/key.ts";
 /**
  * Least Frequently Used Cache
  */
-export class LFU<V> extends BaseCache<V> {
+export class LFU<K extends Key, V> extends BaseCache<V, K> {
   private _keys: { [key in Key]: Node<V> };
   private frequency: { [key: number]: DoublyLinkedList };
   private _size: number;

@@ -8,7 +8,7 @@ import {
   KeyValueEventFunction,
 } from "../models/events.ts";
 
-export declare interface BaseCache<V, K = Key> {
+export declare interface BaseCache<V, K = string> {
   on(event: "remove", listener: KeyValueEventFunction<V, K>): this;
   on(event: "set", listener: KeyValueEventFunction<V, K>): this;
   on(event: "clear", listener: EmptyEventFunction): this;
@@ -16,7 +16,7 @@ export declare interface BaseCache<V, K = Key> {
   on(event: string, listener: EventFunction<V, K>): this;
 }
 
-export abstract class BaseCache<V> extends EventEmitter {
+export abstract class BaseCache<V, K = string> extends EventEmitter {
   /**
    * Maximum number of entries in the cache
    */

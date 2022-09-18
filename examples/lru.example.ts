@@ -11,7 +11,7 @@ interface Hello {
   hello: string;
 }
 
-const lruc = new LRU<Hello>({ capacity: 5 }); // init least recently used Cache with a max of 5 key-value pairs
+const lruc = new LRU<string, Hello>({ capacity: 5 }); // init least recently used Cache with a max of 5 key-value pairs
 
 lruc.on("remove", (key, value) => {
   console.log(key, value);

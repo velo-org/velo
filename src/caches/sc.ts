@@ -9,7 +9,7 @@ import { PointerList } from "../utils/pointerList.ts";
 /**
  * Second Chance Cache
  */
-export class SC<V> extends BaseCache<V> {
+export class SC<K extends Key, V> extends BaseCache<V, K> {
   private head: number;
   private tail: number;
   private arrayMap: {

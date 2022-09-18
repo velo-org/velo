@@ -16,7 +16,7 @@ interface Hello {
 }
 
 // inits a Segmented Least Recently Used Cache with max 5 key-value pairs
-const slruc = new SLRU<Hello>({
+const slruc = new SLRU<string, Hello>({
   protectedCache: 5,
   probationaryCache: 5,
 });

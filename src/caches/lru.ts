@@ -6,7 +6,7 @@ import { PointerList } from "../utils/pointerList.ts";
 /**
  * Least Recently Used Cache
  */
-export class LRU<V = any> extends BaseCache<V> {
+export class LRU<K extends Key, V> extends BaseCache<V, K> {
   private _keys: Array<Key | undefined>;
   private _values: Array<V | undefined>;
   private items: { [key in Key]: number };

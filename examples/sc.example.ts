@@ -14,7 +14,7 @@ interface Hello {
   hello: string;
 }
 
-const scc = new SC<Hello>({ capacity: 5 }); // init Second Chance Cache with max 5 key-value pairs
+const scc = new SC<string, Hello>({ capacity: 5 }); // init Second Chance Cache with max 5 key-value pairs
 scc.on("remove", (key, value) => {
   console.log(key, value);
 });

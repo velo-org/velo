@@ -1,9 +1,6 @@
-export interface SLRUOptions {
+import { Options } from "./options.ts";
+
+export interface SLRUOptions extends Omit<Options, "capacity"> {
   protectedCache: number;
   probationaryCache: number;
-  stdTTL?: number;
-  setEvent?: boolean;
-  clearEvent?: boolean;
-  expiredEvent?: boolean;
-  removeEvent?: boolean;
 }

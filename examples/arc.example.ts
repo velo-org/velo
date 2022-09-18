@@ -10,20 +10,20 @@ import { Person } from "./common/Person.ts";
  * history for both.
  */
 
-const arc = new ARC<Person>({ capacity: 5 });
+const arc = new ARC<number, Person>({ capacity: 5, events: true });
 arc.on("remove", (key, value) => {
-  console.log(key, value);
+  console.log("REMOVE", key, value);
 });
 arc.on("clear", () => {
-  console.log("cache cleared");
+  console.log("CLEAR");
 });
 
 arc.on("set", (key, value) => {
-  console.log(key, value);
+  console.log("SET", key, value);
 });
 
 arc.on("expired", (key, value) => {
-  console.log(key, value);
+  console.log("EXPIRED", key, value);
 });
 
 arc.set(1, { name: "Leon", age: 35 });
