@@ -1,3 +1,8 @@
+import { ARC } from "../policies/arc.ts";
+
+/**
+ * internal definition of a cache policy
+ */
 export interface Policy<V, K = string> {
   /**
    * Maximum number of entries in the cache
@@ -18,6 +23,11 @@ export interface Policy<V, K = string> {
    * List of values in the cache
    */
   readonly values: V[];
+
+  /**
+   * Other internal data that the policy provides as json
+   */
+  readonly internalData?: PolicyInternal<K>;
 
   /**
    * Inserts a new entry into the cache
@@ -71,4 +81,13 @@ export interface Policy<V, K = string> {
   forEach(callback: (item: { key: K; value: V }, index: number) => void): void;
 
   [Symbol.iterator](): IterableIterator<{ key: K; value: V | undefined }>;
+}
+
+export type PolicyInternal<K> = ArcInternal<K> | undefined;
+
+export interface ArcInternal<K> {
+  t1: K[];
+  t2: K[];
+  b1: K[];
+  b2: K[];
 }

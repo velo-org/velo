@@ -1,6 +1,6 @@
 import { Key } from "../models/cache.ts";
 import { PointerList } from "../utils/pointerList.ts";
-import { BasePolicy } from "./common.ts";
+import { BasePolicy } from "./base.ts";
 
 /**
  * Least Recently Used Cache

@@ -1,6 +1,7 @@
 import { Key } from "../models/cache.ts";
+import { ArcInternal } from "../models/policy.ts";
 import { PointerList } from "../utils/pointerList.ts";
-import { BasePolicy } from "./common.ts";
+import { BasePolicy } from "./base.ts";
 
 /**
  * Adaptive Replacement Cache
@@ -172,6 +173,15 @@ export class ARC<K extends Key, V> extends BasePolicy<K, V> {
     return this.t1.values.concat(this.t2.values);
   }
 
+  get internalData(): ArcInternal<K> {
+    return {
+      t1: this.t1.keys,
+      t2: this.t2.keys,
+      b1: this.b1.keys,
+      b2: this.b2.keys,
+    };
+  }
+
   get recentlySet() {
     return this.t1;
   }
@@ -298,7 +308,7 @@ class ARCList<K extends Key, V> {
 
   forEach(
     start: number,
-    callback: (item: { key: K; value: V }, index: number) => void
+    callback: (item: { key: K; value: V }, index: number) => void,
   ) {
     let p: number | undefined = this.pointers.front;
 

@@ -17,7 +17,7 @@ export abstract class BasePolicy<K, V> implements Policy<V, K> {
   abstract clear(): void;
   abstract has(key: K): boolean;
   abstract forEach(
-    callback: (item: { key: K; value: V }, index: number) => void
+    callback: (item: { key: K; value: V }, index: number) => void,
   ): void;
   abstract [Symbol.iterator](): IterableIterator<{
     key: K;

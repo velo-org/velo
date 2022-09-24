@@ -1,7 +1,7 @@
 import { EventEmitter } from "../../deps.ts";
-import { Key, CacheStatistics, CacheOptions } from "../models/cache.ts";
+import { CacheOptions, CacheStatistics, Key } from "../models/cache.ts";
 import { EventName, EventOptions } from "../models/events.ts";
-import { Policy } from "../models/policy.ts";
+import { Policy, PolicyInternal } from "../models/policy.ts";
 import { Inaccessible } from "../utils/error.ts";
 
 export class VeloCache<K extends Key, V> {
@@ -16,6 +16,7 @@ export class VeloCache<K extends Key, V> {
   readonly size: number;
   readonly keys: K[];
   readonly values: V[];
+  readonly policyInternal: PolicyInternal<K>;
 
   constructor(policy: Policy<V, K>, options: CacheOptions) {
     this._policy = policy;
@@ -42,6 +43,7 @@ export class VeloCache<K extends Key, V> {
     this.size = this._policy.size;
     this.keys = this._policy.keys;
     this.values = this._policy.values;
+    this.policyInternal = this._policy.internalData;
   }
 
   get(key: K): V | undefined {
@@ -124,33 +126,12 @@ export class VeloCache<K extends Key, V> {
     return this._eventEmitter;
   }
 
-  private fireEvent(name: EventName, ...args: any[]) {
-    switch (name) {
-      case "set":
-        if (this._eventOptions?.set) {
-          this._eventEmitter?.emit(name, args);
-        }
-        break;
-      case "get":
-        if (this._eventOptions?.get) {
-          this._eventEmitter?.emit(name, args);
-        }
-        break;
-      case "removed":
-        if (this._eventOptions?.removed) {
-          this._eventEmitter?.emit(name, args);
-        }
-        break;
-      case "clear":
-        if (this._eventOptions?.clear) {
-          this._eventEmitter?.emit(name, args);
-        }
-        break;
-      case "expired":
-        if (this._eventOptions?.expired) {
-          this._eventEmitter?.emit(name, args);
-        }
-        break;
+  private fireEvent(name: EventName, ...args: (K | V)[]) {
+    if (!this._eventOptions) {
+      throw new Inaccessible();
+    }
+    if (this._eventOptions[name]) {
+      this._eventEmitter?.emit(name, args);
     }
   }
 }
