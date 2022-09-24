@@ -1,25 +1,24 @@
-import { BaseCache } from "./base.ts";
-import { Options } from "../models/options.ts";
-import { Key } from "../models/key.ts";
+import { Key } from "../models/cache.ts";
 import { PointerList } from "../utils/pointerList.ts";
+import { BasePolicy } from "./common.ts";
 
 /**
  * Adaptive Replacement Cache
  */
-export class ARC<K extends Key, V> extends BaseCache<V, K> {
+export class ARC<K extends Key, V> extends BasePolicy<K, V> {
   private partition = 0;
 
-  private t1: ARCList<V>;
-  private t2: ARCList<V>;
-  private b1: ARCList<null>;
-  private b2: ARCList<null>;
+  private t1: ARCList<K, V>;
+  private t2: ARCList<K, V>;
+  private b1: ARCList<K, null>;
+  private b2: ARCList<K, null>;
 
-  constructor(options: Options) {
-    super(options);
-    this.t1 = new ARCList(this.capacity);
-    this.t2 = new ARCList(this.capacity);
-    this.b1 = new ARCList(this.capacity);
-    this.b2 = new ARCList(this.capacity);
+  constructor(capacity: number) {
+    super(capacity);
+    this.t1 = new ARCList(capacity);
+    this.t2 = new ARCList(capacity);
+    this.b1 = new ARCList(capacity);
+    this.b2 = new ARCList(capacity);
   }
 
   private replace(in_t2: boolean) {
@@ -37,21 +36,10 @@ export class ARC<K extends Key, V> extends BaseCache<V, K> {
     }
   }
 
-  /**
-   * Inserts a new entry into the cache
-   *
-   * @param key The entries key
-   * @param value The entries value
-   * @param ttl The max time to live in ms
-   */
-  set(key: Key, value: V, ttl?: number) {
-    this.fireSetEvent(key, value);
-    this.applyTTL(key, ttl);
-
+  set(key: K, value: V) {
     // in frequent set
     if (this.t2.has(key)) {
       this.t2.insert(key, value);
-      this._stats.hits++;
       return;
     }
 
@@ -59,7 +47,6 @@ export class ARC<K extends Key, V> extends BaseCache<V, K> {
     if (this.t1.has(key)) {
       this.t1.remove(key);
       this.t2.insert(key, value);
-      this._stats.hits++;
       return;
     }
 
@@ -81,7 +68,6 @@ export class ARC<K extends Key, V> extends BaseCache<V, K> {
 
       this.b2.remove(key);
       this.t2.insert(key, value);
-      this._stats.misses++;
 
       return;
     }
@@ -104,7 +90,6 @@ export class ARC<K extends Key, V> extends BaseCache<V, K> {
 
       this.b1.remove(key);
       this.t2.insert(key, value);
-      this._stats.misses++;
 
       return;
     }
@@ -123,17 +108,10 @@ export class ARC<K extends Key, V> extends BaseCache<V, K> {
       this.b2.removeBack();
     }
 
-    this._stats.misses++;
     this.t1.insert(key, value);
   }
 
-  /**
-   * Gets the value for a given key
-   *
-   * @param key The entries key
-   * @returns The element with given key or undefined if the key is unknown
-   */
-  get(key: Key): V | undefined {
+  get(key: K): V | undefined {
     const value = this.t1.removeWithValue(key);
     // if in t1 move to t2
     if (value) {
@@ -142,23 +120,11 @@ export class ARC<K extends Key, V> extends BaseCache<V, K> {
     return this.t2.get(key);
   }
 
-  /**
-   * Checks if a given key is in the cache
-   *
-   * @param key The key to check
-   * @returns True if the cache has the key
-   */
-  has(key: Key) {
+  has(key: K) {
     return this.t1.has(key) || this.t2.has(key);
   }
 
-  /**
-   * Get the value to a key __without__ manipulating the cache
-   *
-   * @param key The entries key
-   * @returns The element with given key or undefined if the key is unknown
-   */
-  peek(key: Key) {
+  peek(key: K) {
     let value = this.t1.peek(key);
 
     if (!value) {
@@ -173,14 +139,13 @@ export class ARC<K extends Key, V> extends BaseCache<V, K> {
    *
    * @param key The entries key
    */
-  remove(key: Key) {
+  remove(key: K) {
     const value = this.peek(key);
     if (value) {
       this.t1.remove(key);
       this.t2.remove(key);
       this.b1.remove(key);
       this.b2.remove(key);
-      this.fireRemoveEvent(key, value);
     }
   }
 
@@ -193,26 +158,16 @@ export class ARC<K extends Key, V> extends BaseCache<V, K> {
     this.t2.clear();
     this.b1.clear();
     this.b2.clear();
-    this.fireClearEvent();
   }
 
-  /**
-   * Current number of entries in the cache
-   */
   get size() {
     return this.t1.size() + this.t2.size();
   }
 
-  /**
-   * List of keys in the cache
-   */
   get keys() {
     return this.t1.keys.concat(this.t2.keys);
   }
 
-  /**
-   * List of values in the cache
-   */
   get values() {
     return this.t1.values.concat(this.t2.values);
   }
@@ -233,50 +188,54 @@ export class ARC<K extends Key, V> extends BaseCache<V, K> {
     return this.b2;
   }
 
-  /**
-   * Array like forEach, iterating over all entries in the cache
-   *
-   * @param callback function to call on each item
-   */
-  forEach(callback: (item: { key: Key; value: V }, index: number) => void) {
+  forEach(callback: (item: { key: K; value: V }, index: number) => void) {
     this.t1.forEach(0, callback);
     this.t2.forEach(this.t1.size(), callback);
+  }
+
+  *[Symbol.iterator]() {
+    for (const entry of this.t1) {
+      yield entry;
+    }
+    for (const entry of this.t2) {
+      yield entry;
+    }
   }
 }
 
 /**
  * An LRU with some special functions
  */
-class ARCList<V> {
+class ARCList<K extends Key, V> {
   private items: { [key in Key]: number } = {};
-  private _keys: Array<Key | undefined>;
+  private _keys: Array<K | undefined>;
   private _values: Array<V | undefined>;
   private pointers: PointerList;
 
   constructor(capacity: number) {
-    this._keys = new Array<Key>();
+    this._keys = new Array<K>();
     this._values = new Array<V>();
     this.pointers = new PointerList(capacity);
   }
 
-  has(key: Key) {
+  has(key: K) {
     return this.items[key] !== undefined ? true : false;
   }
 
-  get(key: Key): V | undefined {
+  get(key: K): V | undefined {
     const p = this.items[key];
     if (p === undefined) return undefined;
     this.pointers.moveToFront(p);
     return this._values[p];
   }
 
-  peek(key: Key): V | undefined {
+  peek(key: K): V | undefined {
     const p = this.items[key];
     if (p === undefined) return undefined;
     return this._values[p];
   }
 
-  remove(key: Key) {
+  remove(key: K) {
     const p = this.items[key];
     if (p !== undefined) {
       delete this.items[key];
@@ -286,7 +245,7 @@ class ARCList<V> {
     }
   }
 
-  removeWithValue(key: Key): V | undefined {
+  removeWithValue(key: K): V | undefined {
     const p = this.items[key];
 
     if (p === undefined) return undefined;
@@ -299,7 +258,7 @@ class ARCList<V> {
     return value;
   }
 
-  insert(key: Key, value: V) {
+  insert(key: K, value: V) {
     let p = this.items[key];
 
     if (p === undefined) {
@@ -312,12 +271,12 @@ class ARCList<V> {
     this._values[p] = value;
   }
 
-  moveToFront(key: Key) {
+  moveToFront(key: K) {
     const p = this.items[key];
     this.pointers.moveToFront(p);
   }
 
-  removeBack(): Key {
+  removeBack(): K {
     const p = this.pointers.removeBack();
     const key = this._keys[p]!;
     delete this.items[key];
@@ -339,7 +298,7 @@ class ARCList<V> {
 
   forEach(
     start: number,
-    callback: (item: { key: Key; value: V }, index: number) => void
+    callback: (item: { key: K; value: V }, index: number) => void
   ) {
     let p: number | undefined = this.pointers.front;
 
@@ -353,11 +312,20 @@ class ARCList<V> {
     }
   }
 
-  get keys() {
-    return this._keys.filter((k) => k !== undefined);
+  *[Symbol.iterator]() {
+    let p: number | undefined = this.pointers.front;
+
+    for (let i = 0; p != undefined; i++) {
+      yield { key: this._keys[p]!, value: this._values[p]! };
+      p = this.pointers.nextOf(p);
+    }
   }
 
-  get values() {
-    return this._values.filter((v) => v !== undefined);
+  get keys(): K[] {
+    return this._keys.filter((k) => k !== undefined) as K[];
+  }
+
+  get values(): V[] {
+    return this._values.filter((v) => v !== undefined) as V[];
   }
 }
