@@ -1,12 +1,11 @@
 import { Key } from "../models/cache.ts";
 import { ArcInternal } from "../models/policy.ts";
 import { PointerList } from "../utils/pointerList.ts";
-import { BasePolicy } from "./base.ts";
 
 /**
  * Adaptive Replacement Cache
  */
-export class ARC<K extends Key, V> extends BasePolicy<K, V> {
+export class ARC<K extends Key, V> {
   private partition = 0;
 
   private t1: ARCList<K, V>;
@@ -14,12 +13,14 @@ export class ARC<K extends Key, V> extends BasePolicy<K, V> {
   private b1: ARCList<K, null>;
   private b2: ARCList<K, null>;
 
+  readonly capacity: number;
+
   constructor(capacity: number) {
-    super(capacity);
-    this.t1 = new ARCList(capacity);
-    this.t2 = new ARCList(capacity);
-    this.b1 = new ARCList(capacity);
-    this.b2 = new ARCList(capacity);
+    this.capacity = capacity;
+    this.t1 = new ARCList(this.capacity);
+    this.t2 = new ARCList(this.capacity);
+    this.b1 = new ARCList(this.capacity);
+    this.b2 = new ARCList(this.capacity);
   }
 
   private replace(in_t2: boolean) {
@@ -308,7 +309,7 @@ class ARCList<K extends Key, V> {
 
   forEach(
     start: number,
-    callback: (item: { key: K; value: V }, index: number) => void,
+    callback: (item: { key: K; value: V }, index: number) => void
   ) {
     let p: number | undefined = this.pointers.front;
 

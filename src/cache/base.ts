@@ -12,12 +12,6 @@ export class VeloCache<K extends Key, V> {
   private _eventEmitter?: EventEmitter;
   private _stats?: CacheStatistics;
 
-  readonly capacity: number;
-  readonly size: number;
-  readonly keys: K[];
-  readonly values: V[];
-  readonly policyInternal: PolicyInternal<K>;
-
   constructor(policy: Policy<V, K>, options: CacheOptions) {
     this._policy = policy;
 
@@ -26,7 +20,7 @@ export class VeloCache<K extends Key, V> {
       this._eventEmitter = new EventEmitter();
     }
 
-    if (options.ttl !== 0) {
+    if (options.ttl && options.ttl !== 0) {
       this._ttl = options.ttl;
       this._timeouts = new Map();
     }
@@ -38,12 +32,6 @@ export class VeloCache<K extends Key, V> {
         hitRatio: NaN,
       };
     }
-
-    this.capacity = this._policy.capacity;
-    this.size = this._policy.size;
-    this.keys = this._policy.keys;
-    this.values = this._policy.values;
-    this.policyInternal = this._policy.internalData;
   }
 
   get(key: K): V | undefined {
@@ -52,7 +40,7 @@ export class VeloCache<K extends Key, V> {
   }
 
   set(key: K, value: V): void {
-    if (this._ttl && this._ttl !== 0) {
+    if (this._ttl) {
       this.setTTL(key, value);
     }
     this.fireEvent("set", key, value);
@@ -68,9 +56,11 @@ export class VeloCache<K extends Key, V> {
       const id = this._timeouts.get(key);
       clearTimeout(id);
     }
+    console.log("mah time", this._ttl);
 
     const id = setTimeout(() => {
       this._policy.remove(key);
+      console.log("oh boi time", this._ttl);
       this.fireEvent("expired", key, value);
     }, this._ttl!);
 
@@ -111,6 +101,26 @@ export class VeloCache<K extends Key, V> {
     }
   }
 
+  get capacity(): number {
+    return this._policy.capacity;
+  }
+
+  get size(): number {
+    return this._policy.size;
+  }
+
+  get keys(): K[] {
+    return this._policy.keys;
+  }
+
+  get values(): V[] {
+    return this._policy.values;
+  }
+
+  get policyInternal(): PolicyInternal<K> {
+    return this._policy.internalData;
+  }
+
   get stats(): CacheStatistics {
     if (!this._stats) {
       throw new Inaccessible();
@@ -127,11 +137,8 @@ export class VeloCache<K extends Key, V> {
   }
 
   private fireEvent(name: EventName, ...args: (K | V)[]) {
-    if (!this._eventOptions) {
-      throw new Inaccessible();
-    }
-    if (this._eventOptions[name]) {
-      this._eventEmitter?.emit(name, args);
+    if (this._eventOptions && this._eventOptions[name]) {
+      this._eventEmitter?.emit(name, ...args);
     }
   }
 }

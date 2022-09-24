@@ -62,16 +62,22 @@ export class CacheBuilder {
     }
   }
 
-  public arc() {
-    return new ArcBuilder();
+  public arc(): ArcBuilder {
+    return this.copyTo(new ArcBuilder());
   }
 
-  public lru() {
-    return new LruBuilder();
+  public lru(): LruBuilder {
+    return this.copyTo(new LruBuilder());
   }
 
   public build<K extends Key, V>() {
     return this.lru().build<K, V>();
+  }
+
+  private copyTo(b: CacheBuilder): CacheBuilder {
+    b._capacity = this._capacity;
+    b._options = this._options;
+    return b;
   }
 }
 

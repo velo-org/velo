@@ -9,7 +9,7 @@
       "runtimeExecutable": "deno",
       "outputCapture": "std",
       "runtimeArgs": ["run", "-A", "--inspect-brk", "mod.ts"],
-      "port": 9229
+      "attachSimplePort": 9229
     },
     {
       "name": "Debug Here",
@@ -19,7 +19,17 @@
       "runtimeExecutable": "deno",
       "outputCapture": "std",
       "runtimeArgs": ["run", "-A", "--inspect-brk", "${file}"],
-      "port": 9229
+      "attachSimplePort": 9229
+    },
+    {
+      "request": "launch",
+      "name": "Debug Test",
+      "type": "node",
+      "program": "${file}",
+      "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "deno",
+      "runtimeArgs": ["test", "--allow-all", "--inspect-brk"],
+      "attachSimplePort": 9229
     }
   ]
 }

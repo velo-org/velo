@@ -8,7 +8,7 @@ Deno.test("ARC create cache, should create a new empty cache", () => {
 });
 
 Deno.test("ARC get existing entry, should return the value", () => {
-  const arcCache = Velo.cache(5).arc().build();
+  const arcCache = Velo.cache(5).arc().build<string, boolean>();
   arcCache.set("key", true);
   assert(arcCache.get("key"));
 });
@@ -18,7 +18,7 @@ Deno.test(
   () => {
     const arcCache = Velo.cache(5).arc().build();
     assertEquals(arcCache.get("key"), undefined);
-  },
+  }
 );
 
 Deno.test("ARC get non-existent entry, should return undefined", () => {
@@ -51,7 +51,7 @@ Deno.test(
     arcCache.set("5", 5);
     arcCache.set("6", 6);
     assertEquals(arcCache.size, 5);
-  },
+  }
 );
 
 Deno.test(
@@ -65,7 +65,7 @@ Deno.test(
     arcCache.set("5", 5);
     arcCache.set("6", 6);
     assert(!arcCache.has("1"));
-  },
+  }
 );
 
 Deno.test("ARC set double the allowed capacity, should evict all keys", () => {
@@ -134,5 +134,5 @@ Deno.test(
     assertEquals(internal?.b1, ["2"]); // recently evicted
     assertEquals(internal?.t1, ["6", "3", "4", "5"]); // recently set
     assertEquals(internal?.t2, ["1"]); // frequently set
-  },
+  }
 );

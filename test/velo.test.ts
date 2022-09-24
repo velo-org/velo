@@ -25,8 +25,9 @@ Deno.test("Cache, should fire clear event", () => {
 Deno.test("Cache, should fire set event", () => {
   const cache = Velo.cache(5).events(true).build();
 
-  cache.events.on("set", (key, _) => {
+  cache.events.on("set", (key, value) => {
     assertEquals(key, "key");
+    assertEquals(value, "value");
   });
 
   cache.set("key", "value");

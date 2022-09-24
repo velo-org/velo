@@ -1,18 +1,19 @@
 import { Key } from "../models/cache.ts";
 import { PointerList } from "../utils/pointerList.ts";
-import { BasePolicy } from "./base.ts";
 
 /**
  * Least Recently Used Cache
  */
-export class LRU<K extends Key, V> extends BasePolicy<K, V> {
+export class LRU<K extends Key, V> {
   private _keys: Array<K | undefined>;
   private _values: Array<V | undefined>;
   private items: { [key in Key]: number };
   private pointers: PointerList;
 
+  readonly capacity: number;
+
   constructor(capacity: number) {
-    super(capacity);
+    this.capacity = capacity;
     this.items = {};
     this._keys = new Array(this.capacity);
     this._values = new Array(this.capacity);

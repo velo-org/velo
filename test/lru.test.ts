@@ -96,13 +96,13 @@ Deno.test("LRU forEach should print out the right key value pairs", () => {
 });
 
 Deno.test("LRU use with ttl", async () => {
-  const lruCache = Velo.cache(5).ttl(500).build();
+  const lruCache = Velo.cache(5).ttl(200).build();
   lruCache.set("1", 1);
   lruCache.set("2", 2);
   lruCache.set("3", 3);
   lruCache.set("4", 4);
   lruCache.set("5", 5);
-  await sleep(600);
+  await sleep(1000);
   assertEquals(lruCache.size, 0);
   assertEquals(lruCache.keys, []);
 });
