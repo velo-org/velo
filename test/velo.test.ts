@@ -3,7 +3,7 @@ import { sleep } from "../src/utils/sleep.ts";
 import { assertEquals } from "../dev_deps.ts";
 
 Deno.test("Cache, should fire expired event", async () => {
-  const cache = Velo.cache(5).events(true).ttl(200).build();
+  const cache = Velo.capacity(5).events(true).ttl(200).build();
   cache.set("key", "value");
 
   cache.events.on("expired", (key, _) => {
@@ -14,7 +14,7 @@ Deno.test("Cache, should fire expired event", async () => {
 });
 
 Deno.test("Cache, should fire clear event", () => {
-  const cache = Velo.cache(5).events(true).build();
+  const cache = Velo.capacity(5).events(true).build();
   cache.set("key", "value");
 
   cache.events.on("clear", () => {
@@ -23,7 +23,7 @@ Deno.test("Cache, should fire clear event", () => {
 });
 
 Deno.test("Cache, should fire set event", () => {
-  const cache = Velo.cache(5).events(true).build();
+  const cache = Velo.capacity(5).events(true).build();
 
   cache.events.on("set", (key, value) => {
     assertEquals(key, "key");
@@ -34,10 +34,10 @@ Deno.test("Cache, should fire set event", () => {
 });
 
 Deno.test("Cache, should fire remove event", () => {
-  const cache = Velo.cache(5).events(true).build();
+  const cache = Velo.capacity(5).events(true).build();
   cache.set("key", "value");
 
-  cache.events.on("remove", (key, _) => {
+  cache.events.on("removed", (key, _) => {
     assertEquals(key, "key");
   });
 
