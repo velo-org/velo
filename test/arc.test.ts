@@ -49,6 +49,7 @@ Deno.test(
     arcCache.set("3", 3);
     arcCache.set("4", 4);
     arcCache.set("5", 5);
+    arcCache.void
     arcCache.set("6", 6);
     assertEquals(arcCache.size, 5);
   }

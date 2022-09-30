@@ -1,6 +1,6 @@
 import { EventEmitter } from "../../deps.ts";
 import { CacheOptions, CacheStatistics, Key } from "../models/cache.ts";
-import { EventName, EventOptions } from "../models/events.ts";
+import { EventName, EventOptions, VeloEventEmitter } from "../models/events.ts";
 import { Policy, PolicyInternal } from "../models/policy.ts";
 import { Inaccessible } from "../utils/error.ts";
 
@@ -128,11 +128,10 @@ export class VeloCache<K extends Key, V> {
     return this._stats;
   }
 
-  get events(): EventEmitter {
+  get events(): VeloEventEmitter<K, V> {
     if (!this._eventEmitter) {
       throw new Inaccessible();
     }
-
     return this._eventEmitter;
   }
 

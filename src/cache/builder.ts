@@ -1,8 +1,9 @@
+import { VeloCache } from "./base.ts";
 import { CacheOptions, Key } from "../models/cache.ts";
 import { EventName } from "../models/events.ts";
 import { ARC } from "../policies/arc.ts";
 import { LRU } from "../policies/lru.ts";
-import { VeloCache } from "./base.ts";
+import { SC } from "../policies/sc.ts";
 
 enum Policy {
   ARC,
@@ -70,6 +71,10 @@ export class CacheBuilder {
     return this.copyTo(new LruBuilder());
   }
 
+  public sc(): ScBuilder {
+    return this.copyTo(new ScBuilder());
+  }
+
   public build<K extends Key, V>() {
     return this.lru().build<K, V>();
   }
@@ -83,12 +88,18 @@ export class CacheBuilder {
 
 class ArcBuilder extends CacheBuilder {
   public build<K extends Key, V>() {
-    return new VeloCache<K, V>(new ARC(this._capacity), this._options);
+    return new VeloCache<K, V>(new ARC<K, V>(this._capacity), this._options);
   }
 }
 
 class LruBuilder extends CacheBuilder {
   public build<K extends Key, V>() {
-    return new VeloCache<K, V>(new LRU(this._capacity), this._options);
+    return new VeloCache<K, V>(new LRU<K, V>(this._capacity), this._options);
+  }
+}
+
+class ScBuilder extends CacheBuilder {
+  public build<K extends Key, V>() {
+    return new VeloCache<K, V>(new SC<K, V>(this._capacity), this._options);
   }
 }

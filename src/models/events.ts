@@ -6,10 +6,14 @@ export interface EventOptions {
   expired: boolean;
 }
 
-export type KeyValueEventFunction<V, K> = (key: K, value: V) => void;
+export type KeyValueEventFunction<K, V> = (key: K, value: V) => void;
 export type EmptyEventFunction = () => void;
-export type EventFunction<V, K> =
-  | KeyValueEventFunction<V, K>
+export type EventFunction<K, V> =
+  | KeyValueEventFunction<K, V>
   | EmptyEventFunction;
 
 export type EventName = "set" | "get" | "removed" | "clear" | "expired";
+
+export interface VeloEventEmitter<K, V> {
+  on(name: EventName, lisener: EventFunction<K, V>): this;
+}

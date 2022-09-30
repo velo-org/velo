@@ -1,11 +1,8 @@
 import { Key } from "../models/cache.ts";
-import { ArcInternal } from "../models/policy.ts";
+import { ArcInternal, Policy } from "../models/policy.ts";
 import { PointerList } from "../utils/pointerList.ts";
 
-/**
- * Adaptive Replacement Cache
- */
-export class ARC<K extends Key, V> {
+export class ARC<K extends Key, V> implements Policy<V, K> {
   private partition = 0;
 
   private t1: ARCList<K, V>;

@@ -1,28 +1,21 @@
-import { ARC } from "../mod.ts";
+import { Velo } from "../src/cache/cache.ts";
 import { Person } from "./common/Person.ts";
 
-/*
- * https://en.wikipedia.org/wiki/Adaptive_replacement_cache
- *
- * Adaptive Replacement Cache (ARC) is a page replacement algorithm with better
- * performance than LRU (least recently used). This is accomplished by keeping
- * track of both frequently used and recently used pages plus a recent eviction
- * history for both.
- */
+const arc = Velo.capacity(5).events().arc().build<number, Person>();
 
-const arc = new ARC<number, Person>({ capacity: 5, events: true });
-arc.on("remove", (key, value) => {
+arc.events.on("removed", (key, value) => {
   console.log("REMOVE", key, value);
 });
-arc.on("clear", () => {
+
+arc.events.on("clear", () => {
   console.log("CLEAR");
 });
 
-arc.on("set", (key, value) => {
+arc.events.on("set", (key, value) => {
   console.log("SET", key, value);
 });
 
-arc.on("expired", (key, value) => {
+arc.events.on("expired", (key, value) => {
   console.log("EXPIRED", key, value);
 });
 
@@ -47,7 +40,7 @@ arc.set(1, { name: "Leon", age: 36 }); // removes this key from b1 and inserts i
 
 // the cache has 2 keys in recent set t1 (keys: 3,6) and 3 in frequently set t2 (keys: 4,5,1)
 
-arc.peek("4"); // returns value for key 4 without changing the queue
+arc.peek(4); // returns value for key 4 without changing the queue
 arc.forEach((item, index) => console.log(item, index)); // Array like forEach
-arc.remove("4"); // remove key 4
+arc.remove(4); // remove key 4
 arc.clear(); // clear cache

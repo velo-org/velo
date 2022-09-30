@@ -1,10 +1,8 @@
 import { Key } from "../models/cache.ts";
+import { Policy } from "../models/policy.ts";
 import { PointerList } from "../utils/pointerList.ts";
 
-/**
- * Least Recently Used Cache
- */
-export class LRU<K extends Key, V> {
+export class LRU<K extends Key, V> implements Policy<V, K> {
   private _keys: Array<K | undefined>;
   private _values: Array<V | undefined>;
   private items: { [key in Key]: number };

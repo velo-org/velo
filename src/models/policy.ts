@@ -1,5 +1,3 @@
-import { ARC } from "../policies/arc.ts";
-
 /**
  * internal definition of a cache policy
  */
