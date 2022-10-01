@@ -56,11 +56,9 @@ export class VeloCache<K extends Key, V> {
       const id = this._timeouts.get(key);
       clearTimeout(id);
     }
-    console.log("mah time", this._ttl);
 
     const id = setTimeout(() => {
       this._policy.remove(key);
-      console.log("oh boi time", this._ttl);
       this.fireEvent("expired", key, value);
     }, this._ttl!);
 

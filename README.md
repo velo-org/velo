@@ -2,7 +2,7 @@
 <img src="https://raw.githubusercontent.com/velo-org/velo/master/media/velo-logo.svg" width="200">
 
 <h1 align="center">Velo</h1>
-<blockquote align="center">Performant caching for Deno</blockquote>
+<blockquote align="center">Performant in-memory caching library for Deno</blockquote>
 </p>
 <p align="center">
   <a href="https://github.com/velo-org/velo/actions?query=workflow%3Atests">
@@ -28,61 +28,40 @@
 
 ## Introduction
 
-This library aims to bring you in memory caching, while trying to be as
-performant as possible for a high level language. Several caching policies are
-supported. Keys can have a timeout (ttl) after which they expire and are deleted
-from the cache. And the events can be emitted for different cache opterations.
+Velo is an in-memory caching library for Deno. We provide a high-performance cache implementation with an API inspired by [Google Guava's Cache](https://github.com/google/guava/wiki/CachesExplained). While it can be ineffectual to optimize JavaScript we draw significant performance increases from using a [custom pointer system](https://yomguithereal.github.io/posts/lru-cache#a-custom-pointer-system). For more details, see our [examples](./examples/) and browse the [API documentation](https://doc.deno.land/https/deno.land/x/velo@0.1.6/mod.ts).
 
-## Quick start
+## Install
 
-With Deno it's very easy to use third party libraries. Just import from one of
-the following urls.
+Import `Velo` from one of the following urls.
 
 - from `deno.land/x`
 
 ```ts
-import { [cache-name] } from "https://deno.land/x/velo@0.1.6/mod.ts";
+import { Velo } from "https://deno.land/x/velo@0.1.6/mod.ts";
 ```
 
-- from `nest.land`
-
-[![nest badge](https://nest.land/badge.svg)](https://nest.land/package/velo)
+- [![nest badge](https://nest.land/badge.svg)](https://nest.land/package/velo)
 
 ```ts
-import { [cache-name] } from "https://x.nest.land/velo@0.1.6/mod.ts";
+import { Velo } from "https://x.nest.land/velo@0.1.6/mod.ts";
 ```
-
-## Caches
-
-- ARC Cache (adaptive-replacement-cache)
-- LFU Cache (least-frequently-used)
-- LRU Cache (least-recently-used)
-- RR Cache (random-replacement)
-- SC Cache (second-chance)
-- SLRU Cache (segmented-least-recently-used)
 
 ## Usage
 
-All caches share the same set of methods.
-
 ```ts
-import { LRU } from "https://deno.land/x/velo@0.1.6/mod.ts";
-
-const lru = new LRU({ capacity: 5 });
-
-lru.set(1, 1);
-lru.get(1);
-lru.delete(1);
-
-lru.set(2, 2, 60000); // with ttl
-
-// event
-lru.on("expired", (k, v) => {
-  console.log(k, v);
-});
+const cache = Velo.capacity(10_000)
+  .ttl(2 * 60 * 1000) // 2 minutes
+  .events()
+  .lru()
+  .build();
 ```
 
-For more detailed examples take a look at the [examples folder](./examples).
+Velo provides a builder class to create a cache. Multipe optional features can be enabled:
+
+- `ttl()`: time-based eviction of keys
+- `events()`: uses an `EventEmitter` to notify you about certain cache events
+- ``
+
 
 ## Contributing
 

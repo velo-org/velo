@@ -4,11 +4,7 @@ import { EventName } from "../models/events.ts";
 import { ARC } from "../policies/arc.ts";
 import { LRU } from "../policies/lru.ts";
 import { SC } from "../policies/sc.ts";
-
-enum Policy {
-  ARC,
-  LRU,
-}
+import { Policy } from "../models/policy.ts";
 
 export class CacheBuilder {
   protected _capacity: number;
@@ -24,6 +20,7 @@ export class CacheBuilder {
     stats: false,
     ttl: 0,
   };
+  private _policy: Policy<unknown, unknown> | undefined;
 
   constructor(capacity?: number) {
     this._capacity = capacity || 0;
@@ -54,13 +51,9 @@ export class CacheBuilder {
     return this;
   }
 
-  public withPolicy(policy: Policy): CacheBuilder {
-    switch (policy) {
-      case Policy.ARC:
-        return this.arc();
-      case Policy.LRU:
-        return this.lru();
-    }
+  public withPolicy<K, V>(policy: Policy<V, K>): CacheBuilder {
+    this._policy = policy;
+    return this;
   }
 
   public arc(): ArcBuilder {
@@ -76,6 +69,9 @@ export class CacheBuilder {
   }
 
   public build<K extends Key, V>() {
+    if (this._policy) {
+      return new VeloCache<K, V>(this._policy as Policy<V, K>, this._options);
+    }
     return this.lru().build<K, V>();
   }
 
