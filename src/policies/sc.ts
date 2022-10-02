@@ -1,19 +1,18 @@
-import { BaseCache } from "./base.ts";
-import { Options } from "../models/options.ts";
 import { getTypedArray, TypedArray } from "../utils/typedArray.ts";
-import { Key } from "../models/key.ts";
 import { PointerList } from "../utils/pointerList.ts";
+import { Key } from "../models/cache.ts";
+import { Policy } from "../models/policy.ts";
 
 //TODO: delete single entry
 
 /**
  * Second Chance Cache
  */
-export class SC<K extends Key, V> extends BaseCache<V, K> {
+export class SC<K extends Key, V> implements Policy<V, K> {
   private head: number;
   private tail: number;
   private arrayMap: {
-    key: Key | undefined;
+    key: K | undefined;
     value: V | undefined;
     sChance: boolean;
   }[];
@@ -22,8 +21,10 @@ export class SC<K extends Key, V> extends BaseCache<V, K> {
   private items: { [key in Key]: number };
   private _size: number;
 
-  constructor(options: Options) {
-    super(options);
+  readonly capacity: number;
+
+  constructor(capacity: number) {
+    this.capacity = capacity;
     this.backward = getTypedArray(this.capacity);
     this.head = 0;
     this._size = 0;
@@ -33,22 +34,11 @@ export class SC<K extends Key, V> extends BaseCache<V, K> {
     this.arrayMap = new Array(this.capacity);
   }
 
-  /**
-   * Inserts a new entry into the cache
-   *
-   * @param key The entries key
-   * @param value The entries value
-   * @param ttl The max time to live in ms
-   */
-  set(key: Key, value: V, ttl?: number) {
-    this.applyTTL(key, ttl);
-    this.fireSetEvent(key, value);
-
+  set(key: K, value: V) {
     let pointer = this.items[key];
     if (pointer !== undefined) {
       this.arrayMap[pointer].value = value;
       this.arrayMap[pointer].sChance = true;
-      this._stats.hits++;
       return;
     }
 
@@ -84,41 +74,22 @@ export class SC<K extends Key, V> extends BaseCache<V, K> {
         this.pointers.moveToBack(this.pointers.front);
       }
     }
-
-    this._stats.misses++;
   }
 
-  /**
-   * Gets the value for a given key
-   *
-   * @param key The entries key
-   * @returns The element with given key or undefined if the key is unknown
-   */
-  get(key: Key) {
+  get(key: K) {
     const pointer = this.items[key];
     if (pointer === undefined) return undefined;
     this.arrayMap[pointer].sChance = true;
     return this.arrayMap[pointer].value;
   }
 
-  /**
-   * Get the value to a key __without__ manipulating the cache
-   *
-   * @param key The entries key
-   * @returns The element with given key or undefined if the key is unknown
-   */
-  peek(key: Key) {
+  peek(key: K) {
     const pointer = this.items[key];
     if (pointer === undefined) return undefined;
     return this.arrayMap[pointer].value;
   }
 
-  /**
-   * Array like forEach, iterating over all entries in the cache
-   *
-   * @param callback function to call on each item
-   */
-  forEach(callback: (item: { key: Key; value: V }, index: number) => void) {
+  forEach(callback: (item: { key: K; value: V }, index: number) => void) {
     this.arrayMap
       .filter((am) => am.key != undefined)
       .forEach((val, i) => {
@@ -126,9 +97,10 @@ export class SC<K extends Key, V> extends BaseCache<V, K> {
       });
   }
 
-  /**
-   * Reset the cache
-   */
+  *[Symbol.iterator]() {
+    yield { key: this.arrayMap[0].key!, value: this.arrayMap[0].value };
+  }
+
   clear() {
     this.backward = getTypedArray(this.capacity!);
     this.head = 0;
@@ -136,18 +108,11 @@ export class SC<K extends Key, V> extends BaseCache<V, K> {
     this.tail = 0;
     this.items = {};
     this.arrayMap = new Array(this.capacity);
-    this.fireClearEvent();
   }
 
-  /**
-   * Removes the cache entry with given key
-   *
-   * @param key The entries key
-   */
-  remove(key: Key) {
+  remove(key: K) {
     const pointer = this.items[key];
     this.pointers.remove(pointer);
-    this.fireRemoveEvent(key, this.arrayMap[pointer].value!);
     this.arrayMap[pointer].key = undefined;
     this.arrayMap[pointer].value = undefined;
     this.arrayMap[pointer].sChance = false;
@@ -155,35 +120,22 @@ export class SC<K extends Key, V> extends BaseCache<V, K> {
     delete this.items[key];
   }
 
-  /**
-   * Checks if a given key is in the cache
-   *
-   * @param key The key to check
-   * @returns True if the cache has the key
-   */
   has(key: Key) {
     return this.items[key] !== undefined ? true : false;
   }
 
-  /**
-   * List of keys in the cache
-   */
   get keys() {
-    return this.arrayMap.filter((am) => am.key != undefined).map((v) => v.key);
+    return this.arrayMap
+      .filter((am) => am.key != undefined)
+      .map((v) => v.key) as K[];
   }
 
-  /**
-   * List of values in the cache
-   */
   get values() {
     return this.arrayMap
       .filter((am) => am.key != undefined)
-      .map((v) => v.value);
+      .map((v) => v.value) as V[];
   }
 
-  /**
-   * Current number of entries in the cache
-   */
   get size() {
     return this._size;
   }

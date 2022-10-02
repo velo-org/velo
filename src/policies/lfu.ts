@@ -1,40 +1,30 @@
-import { BaseCache } from "./base.ts";
-import { Options } from "../models/options.ts";
+import { Key } from "../models/cache.ts";
+import { Policy } from "../models/policy.ts";
 import { DoublyLinkedList, Node } from "../utils/doublyLinkedList.ts";
-import { Key } from "../models/key.ts";
 
 /**
  * Least Frequently Used Cache
  */
-export class LFU<K extends Key, V> extends BaseCache<V, K> {
+export class LFU<K extends Key, V> implements Policy<V, K> {
   private _keys: { [key in Key]: Node<V> };
-  private frequency: { [key: number]: DoublyLinkedList };
+  private frequency: { [key: number]: DoublyLinkedList<V> };
   private _size: number;
   private minFrequency: number;
+  readonly capacity: number;
 
-  constructor(options: Options) {
-    super(options);
+  constructor(capacity: number) {
+    this.capacity = capacity;
     this._keys = {};
     this.frequency = {};
     this._size = 0;
     this.minFrequency = 1;
   }
 
-  /**
-   * Inserts a new entry into the cache
-   *
-   * @param key The entries key
-   * @param value The entries value
-   * @param ttl The max time to live in ms
-   */
-  set(key: Key, value: V, ttl?: number) {
-    this.applyTTL(key, ttl);
-    this.fireSetEvent(key, value);
+  set(key: K, value: V) {
     let node = this._keys[key];
 
     // if node doesnt exist in _keys then add it
     if (node == undefined) {
-      this._stats.misses++;
       // create new node and store in _keys
       node = new Node(key, value);
       this._keys[key] = node;
@@ -66,7 +56,6 @@ export class LFU<K extends Key, V> extends BaseCache<V, K> {
       // aka new node was referenced once
       this.minFrequency = 1;
     } else {
-      this._stats.hits++;
       // else node exists so we need to get it and move it to the new linked list
 
       // save the old frequency of the node and increment (also update data)
@@ -98,13 +87,7 @@ export class LFU<K extends Key, V> extends BaseCache<V, K> {
     }
   }
 
-  /**
-   * Gets the value for a given key
-   *
-   * @param key The entries key
-   * @returns The element with given key or undefined if the key is unknown
-   */
-  get(key: Key) {
+  get(key: K) {
     const node = this._keys[key];
     if (node == undefined) return undefined;
 
@@ -132,27 +115,22 @@ export class LFU<K extends Key, V> extends BaseCache<V, K> {
     return node.data;
   }
 
-  /**
-   * Array like forEach, iterating over all entries in the cache
-   *
-   * @param callback function to call on each item
-   */
-  forEach(callback: (item: { key: Key; value: V }, index: number) => void) {
-    Object.keys(this._keys).forEach((val, i) => {
-      callback.call(this, { key: val, value: this._keys[val].data }, i);
+  forEach(callback: (item: { key: K; value: V }, index: number) => void) {
+    this.keys.forEach((val, i) => {
+      callback.call(this, { key: val, value: this._keys[val].data as V }, i);
     });
   }
 
-  /**
-   * Removes the cache entry with given key
-   *
-   * @param key The entries key
-   */
-  remove(key: Key) {
+  *[Symbol.iterator]() {
+    for (const k of this.keys) {
+      yield { key: k, value: this._keys[k].data };
+    }
+  }
+
+  remove(key: K) {
     const node = this._keys[key];
     if (!node) return;
     else {
-      this.fireRemoveEvent(key, this._keys[key].data);
       this._size--;
       const oldFrequencyCount = node.frequencyCount;
       this.frequency[oldFrequencyCount].removeNode(node);
@@ -167,57 +145,32 @@ export class LFU<K extends Key, V> extends BaseCache<V, K> {
     }
   }
 
-  /**
-   * List of values in the cache
-   */
   get values() {
-    return Object.keys(this._keys).map((k) => this._keys[k].data);
+    return this.keys.map((k) => this._keys[k].data) as V[];
   }
 
-  /**
-   * List of keys in the cache
-   */
   get keys() {
-    return Object.keys(this._keys);
+    return Object.keys(this._keys) as K[];
   }
 
-  /**
-   * Current number of entries in the cache
-   */
   get size() {
     return this._size;
   }
 
-  /**
-   * Get the value to a key __without__ manipulating the cache
-   *
-   * @param key The entries key
-   * @returns The element with given key or undefined if the key is unknown
-   */
-  peek(key: Key) {
+  peek(key: K) {
     const node = this._keys[key];
     if (node == undefined) return undefined;
     return node.data;
   }
 
-  /**
-   * Checks if a given key is in the cache
-   *
-   * @param key The key to check
-   * @returns True if the cache has the key
-   */
-  has(key: Key) {
+  has(key: K) {
     return this._keys[key] !== undefined ? true : false;
   }
 
-  /**
-   * Reset the cache
-   */
   clear() {
     this._keys = {};
     this.frequency = {};
     this._size = 0;
     this.minFrequency = 1;
-    this.fireClearEvent();
   }
 }

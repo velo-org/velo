@@ -1,31 +1,20 @@
-import { SC } from "../mod.ts";
+import { Velo } from "../mod.ts";
+import { Hello } from "./common/Hello.ts";
 
-/*
- * https://www.geeksforgeeks.org/second-chance-or-clock-page-replacement-policy/
- *
- * In the Second Chance page replacement policy, the candidate pages for
- * removal are considered in a round robin matter, and a page that has been
- * accessed between consecutive considerations will not be replaced. The page
- * replaced is the one that, when considered in a round robin matter, has not
- * been accessed since its last consideration.
- */
+// init Second Chance Cache with max 5 key-value pairs
+const scc = Velo.capacity(5).sc().build<string, Hello>();
 
-interface Hello {
-  hello: string;
-}
-
-const scc = new SC<string, Hello>({ capacity: 5 }); // init Second Chance Cache with max 5 key-value pairs
-scc.on("remove", (key, value) => {
+scc.events.on("removed", (key, value) => {
   console.log(key, value);
 });
-scc.on("clear", () => {
+scc.events.on("clear", () => {
   console.log("cache cleared");
 });
 
-scc.on("set", (key, value) => {
+scc.events.on("set", (key, value) => {
   console.log(key, value);
 });
-scc.on("expired", (key, value) => {
+scc.events.on("expired", (key, value) => {
   console.log(key, value);
 });
 

@@ -1,14 +1,14 @@
-import { LRU } from "../src/caches/lru.ts";
 import { assert, assertEquals } from "../dev_deps.ts";
+import { Velo } from "../src/cache/cache.ts";
 import { sleep } from "../src/utils/sleep.ts";
 
 Deno.test("LRU create cache, should create a new empty cache", () => {
-  const lruCache = new LRU({ capacity: 5 });
+  const lruCache = Velo.capacity(5).build();
   assertEquals(lruCache.size, 0);
 });
 
 Deno.test("LRU get existing entry, should return the value", () => {
-  const lruCache = new LRU({ capacity: 5 });
+  const lruCache = Velo.capacity(5).build();
   lruCache.set("key", true);
   assert(lruCache.get("key"));
 });
@@ -16,13 +16,13 @@ Deno.test("LRU get existing entry, should return the value", () => {
 Deno.test(
   "LRU get (non-existent) entry from empty cache, should return undefined",
   () => {
-    const lruCache = new LRU({ capacity: 5 });
+    const lruCache = Velo.capacity(5).build();
     assertEquals(lruCache.get("key"), undefined);
   }
 );
 
 Deno.test("LRU get non-existent entry, should return undefined", () => {
-  const lruCache = new LRU({ capacity: 5 });
+  const lruCache = Velo.capacity(5).build();
   lruCache.set("1", 1);
   lruCache.set("2", 2);
   lruCache.set("3", 3);
@@ -31,7 +31,7 @@ Deno.test("LRU get non-existent entry, should return undefined", () => {
 });
 
 Deno.test("LRU get removed entry, should return undefined", () => {
-  const lruCache = new LRU({ capacity: 5 });
+  const lruCache = Velo.capacity(5).build();
   lruCache.set("1", 1);
   lruCache.set("2", 2);
   lruCache.set("3", 3);
@@ -43,7 +43,7 @@ Deno.test("LRU get removed entry, should return undefined", () => {
 Deno.test(
   "LRU set one more than allowed capacity, should not increase amount of keys",
   () => {
-    const lruCache = new LRU({ capacity: 5 });
+    const lruCache = Velo.capacity(5).build();
     lruCache.set("1", 1);
     lruCache.set("2", 2);
     lruCache.set("3", 3);
@@ -57,7 +57,7 @@ Deno.test(
 Deno.test(
   "LRU set one more than allowed capacity, should evict first inserted key",
   () => {
-    const lruCache = new LRU({ capacity: 5 });
+    const lruCache = Velo.capacity(5).build();
     lruCache.set("1", 1);
     lruCache.set("2", 2);
     lruCache.set("3", 3);
@@ -69,7 +69,7 @@ Deno.test(
 );
 
 Deno.test("LRU set double the allowed capacity, should evict all keys", () => {
-  const lruCache = new LRU({ capacity: 3 });
+  const lruCache = Velo.capacity(3).build();
   lruCache.set("1", 1);
   lruCache.set("2", 2);
   lruCache.set("3", 3);
@@ -81,7 +81,7 @@ Deno.test("LRU set double the allowed capacity, should evict all keys", () => {
 });
 
 Deno.test("LRU forEach should print out the right key value pairs", () => {
-  const lruCache = new LRU({ capacity: 5 });
+  const lruCache = Velo.capacity(5).build();
   lruCache.set("1", 1);
   lruCache.set("2", 2);
   lruCache.set("3", 3);
@@ -96,26 +96,13 @@ Deno.test("LRU forEach should print out the right key value pairs", () => {
 });
 
 Deno.test("LRU use with ttl", async () => {
-  const lruCache = new LRU({ capacity: 5, defaultTTL: 500 });
+  const lruCache = Velo.capacity(5).ttl(200).build();
   lruCache.set("1", 1);
   lruCache.set("2", 2);
   lruCache.set("3", 3);
   lruCache.set("4", 4);
   lruCache.set("5", 5);
-  await sleep(600);
+  await sleep(1000);
   assertEquals(lruCache.size, 0);
   assertEquals(lruCache.keys, []);
-});
-
-Deno.test("LRU use with ttl, override ttl for specific set", async () => {
-  const lruCache = new LRU({ capacity: 5, defaultTTL: 500 });
-  lruCache.set("1", 1);
-  lruCache.set("2", 2);
-  lruCache.set("3", 3);
-  lruCache.set("4", 4);
-  lruCache.set("5", 5, 1000);
-  await sleep(600);
-  assertEquals(lruCache.size, 1);
-  assertEquals(lruCache.keys, ["5"]);
-  await sleep(400);
 });

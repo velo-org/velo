@@ -1,7 +1,7 @@
 import { platform } from "https://deno.land/std@0.155.0/node/os.ts";
 import {
-  runBenchmarks,
   bench,
+  runBenchmarks,
 } from "https://deno.land/std@0.155.0/testing/bench.ts";
 
 import {

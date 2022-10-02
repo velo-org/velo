@@ -27,7 +27,7 @@ let filterRegex: RegExp | undefined;
 
 if (Deno.args.length > 0 && Deno.args[0] !== "md") {
   const skip = CACHES.filter(
-    (name) => !Deno.args[0].toUpperCase().split(",").includes(name)
+    (name) => !Deno.args[0].toUpperCase().split(",").includes(name),
   ).map((name) => `^${name}`);
 
   filterRegex = skip.length > 0 ? new RegExp(skip.join("|")) : undefined;
@@ -57,7 +57,7 @@ runBenchmarks({ silent: true, skip: filterRegex }, prettyBenchmarkProgress())
             },
           ],
           groups: MARKDOWN_GROUPS,
-        }
+        },
       )(b);
     }
     return b;
@@ -75,9 +75,7 @@ async function generateDescription() {
     res = await systemSpecsWindows();
   }
 
-  return `\`\`\`bash\nKEYS: ${MAX_KEYS}\nRUNS: ${RUNS}\nOS: ${platform()}\nCPU: ${
-    res.cpu
-  }\nRAM: ${res.memory}\n\`\`\``;
+  return `\`\`\`bash\nKEYS: ${MAX_KEYS}\nRUNS: ${RUNS}\nOS: ${platform()}\nCPU: ${res.cpu}\nRAM: ${res.memory}\n\`\`\``;
 }
 
 async function systemSpecLinux() {
