@@ -5,6 +5,7 @@ import { ARC } from "../policies/arc.ts";
 import { LRU } from "../policies/lru.ts";
 import { SC } from "../policies/sc.ts";
 import { Policy } from "../models/policy.ts";
+import { LFU } from "../policies/lfu.ts";
 
 export class CacheBuilder {
   protected _capacity: number;
@@ -68,6 +69,10 @@ export class CacheBuilder {
     return this.copyTo(new ScBuilder());
   }
 
+  public lfu(): LfuBuilder {
+    return this.copyTo(new LfuBuilder());
+  }
+
   public build<K extends Key, V>() {
     if (this._policy) {
       return new VeloCache<K, V>(this._policy as Policy<V, K>, this._options);
@@ -97,5 +102,11 @@ class LruBuilder extends CacheBuilder {
 class ScBuilder extends CacheBuilder {
   public build<K extends Key, V>() {
     return new VeloCache<K, V>(new SC<K, V>(this._capacity), this._options);
+  }
+}
+
+class LfuBuilder extends CacheBuilder {
+  public build<K extends Key, V>() {
+    return new VeloCache<K, V>(new LFU<K, V>(this._capacity), this._options);
   }
 }
