@@ -1,14 +1,14 @@
 import { assert, assertEquals } from "../dev_deps.ts";
-import { Velo } from "../src/cache/cache.ts";
+import { Velo } from "../src/cache/builder.ts";
 import { sleep } from "../src/utils/sleep.ts";
 
 Deno.test("ARC create cache, should create a new empty cache", () => {
-  const arcCache = Velo.capacity(5).arc().build();
+  const arcCache = Velo.builder().capacity(5).arc().build();
   assertEquals(arcCache.size, 0);
 });
 
 Deno.test("ARC get existing entry, should return the value", () => {
-  const arcCache = Velo.capacity(5).arc().build<string, boolean>();
+  const arcCache = Velo.builder().capacity(5).arc().build<string, boolean>();
   arcCache.set("key", true);
   assert(arcCache.get("key"));
 });
@@ -16,13 +16,13 @@ Deno.test("ARC get existing entry, should return the value", () => {
 Deno.test(
   "ARC get (non-existent) entry from empty cache, should return undefined",
   () => {
-    const arcCache = Velo.capacity(5).arc().build();
+    const arcCache = Velo.builder().capacity(5).arc().build();
     assertEquals(arcCache.get("key"), undefined);
   }
 );
 
 Deno.test("ARC get non-existent entry, should return undefined", () => {
-  const arcCache = Velo.capacity(5).arc().build();
+  const arcCache = Velo.builder().capacity(5).arc().build();
   arcCache.set("1", 1);
   arcCache.set("2", 2);
   arcCache.set("3", 3);
@@ -31,7 +31,7 @@ Deno.test("ARC get non-existent entry, should return undefined", () => {
 });
 
 Deno.test("ARC get removed entry, should return undefined", () => {
-  const arcCache = Velo.capacity(5).arc().build();
+  const arcCache = Velo.builder().capacity(5).arc().build();
   arcCache.set("1", 1);
   arcCache.set("2", 2);
   arcCache.set("3", 3);
@@ -43,7 +43,7 @@ Deno.test("ARC get removed entry, should return undefined", () => {
 Deno.test(
   "ARC set one more than allowed capacity, should not increase amount of keys",
   () => {
-    const arcCache = Velo.capacity(5).arc().build();
+    const arcCache = Velo.builder().capacity(5).arc().build();
     arcCache.set("1", 1);
     arcCache.set("2", 2);
     arcCache.set("3", 3);
@@ -57,7 +57,7 @@ Deno.test(
 Deno.test(
   "ARC set one more than allowed capacity, should evict first inserted key",
   () => {
-    const arcCache = Velo.capacity(5).arc().build();
+    const arcCache = Velo.builder().capacity(5).arc().build();
     arcCache.set("1", 1);
     arcCache.set("2", 2);
     arcCache.set("3", 3);
@@ -69,7 +69,7 @@ Deno.test(
 );
 
 Deno.test("ARC set double the allowed capacity, should evict all keys", () => {
-  const arcCache = Velo.capacity(3).arc().build();
+  const arcCache = Velo.builder().capacity(3).arc().build();
   arcCache.set("1", 1);
   arcCache.set("2", 2);
   arcCache.set("3", 3);
@@ -81,7 +81,7 @@ Deno.test("ARC set double the allowed capacity, should evict all keys", () => {
 });
 
 Deno.test("ARC forEach should print out the right key value pairs", () => {
-  const arcCache = Velo.capacity(5).arc().build<string, number>();
+  const arcCache = Velo.builder().capacity(5).arc().build<string, number>();
   arcCache.set("1", 1);
   arcCache.set("2", 2);
   arcCache.set("3", 3);
@@ -96,7 +96,7 @@ Deno.test("ARC forEach should print out the right key value pairs", () => {
 });
 
 Deno.test("ARC use with ttl", async () => {
-  const arcCache = Velo.capacity(5).ttl(500).arc().build();
+  const arcCache = Velo.builder().capacity(5).ttl(500).arc().build();
   arcCache.set("1", 1);
   arcCache.set("2", 2);
   arcCache.set("3", 3);
@@ -108,7 +108,7 @@ Deno.test("ARC use with ttl", async () => {
 });
 
 Deno.test("ARC getting entry from t1, should move it to t2", () => {
-  const arcCache = Velo.capacity(5).arc().build();
+  const arcCache = Velo.builder().capacity(5).arc().build();
   arcCache.set("1", 1);
   arcCache.set("2", 2);
   arcCache.set("3", 3);
@@ -120,7 +120,7 @@ Deno.test("ARC getting entry from t1, should move it to t2", () => {
 Deno.test(
   "ARC setting entry that was evicted from t1, should remove it from b1 into t2 and also evict the last entry from t1 into b1",
   () => {
-    const arcCache = Velo.capacity(5).arc().build();
+    const arcCache = Velo.builder().capacity(5).arc().build();
     arcCache.set("1", 1);
     arcCache.set("2", 2);
     arcCache.set("3", 3);

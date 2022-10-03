@@ -1,7 +1,7 @@
-import { Velo } from "../src/cache/cache.ts";
+import { Velo } from "../src/cache/builder.ts";
 import { Person } from "./common/Person.ts";
 
-const arc = Velo.capacity(5).events().arc().build<number, Person>();
+const arc = Velo.builder().capacity(5).events().arc().build<number, Person>();
 
 arc.events.on("removed", (key, value) => {
   console.log("REMOVE", key, value);

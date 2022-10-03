@@ -7,28 +7,35 @@ import { SC } from "../policies/sc.ts";
 import { Policy } from "../models/policy.ts";
 import { LFU } from "../policies/lfu.ts";
 
-export class CacheBuilder {
-  protected _capacity: number;
+export class Velo {
   protected _options: CacheOptions = {
+    capacity: 0,
+    policy: undefined,
     enableEvents: false,
     events: {
-      clear: true,
+      clear: false,
       expired: true,
-      get: true,
+      get: false,
       removed: true,
-      set: true,
+      set: false,
     },
     stats: false,
     ttl: 0,
   };
-  private _policy: Policy<unknown, unknown> | undefined;
 
-  constructor(capacity?: number) {
-    this._capacity = capacity || 0;
+  private constructor() {}
+
+  static builder() {
+    return new Velo();
   }
 
   public capacity(capacity: number) {
-    this._capacity = capacity;
+    this._options.capacity = capacity;
+    return this;
+  }
+
+  public from(options: CacheOptions) {
+    this._options = options;
     return this;
   }
 
@@ -47,66 +54,50 @@ export class CacheBuilder {
     return this;
   }
 
-  public enableEvent(name: EventName, active?: boolean) {
-    this._options.events[name] = active || true;
+  public enableEvent(...name: EventName[]) {
+    this.events();
+    name.forEach((n) => (this._options.events[n] = true));
     return this;
   }
 
-  public withPolicy<K, V>(policy: Policy<V, K>): CacheBuilder {
-    this._policy = policy;
+  public disableEvent(...name: EventName[]) {
+    name.forEach((n) => (this._options.events[n] = false));
     return this;
   }
 
-  public arc(): ArcBuilder {
-    return this.copyTo(new ArcBuilder());
+  public withPolicy<K, V>(policy: Policy<V, K>): Velo {
+    this._options.policy = policy;
+    return this;
   }
 
-  public lru(): LruBuilder {
-    return this.copyTo(new LruBuilder());
+  public arc(): Velo {
+    this._options.policy = new ARC(this._options.capacity);
+    return this;
   }
 
-  public sc(): ScBuilder {
-    return this.copyTo(new ScBuilder());
+  public lru(): Velo {
+    this._options.policy = new LRU(this._options.capacity);
+    return this;
   }
 
-  public lfu(): LfuBuilder {
-    return this.copyTo(new LfuBuilder());
+  public sc(): Velo {
+    this._options.policy = new SC(this._options.capacity);
+    return this;
+  }
+
+  public lfu(): Velo {
+    this._options.policy = new LFU(this._options.capacity);
+    return this;
   }
 
   public build<K extends Key, V>() {
-    if (this._policy) {
-      return new VeloCache<K, V>(this._policy as Policy<V, K>, this._options);
+    if (!this._options.policy) {
+      this.lru();
     }
-    return this.lru().build<K, V>();
-  }
 
-  private copyTo(b: CacheBuilder): CacheBuilder {
-    b._capacity = this._capacity;
-    b._options = this._options;
-    return b;
-  }
-}
-
-class ArcBuilder extends CacheBuilder {
-  public build<K extends Key, V>() {
-    return new VeloCache<K, V>(new ARC<K, V>(this._capacity), this._options);
-  }
-}
-
-class LruBuilder extends CacheBuilder {
-  public build<K extends Key, V>() {
-    return new VeloCache<K, V>(new LRU<K, V>(this._capacity), this._options);
-  }
-}
-
-class ScBuilder extends CacheBuilder {
-  public build<K extends Key, V>() {
-    return new VeloCache<K, V>(new SC<K, V>(this._capacity), this._options);
-  }
-}
-
-class LfuBuilder extends CacheBuilder {
-  public build<K extends Key, V>() {
-    return new VeloCache<K, V>(new LFU<K, V>(this._capacity), this._options);
+    return new VeloCache<K, V>(
+      this._options.policy as Policy<V, K>,
+      this._options
+    );
   }
 }
