@@ -3,6 +3,8 @@ import { Policy } from "./policy.ts";
 
 export type Key = number | string;
 
+export type LoaderFunction<K, V> = (key: K) => V;
+
 export interface CacheOptions {
   capacity: number;
   policy: Policy<unknown, unknown> | undefined;
