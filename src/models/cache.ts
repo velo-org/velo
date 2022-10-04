@@ -5,7 +5,7 @@ export type Key = number | string;
 
 export type LoaderFunction<K, V> = (key: K) => V;
 
-export interface CacheOptions {
+export interface VeloOptions {
   capacity: number;
   policy: Policy<unknown, unknown> | undefined;
   enableEvents: boolean;

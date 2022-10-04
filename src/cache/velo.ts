@@ -1,10 +1,5 @@
 import { EventEmitter } from "../../deps.ts";
-import {
-  CacheOptions,
-  CacheStatistics,
-  Key,
-  LoaderFunction,
-} from "../models/cache.ts";
+import { CacheStatistics, Key, VeloOptions } from "../models/cache.ts";
 import { EventName, EventOptions, VeloEventEmitter } from "../models/events.ts";
 import { Policy, PolicyInternal } from "../models/policy.ts";
 import { Inaccessible } from "../utils/error.ts";
@@ -17,7 +12,7 @@ export class VeloCache<K extends Key, V> {
   private _eventEmitter?: EventEmitter;
   private _stats?: CacheStatistics;
 
-  constructor(policy: Policy<V, K>, options: CacheOptions) {
+  constructor(policy: Policy<V, K>, options: VeloOptions) {
     this._policy = policy;
 
     if (options.enableEvents) {

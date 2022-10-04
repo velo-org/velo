@@ -1,16 +1,15 @@
-import { VeloCache } from "./base.ts";
-import { CacheOptions, Key, LoaderFunction } from "../models/cache.ts";
+import { VeloCache } from "./velo.ts";
+import { Key, LoaderFunction, VeloOptions } from "../models/cache.ts";
 import { EventName } from "../models/events.ts";
 import { ARC } from "../policies/arc.ts";
 import { LRU } from "../policies/lru.ts";
 import { SC } from "../policies/sc.ts";
 import { Policy } from "../models/policy.ts";
 import { LFU } from "../policies/lfu.ts";
-import { kArrayBufferOffset } from "https://deno.land/std@0.155.0/node/internal_binding/stream_wrap.ts";
 import { VeloLoadingCache } from "./loading.ts";
 
 export class Velo {
-  protected _options: CacheOptions = {
+  protected _options: VeloOptions = {
     capacity: 0,
     policy: undefined,
     enableEvents: false,
@@ -36,7 +35,7 @@ export class Velo {
     return this;
   }
 
-  public from(options: CacheOptions) {
+  public from(options: VeloOptions) {
     this._options = options;
     return this;
   }
@@ -91,12 +90,13 @@ export class Velo {
     this._options.policy = new LFU(this._options.capacity);
     return this;
   }
+
   public build<K extends Key, V>(): VeloCache<K, V>;
   public build<K extends Key, V>(
-    loader: LoaderFunction<K, V>
+    loader: LoaderFunction<K, V>,
   ): VeloLoadingCache<K, V>;
   public build<K extends Key, V>(
-    loader?: LoaderFunction<K, V>
+    loader?: LoaderFunction<K, V>,
   ): VeloCache<K, V> | VeloLoadingCache<K, V> {
     if (!this._options.policy) {
       this.lru();
@@ -105,13 +105,13 @@ export class Velo {
       return new VeloLoadingCache<K, V>(
         this._options.policy as Policy<V, K>,
         this._options,
-        loader
+        loader,
       );
     }
 
     return new VeloCache<K, V>(
       this._options.policy as Policy<V, K>,
-      this._options
+      this._options,
     );
   }
 }

@@ -1,13 +1,13 @@
-import { CacheOptions, Key, LoaderFunction } from "../models/cache.ts";
+import { Key, LoaderFunction, VeloOptions } from "../models/cache.ts";
 import { Policy } from "../models/policy.ts";
-import { VeloCache } from "./base.ts";
+import { VeloCache } from "./velo.ts";
 
 export class VeloLoadingCache<K extends Key, V> extends VeloCache<K, V> {
   private _loaderFunction: LoaderFunction<K, V>;
   constructor(
     policy: Policy<V, K>,
-    options: CacheOptions,
-    loader: LoaderFunction<K, V>
+    options: VeloOptions,
+    loader: LoaderFunction<K, V>,
   ) {
     super(policy, options);
     this._loaderFunction = (k) => {
