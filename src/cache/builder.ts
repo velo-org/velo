@@ -1,117 +1,104 @@
 import { VeloCache } from "./velo.ts";
-import { Key, LoaderFunction, VeloOptions } from "../models/cache.ts";
-import { EventName } from "../models/events.ts";
+import { Key, LoaderFunction } from "../models/cache.ts";
+import { EventOptions } from "../models/events.ts";
 import { ARC } from "../policies/arc.ts";
 import { LRU } from "../policies/lru.ts";
 import { SC } from "../policies/sc.ts";
 import { Policy } from "../models/policy.ts";
 import { LFU } from "../policies/lfu.ts";
 import { VeloLoadingCache } from "./loading.ts";
+import { VeloOptions } from "./options.ts";
 
-export class Velo {
-  protected _options: VeloOptions = {
-    capacity: 0,
-    policy: undefined,
-    enableEvents: false,
-    events: {
-      clear: false,
-      expired: true,
-      get: false,
-      removed: true,
-      set: false,
-    },
-    stats: false,
-    ttl: 0,
+export class Velo<K extends Key, V> {
+  _capacity = 0;
+  _policy: Policy<K, V> | undefined = undefined;
+  _events = false;
+  _eventOptions = {
+    clear: false,
+    expired: true,
+    get: false,
+    removed: true,
+    set: false,
   };
+  _stats = false;
+  _ttl = 0;
 
   private constructor() {}
 
-  static builder() {
-    return new Velo();
+  static builder<K1 extends Key, V1>() {
+    return new Velo<K1, V1>();
   }
 
   public capacity(capacity: number) {
-    this._options.capacity = capacity;
+    this._capacity = capacity;
     return this;
   }
 
-  public from(options: VeloOptions) {
-    this._options = options;
-    return this;
+  public from(options: VeloOptions<K, V>) {
+    return options.toBuilder();
   }
 
   public ttl(timeout: number) {
-    this._options.ttl = timeout;
+    this._ttl = timeout;
     return this;
   }
 
   public stats(active?: boolean) {
-    this._options.stats = active || true;
+    this._stats = active || true;
     return this;
   }
 
-  public events(active?: boolean) {
-    this._options.enableEvents = active || true;
+  public events(options?: EventOptions) {
+    this._events = true;
+    if (options) {
+      this._eventOptions = options;
+    }
     return this;
   }
 
-  public enableEvent(...name: EventName[]) {
-    this.events();
-    name.forEach((n) => (this._options.events[n] = true));
+  public withPolicy(policy: Policy<K, V>) {
+    this._policy = policy;
     return this;
   }
 
-  public disableEvent(...name: EventName[]) {
-    name.forEach((n) => (this._options.events[n] = false));
+  public arc() {
+    this._policy = new ARC(this._capacity);
     return this;
   }
 
-  public withPolicy<K, V>(policy: Policy<V, K>): Velo {
-    this._options.policy = policy;
+  public lru() {
+    this._policy = new LRU(this._capacity);
     return this;
   }
 
-  public arc(): Velo {
-    this._options.policy = new ARC(this._options.capacity);
+  public sc() {
+    this._policy = new SC(this._capacity);
     return this;
   }
 
-  public lru(): Velo {
-    this._options.policy = new LRU(this._options.capacity);
+  public lfu() {
+    this._policy = new LFU(this._capacity);
     return this;
   }
 
-  public sc(): Velo {
-    this._options.policy = new SC(this._options.capacity);
-    return this;
-  }
-
-  public lfu(): Velo {
-    this._options.policy = new LFU(this._options.capacity);
-    return this;
-  }
-
-  public build<K extends Key, V>(): VeloCache<K, V>;
-  public build<K extends Key, V>(
-    loader: LoaderFunction<K, V>,
-  ): VeloLoadingCache<K, V>;
-  public build<K extends Key, V>(
-    loader?: LoaderFunction<K, V>,
-  ): VeloCache<K, V> | VeloLoadingCache<K, V> {
-    if (!this._options.policy) {
+  public build(): VeloCache<K, V>;
+  //prettier-ignore
+  public build(loader: LoaderFunction<K, V>): VeloLoadingCache<K, V>;
+  //prettier-ignore
+  public build(loader?: LoaderFunction<K, V>): VeloCache<K, V> | VeloLoadingCache<K, V> {
+    if (!this._policy) {
       this.lru();
     }
+
     if (loader) {
       return new VeloLoadingCache<K, V>(
-        this._options.policy as Policy<V, K>,
-        this._options,
-        loader,
+        this,
+        loader
       );
     }
 
     return new VeloCache<K, V>(
-      this._options.policy as Policy<V, K>,
-      this._options,
+      this
     );
   }
 }

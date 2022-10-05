@@ -2,13 +2,16 @@ import { getTypedArray, TypedArray } from "../utils/typedArray.ts";
 import { PointerList } from "../utils/pointerList.ts";
 import { Key } from "../models/cache.ts";
 import { Policy } from "../models/policy.ts";
+import { StatCounter } from "../models/stats.ts";
+import { NoopCounter } from "../cache/stats/noopCounter.ts";
 
 //TODO: delete single entry
 
 /**
  * Second Chance Cache
  */
-export class SC<K extends Key, V> implements Policy<V, K> {
+export class SC<K extends Key, V> implements Policy<K, V> {
+  statCounter: StatCounter = new NoopCounter();
   private head: number;
   private tail: number;
   private arrayMap: {

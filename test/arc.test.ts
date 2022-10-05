@@ -8,7 +8,7 @@ Deno.test("ARC create cache, should create a new empty cache", () => {
 });
 
 Deno.test("ARC get existing entry, should return the value", () => {
-  const arcCache = Velo.builder().capacity(5).arc().build<string, boolean>();
+  const arcCache = Velo.builder<string, boolean>().capacity(5).arc().build();
   arcCache.set("key", true);
   assert(arcCache.get("key"));
 });
@@ -81,7 +81,7 @@ Deno.test("ARC set double the allowed capacity, should evict all keys", () => {
 });
 
 Deno.test("ARC forEach should print out the right key value pairs", () => {
-  const arcCache = Velo.builder().capacity(5).arc().build<string, number>();
+  const arcCache = Velo.builder<string, number>().capacity(5).arc().build();
   arcCache.set("1", 1);
   arcCache.set("2", 2);
   arcCache.set("3", 3);
@@ -113,8 +113,7 @@ Deno.test("ARC getting entry from t1, should move it to t2", () => {
   arcCache.set("2", 2);
   arcCache.set("3", 3);
   arcCache.get("3");
-  const internal = arcCache.policyInternal;
-  assertEquals(internal?.t2, ["3"]); // frequently set
+  assertEquals((arcCache as any)._policy.t2.keys, ["3"]); // frequently set
 });
 
 Deno.test(
@@ -127,12 +126,10 @@ Deno.test(
     arcCache.set("4", 4);
     arcCache.set("5", 5);
     arcCache.set("6", 6);
-    let internal = arcCache.policyInternal;
-    assertEquals(internal?.b1, ["1"]); // recently evicted
+    assertEquals((arcCache as any)._policy.b1.keys, ["1"]); // recently evicted
     arcCache.set("1", 1);
-    internal = arcCache.policyInternal;
-    assertEquals(internal?.b1, ["2"]); // recently evicted
-    assertEquals(internal?.t1, ["6", "3", "4", "5"]); // recently set
-    assertEquals(internal?.t2, ["1"]); // frequently set
+    assertEquals((arcCache as any)._policy.b1.keys, ["2"]); // recently evicted
+    assertEquals((arcCache as any)._policy.t1.keys, ["6", "3", "4", "5"]); // recently set
+    assertEquals((arcCache as any)._policy.t2.keys, ["1"]); // frequently set
   }
 );

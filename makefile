@@ -5,9 +5,6 @@ bench:
 utest:
 	deno test --unstable --allow-read --allow-env ./test
 
-format:
-	deno fmt
-
 debug:
 	deno run -A --inspect-brk mod.ts
 

@@ -1,11 +1,14 @@
+import { NoopCounter } from "../cache/stats/noopCounter.ts";
 import { Key } from "../models/cache.ts";
 import { Policy } from "../models/policy.ts";
+import { StatCounter } from "../models/stats.ts";
 import { DoublyLinkedList, Node } from "../utils/doublyLinkedList.ts";
 
 /**
  * Least Frequently Used Cache
  */
-export class LFU<K extends Key, V> implements Policy<V, K> {
+export class LFU<K extends Key, V> implements Policy<K, V> {
+  statCounter: StatCounter = new NoopCounter();
   private _keys: { [key in Key]: Node<V> };
   private frequency: { [key: number]: DoublyLinkedList<V> };
   private _size: number;

@@ -1,37 +1,39 @@
 import { EventEmitter } from "../../deps.ts";
-import { CacheStatistics, Key, VeloOptions } from "../models/cache.ts";
+import { Key } from "../models/cache.ts";
 import { EventName, EventOptions, VeloEventEmitter } from "../models/events.ts";
-import { Policy, PolicyInternal } from "../models/policy.ts";
-import { Inaccessible } from "../utils/error.ts";
+import { Policy } from "../models/policy.ts";
+import { CacheStatistics, StatCounter } from "../models/stats.ts";
+import { Velo } from "./builder.ts";
+import { VeloCounter } from "./stats/Counter.ts";
+import { NoopCounter } from "./stats/noopCounter.ts";
 
 export class VeloCache<K extends Key, V> {
-  protected _policy: Policy<V, K>;
+  protected _policy: Policy<K, V>;
   private _ttl?: number;
   private _timeouts?: Map<K, number>;
-  private _eventOptions?: EventOptions;
+  private _events?: EventOptions;
   private _eventEmitter?: EventEmitter;
-  private _stats?: CacheStatistics;
+  private _stats: StatCounter;
 
-  constructor(policy: Policy<V, K>, options: VeloOptions) {
-    this._policy = policy;
+  constructor(builder: Velo<K, V>) {
+    this._policy = builder._policy!;
 
-    if (options.enableEvents) {
-      this._eventOptions = options.events;
+    if (builder._events) {
+      this._events = builder._eventOptions;
       this._eventEmitter = new EventEmitter();
     }
 
-    if (options.ttl && options.ttl !== 0) {
-      this._ttl = options.ttl;
+    if (builder._ttl) {
+      this._ttl = builder._ttl;
       this._timeouts = new Map();
     }
 
-    if (options.stats) {
-      this._stats = {
-        hits: 0,
-        misses: 0,
-        hitRatio: NaN,
-      };
+    if (builder._stats) {
+      this._stats = new VeloCounter();
+    } else {
+      this._stats = new NoopCounter();
     }
+    this._policy.statCounter = this._stats;
   }
 
   get(key: K): V | undefined {
@@ -49,7 +51,7 @@ export class VeloCache<K extends Key, V> {
 
   setTTL(key: K, value: V) {
     if (!this._ttl) {
-      throw new Inaccessible();
+      throw new Error();
     }
 
     if (this._timeouts?.has(key)) {
@@ -115,26 +117,19 @@ export class VeloCache<K extends Key, V> {
     return this._policy.values;
   }
 
-  get policyInternal(): PolicyInternal<K> {
-    return this._policy.internalData;
-  }
-
   get stats(): CacheStatistics {
-    if (!this._stats) {
-      throw new Inaccessible();
-    }
-    return this._stats;
+    return this._stats.stats();
   }
 
   get events(): VeloEventEmitter<K, V> {
     if (!this._eventEmitter) {
-      throw new Inaccessible();
+      throw new Error();
     }
     return this._eventEmitter;
   }
 
   private fireEvent(name: EventName, ...args: (K | V)[]) {
-    if (this._eventOptions && this._eventOptions[name]) {
+    if (this._events && this._events[name]) {
       this._eventEmitter?.emit(name, ...args);
     }
   }

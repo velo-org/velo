@@ -1,8 +1,11 @@
+import { NoopCounter } from "../cache/stats/noopCounter.ts";
 import { Key } from "../models/cache.ts";
-import { ArcInternal, Policy } from "../models/policy.ts";
+import { Policy } from "../models/policy.ts";
+import { StatCounter } from "../models/stats.ts";
 import { PointerList } from "../utils/pointerList.ts";
 
-export class ARC<K extends Key, V> implements Policy<V, K> {
+export class ARC<K extends Key, V> implements Policy<K, V> {
+  statCounter: StatCounter = new NoopCounter();
   private partition = 0;
 
   private t1: ARCList<K, V>;
@@ -169,15 +172,6 @@ export class ARC<K extends Key, V> implements Policy<V, K> {
 
   get values() {
     return this.t1.values.concat(this.t2.values);
-  }
-
-  get internalData(): ArcInternal<K> {
-    return {
-      t1: this.t1.keys,
-      t2: this.t2.keys,
-      b1: this.b1.keys,
-      b2: this.b2.keys,
-    };
   }
 
   get recentlySet() {
