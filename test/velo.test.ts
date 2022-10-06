@@ -1,41 +1,80 @@
 import { Velo } from "../src/cache/builder.ts";
 import { sleep } from "../src/utils/sleep.ts";
 import { assertEquals } from "../dev_deps.ts";
-import { VeloLoadingCache } from "../src/cache/loading.ts";
 import {
   assert,
   assertThrows,
 } from "https://deno.land/std@0.155.0/testing/asserts.ts";
+import { VeloLoadingCache } from "../src/cache/velo.ts";
+
+Deno.test("CacheBuilder, should reject non-positive capacity", () => {
+  assertThrows(() => Velo.builder().capacity(-5));
+  assertThrows(() => Velo.builder().capacity(0));
+});
+
+Deno.test("CacheBuilder, should reject non-positive TTL", () => {
+  assertThrows(() => Velo.builder().ttl(-5));
+  assertThrows(() => Velo.builder().ttl(0));
+});
+
+Deno.test(
+  "CacheBuilder, should reject policy if no capacity is provided",
+  () => {
+    assertThrows(() => Velo.builder().lru());
+  }
+);
+
+Deno.test("CacheBuilder, should reject multiple calls to same method", () => {
+  assertThrows(() => Velo.builder().capacity(5).capacity(10));
+  assertThrows(() => Velo.builder().ttl(5).ttl(10));
+  assertThrows(() => Velo.builder().stats().stats());
+  assertThrows(() => Velo.builder().events().events());
+  assertThrows(() => Velo.builder().capacity(5).lru().lru());
+  assertThrows(() => Velo.builder().capacity(5).lru().lfu());
+});
 
 Deno.test("Cache, should fire expired event", async () => {
   const cache = Velo.builder().capacity(5).events().ttl(200).build();
   cache.set("key", "value");
 
+  let fired = false;
   cache.events.on("expired", (key, _) => {
     assertEquals(key, "key");
+    fired = true;
   });
 
   await sleep(500);
+  assert(fired);
 });
 
-Deno.test("Cache, should fire clear event", () => {
-  const cache = Velo.builder().capacity(5).events().build();
+Deno.test("Cache, should fire clear event", async () => {
+  const cache = Velo.builder().capacity(5).events().setEvent("clear").build();
   cache.set("key", "value");
 
+  let fired = false;
   cache.events.on("clear", () => {
     assertEquals(cache.size, 0);
+    fired = true;
   });
+
+  cache.clear();
+  await sleep(500);
+  assert(fired);
 });
 
-Deno.test("Cache, should fire set event", () => {
-  const cache = Velo.builder().capacity(5).events().build();
+Deno.test("Cache, should fire set event", async () => {
+  const cache = Velo.builder().capacity(5).events().setEvent("set").build();
 
+  let fired = false;
   cache.events.on("set", (key, value) => {
     assertEquals(key, "key");
     assertEquals(value, "value");
+    fired = true;
   });
 
   cache.set("key", "value");
+  await sleep(500);
+  assert(fired);
 });
 
 Deno.test("Cache, should fire remove event", () => {

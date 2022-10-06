@@ -1,6 +1,6 @@
 import { VeloCache, VeloLoadingCache } from "./velo.ts";
 import { Key, LoaderFunction } from "../models/cache.ts";
-import { EventOptions } from "../models/events.ts";
+import { EventName, EventOptions } from "../models/events.ts";
 import { ARC } from "../policies/arc.ts";
 import { LRU } from "../policies/lru.ts";
 import { SC } from "../policies/sc.ts";
@@ -10,14 +10,13 @@ import { VeloOptions } from "./options.ts";
 
 export class Velo<K extends Key, V> {
   _capacity = 0;
-  _policy: Policy<K, V> | undefined = undefined;
+  _policy?: Policy<K, V>;
   _events = false;
   _eventOptions = {
-    clear: false,
     expired: true,
-    get: false,
     removed: true,
     set: false,
+    clear: false,
   };
   _stats = false;
   _ttl = 0;
@@ -29,6 +28,8 @@ export class Velo<K extends Key, V> {
   }
 
   public capacity(capacity: number) {
+    this.requireExpr(capacity > 0, "Capacity must be greater than 0");
+    this.requireExpr(this._capacity === 0, "Capacity already set");
     this._capacity = capacity;
     return this;
   }
@@ -38,16 +39,20 @@ export class Velo<K extends Key, V> {
   }
 
   public ttl(timeout: number) {
+    this.requireExpr(timeout > 0, "TTL must be greater than 0");
+    this.requireExpr(this._ttl === 0, "TTL already set");
     this._ttl = timeout;
     return this;
   }
 
-  public stats(active?: boolean) {
-    this._stats = active || true;
+  public stats() {
+    this.requireExpr(!this._stats, "Stats already enabled");
+    this._stats = true;
     return this;
   }
 
   public events(options?: EventOptions) {
+    this.requireExpr(!this._events, "Events already enabled");
     this._events = true;
     if (options) {
       this._eventOptions = options;
@@ -55,29 +60,35 @@ export class Velo<K extends Key, V> {
     return this;
   }
 
+  public setEvent(name: EventName, active?: boolean) {
+    this._eventOptions[name] = active ?? true;
+    return this;
+  }
+
   public withPolicy(policy: Policy<K, V>) {
+    this.requireExpr(this._policy === undefined, "Policy is already set");
+    this.requireExpr(
+      this._capacity > 0,
+      "Provide capacity before policy and build"
+    );
     this._policy = policy;
     return this;
   }
 
   public arc() {
-    this._policy = new ARC(this._capacity);
-    return this;
+    return this.withPolicy(new ARC(this._capacity));
   }
 
   public lru() {
-    this._policy = new LRU(this._capacity);
-    return this;
+    return this.withPolicy(new LRU(this._capacity));
   }
 
   public sc() {
-    this._policy = new SC(this._capacity);
-    return this;
+    return this.withPolicy(new SC(this._capacity));
   }
 
   public lfu() {
-    this._policy = new LFU(this._capacity);
-    return this;
+    return this.withPolicy(new LFU(this._capacity));
   }
 
   public build(): VeloCache<K, V>;
@@ -99,5 +110,11 @@ export class Velo<K extends Key, V> {
     return new VeloCache<K, V>(
       this
     );
+  }
+
+  private requireExpr(expression: boolean, message?: string) {
+    if (!expression) {
+      throw new Error(message);
+    }
   }
 }

@@ -37,7 +37,6 @@ export class VeloCache<K extends Key, V> {
   }
 
   get(key: K): V | undefined {
-    this.fireEvent("get", key);
     return this._policy.get(key);
   }
 
@@ -45,8 +44,8 @@ export class VeloCache<K extends Key, V> {
     if (this._ttl) {
       this.setTTL(key, value);
     }
+    this._policy.set(key, value);
     this.fireEvent("set", key, value);
-    return this._policy.set(key, value);
   }
 
   setTTL(key: K, value: V) {
@@ -68,8 +67,8 @@ export class VeloCache<K extends Key, V> {
   }
 
   remove(key: K): void {
+    this._policy.remove(key);
     this.fireEvent("removed", key);
-    return this._policy.remove(key);
   }
 
   take(key: K): V | undefined {
@@ -87,8 +86,8 @@ export class VeloCache<K extends Key, V> {
   }
 
   clear(): void {
+    this._policy.clear();
     this.fireEvent("clear");
-    return this._policy.clear();
   }
 
   forEach(callback: (item: { key: K; value: V }, index: number) => void): void {
