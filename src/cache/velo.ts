@@ -1,5 +1,5 @@
 import { EventEmitter } from "../../deps.ts";
-import { Key } from "../models/cache.ts";
+import { Key, LoaderFunction } from "../models/cache.ts";
 import { EventName, EventOptions, VeloEventEmitter } from "../models/events.ts";
 import { Policy } from "../models/policy.ts";
 import { CacheStatistics, StatCounter } from "../models/stats.ts";
@@ -132,5 +132,34 @@ export class VeloCache<K extends Key, V> {
     if (this._events && this._events[name]) {
       this._eventEmitter?.emit(name, ...args);
     }
+  }
+}
+
+export class VeloLoadingCache<K extends Key, V> extends VeloCache<K, V> {
+  private _loaderFunction: LoaderFunction<K, V>;
+  constructor(builder: Velo<K, V>, loader: LoaderFunction<K, V>) {
+    super(builder);
+    this._loaderFunction = (k) => {
+      try {
+        return loader(k);
+      } catch (e) {
+        throw e;
+      }
+    };
+  }
+
+  get(key: K): V | undefined {
+    let value = this._policy.get(key);
+    if (!value) {
+      value = this._loaderFunction(key);
+      this.set(key, value!);
+      return value;
+    }
+    return value;
+  }
+
+  refresh(key: K) {
+    const value = this._loaderFunction(key);
+    this.set(key, value!);
   }
 }

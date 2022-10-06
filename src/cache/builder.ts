@@ -1,4 +1,4 @@
-import { VeloCache } from "./velo.ts";
+import { VeloCache, VeloLoadingCache } from "./velo.ts";
 import { Key, LoaderFunction } from "../models/cache.ts";
 import { EventOptions } from "../models/events.ts";
 import { ARC } from "../policies/arc.ts";
@@ -6,7 +6,6 @@ import { LRU } from "../policies/lru.ts";
 import { SC } from "../policies/sc.ts";
 import { Policy } from "../models/policy.ts";
 import { LFU } from "../policies/lfu.ts";
-import { VeloLoadingCache } from "./loading.ts";
 import { VeloOptions } from "./options.ts";
 
 export class Velo<K extends Key, V> {
