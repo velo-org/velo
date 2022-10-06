@@ -4,7 +4,7 @@ import { EventName, EventOptions, VeloEventEmitter } from "../models/events.ts";
 import { Policy } from "../models/policy.ts";
 import { CacheStatistics, StatCounter } from "../models/stats.ts";
 import { Velo } from "./builder.ts";
-import { VeloCounter } from "./stats/Counter.ts";
+import { VeloCounter } from "./stats/counter.ts";
 import { NoopCounter } from "./stats/noopCounter.ts";
 
 export class VeloCache<K extends Key, V> {
