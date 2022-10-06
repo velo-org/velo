@@ -27,6 +27,7 @@ export class LRU<K extends Key, V> implements Policy<K, V> {
     if (pointer) {
       this.pointers.moveToFront(pointer);
       this._values[pointer] = value;
+      this.statCounter.recordHit();
       return;
     }
 
@@ -46,6 +47,7 @@ export class LRU<K extends Key, V> implements Policy<K, V> {
     this._values[pointer] = value;
 
     this.pointers.pushFront(pointer);
+    this.statCounter.recordMiss();
   }
 
   clear() {

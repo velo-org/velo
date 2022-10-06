@@ -42,6 +42,7 @@ export class ARC<K extends Key, V> implements Policy<K, V> {
     // in frequent set
     if (this.t2.has(key)) {
       this.t2.insert(key, value);
+      this.statCounter.recordHit();
       return;
     }
 
@@ -49,6 +50,7 @@ export class ARC<K extends Key, V> implements Policy<K, V> {
     if (this.t1.has(key)) {
       this.t1.remove(key);
       this.t2.insert(key, value);
+      this.statCounter.recordHit();
       return;
     }
 
@@ -70,6 +72,7 @@ export class ARC<K extends Key, V> implements Policy<K, V> {
 
       this.b2.remove(key);
       this.t2.insert(key, value);
+      this.statCounter.recordMiss();
 
       return;
     }
@@ -92,6 +95,7 @@ export class ARC<K extends Key, V> implements Policy<K, V> {
 
       this.b1.remove(key);
       this.t2.insert(key, value);
+      this.statCounter.recordMiss();
 
       return;
     }
@@ -110,6 +114,7 @@ export class ARC<K extends Key, V> implements Policy<K, V> {
       this.b2.removeBack();
     }
 
+    this.statCounter.recordMiss();
     this.t1.insert(key, value);
   }
 

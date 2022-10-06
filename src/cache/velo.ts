@@ -13,7 +13,7 @@ export class VeloCache<K extends Key, V> {
   private _timeouts?: Map<K, number>;
   private _events?: EventOptions;
   private _eventEmitter?: EventEmitter;
-  private _stats: StatCounter;
+  protected _stats: StatCounter;
 
   constructor(builder: Velo<K, V>) {
     this._policy = builder._policy!;
@@ -141,8 +141,11 @@ export class VeloLoadingCache<K extends Key, V> extends VeloCache<K, V> {
     super(builder);
     this._loaderFunction = (k) => {
       try {
-        return loader(k);
+        const value = loader(k);
+        this._stats.recordLoadingSuccess();
+        return value;
       } catch (e) {
+        this._stats.recordLoadingFail();
         throw e;
       }
     };
