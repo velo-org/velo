@@ -1,8 +1,8 @@
-import { getTypedArray, TypedArray } from "./typedArray.ts";
+import { getTypedArray, TypedArray } from "./typed_array.ts";
 
 /**
- * Implements a fixed size doubly linked list. This implementation relies on a
- * custom pointer system utilizing TypedArrays.
+ * Implements a fixed size doubly linked list of referebce pointers. This
+ * implementation relies on a custom pointer system utilizing TypedArrays.
  *
  * Reference: https://yomguithereal.github.io/posts/lru-cache#a-custom-pointer-system
  *
@@ -11,7 +11,7 @@ import { getTypedArray, TypedArray } from "./typedArray.ts";
  * and back elements of the list.
  *
  * The list will allow pushing any values if it is not full. To not
- * destroy the index based structure use the newPointer() method to create a
+ * destroy the index based structure use the `newPointer()` method to create a
  * safe index.
  *
  *     const list = new PointerList(10);

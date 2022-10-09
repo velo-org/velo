@@ -136,6 +136,7 @@ export class VeloCache<K extends Key, V> {
 
 export class VeloLoadingCache<K extends Key, V> extends VeloCache<K, V> {
   private _loaderFunction: LoaderFunction<K, V>;
+
   constructor(builder: Velo<K, V>, loader: LoaderFunction<K, V>) {
     super(builder);
     this._loaderFunction = (k) => {

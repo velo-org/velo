@@ -2,8 +2,11 @@ import { NoopCounter } from "../cache/stats/noopCounter.ts";
 import { Key } from "../models/cache.ts";
 import { Policy } from "../models/policy.ts";
 import { StatCounter } from "../models/stats.ts";
-import { PointerList } from "../utils/pointerList.ts";
+import { PointerList } from "../utils/pointer_list.ts";
 
+/**
+ * Least Recently Used (LRU)
+ */
 export class LRU<K extends Key, V> implements Policy<K, V> {
   statCounter: StatCounter = new NoopCounter();
   private _keys: Array<K | undefined>;
