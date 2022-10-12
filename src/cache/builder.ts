@@ -7,6 +7,7 @@ import { SC } from "../policies/sc.ts";
 import { Policy } from "../models/policy.ts";
 import { LFU } from "../policies/lfu.ts";
 import { VeloOptions } from "./options.ts";
+import { WindowTinyLfu } from "../policies/tiny_lfu/w_tiny_lfu.ts";
 
 export class Velo<K extends Key, V> {
   _capacity = 0;
@@ -76,19 +77,23 @@ export class Velo<K extends Key, V> {
   }
 
   public arc() {
-    return this.withPolicy(new ARC(this._capacity));
+    return this.withPolicy(new ARC<K, V>(this._capacity));
   }
 
   public lru() {
-    return this.withPolicy(new LRU(this._capacity));
+    return this.withPolicy(new LRU<K, V>(this._capacity));
   }
 
   public sc() {
-    return this.withPolicy(new SC(this._capacity));
+    return this.withPolicy(new SC<K, V>(this._capacity));
   }
 
   public lfu() {
-    return this.withPolicy(new LFU(this._capacity));
+    return this.withPolicy(new LFU<K, V>(this._capacity));
+  }
+
+  public tinyLfu() {
+    return this.withPolicy(new WindowTinyLfu<K, V>(this._capacity));
   }
 
   public build(): VeloCache<K, V>;
