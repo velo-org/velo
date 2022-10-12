@@ -23,6 +23,10 @@ import { FrequencySketch } from "./frequency_sketch.ts";
  * the cold/probationary part.
  */
 export class WindowTinyLfu<K extends Key, V> implements Policy<K, V> {
+  /**
+   * A global cache entry map that maps entries to their segment and their 
+   * local pointer inside that segment.
+   */
   private entryMap: { [key in Key]: EntryIdent };
   private window: LruPointerList<K, V>;
   private protected: LruPointerList<K, V>;

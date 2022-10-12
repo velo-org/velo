@@ -27,6 +27,7 @@ export class ARC<K extends Key, V> implements Policy<K, V> {
   }
 
   private replace(in_t2: boolean) {
+    this.statCounter.recordEviction();
     const t1Size = this.t1.size();
 
     if (
@@ -45,7 +46,6 @@ export class ARC<K extends Key, V> implements Policy<K, V> {
     // in frequent set
     if (this.t2.has(key)) {
       this.t2.insert(key, value);
-      this.statCounter.recordHit();
       return;
     }
 
@@ -53,7 +53,6 @@ export class ARC<K extends Key, V> implements Policy<K, V> {
     if (this.t1.has(key)) {
       this.t1.remove(key);
       this.t2.insert(key, value);
-      this.statCounter.recordHit();
       return;
     }
 
@@ -75,7 +74,6 @@ export class ARC<K extends Key, V> implements Policy<K, V> {
 
       this.b2.remove(key);
       this.t2.insert(key, value);
-      this.statCounter.recordMiss();
 
       return;
     }
@@ -98,7 +96,6 @@ export class ARC<K extends Key, V> implements Policy<K, V> {
 
       this.b1.remove(key);
       this.t2.insert(key, value);
-      this.statCounter.recordMiss();
 
       return;
     }
@@ -117,17 +114,25 @@ export class ARC<K extends Key, V> implements Policy<K, V> {
       this.b2.removeBack();
     }
 
-    this.statCounter.recordMiss();
     this.t1.insert(key, value);
   }
 
   get(key: K): V | undefined {
-    const value = this.t1.removeWithValue(key);
+    let value = this.t1.removeWithValue(key);
+
     // if in t1 move to t2
     if (value) {
       this.t2.insert(key, value);
     }
-    return this.t2.get(key);
+    value = this.t2.get(key);
+
+    if (value) {
+      this.statCounter.recordHit();
+    } else {
+      this.statCounter.recordMiss();
+    }
+
+    return value;
   }
 
   has(key: K) {

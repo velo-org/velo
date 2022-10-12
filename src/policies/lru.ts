@@ -30,7 +30,6 @@ export class LRU<K extends Key, V> implements Policy<K, V> {
     if (pointer) {
       this.pointers.moveToFront(pointer);
       this._values[pointer] = value;
-      this.statCounter.recordHit();
       return;
     }
 
@@ -42,6 +41,7 @@ export class LRU<K extends Key, V> implements Policy<K, V> {
       pointer = this.pointers.removeBack();
       delete this.items[this._keys[pointer]!];
       pointer = this.pointers.newPointer()!;
+      this.statCounter.recordEviction();
     }
 
     // Storing key & value
@@ -50,7 +50,6 @@ export class LRU<K extends Key, V> implements Policy<K, V> {
     this._values[pointer] = value;
 
     this.pointers.pushFront(pointer);
-    this.statCounter.recordMiss();
   }
 
   clear() {
@@ -73,8 +72,12 @@ export class LRU<K extends Key, V> implements Policy<K, V> {
   get(key: K): V | undefined {
     const pointer = this.items[key];
 
-    if (pointer === undefined) return;
+    if (pointer === undefined) {
+      this.statCounter.recordMiss();
+      return undefined;
+    }
 
+    this.statCounter.recordHit();
     this.pointers.moveToFront(pointer);
     return this._values[pointer];
   }

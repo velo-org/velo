@@ -28,7 +28,6 @@ export class LFU<K extends Key, V> implements Policy<K, V> {
 
     // if node doesnt exist in _keys then add it
     if (node == undefined) {
-      this.statCounter.recordMiss();
       // create new node and store in _keys
       node = new Node(key, value);
       this._keys[key] = node;
@@ -61,7 +60,6 @@ export class LFU<K extends Key, V> implements Policy<K, V> {
       this.minFrequency = 1;
     } else {
       // else node exists so we need to get it and move it to the new linked list
-      this.statCounter.recordHit();
 
       // save the old frequency of the node and increment (also update data)
       const oldFrequencyCount = node.frequencyCount;
@@ -94,7 +92,10 @@ export class LFU<K extends Key, V> implements Policy<K, V> {
 
   get(key: K) {
     const node = this._keys[key];
-    if (node == undefined) return undefined;
+    if (node == undefined) {
+      this.statCounter.recordMiss();
+      return undefined;
+    }
 
     const oldFrequencyCount = node.frequencyCount;
     node.frequencyCount++;
@@ -117,6 +118,7 @@ export class LFU<K extends Key, V> implements Policy<K, V> {
       delete this.frequency[oldFrequencyCount];
     }
 
+    this.statCounter.recordHit();
     return node.data;
   }
 

@@ -40,7 +40,6 @@ export class SC<K extends Key, V> implements Policy<K, V> {
     if (pointer !== undefined) {
       this.arrayMap[pointer].value = value;
       this.arrayMap[pointer].sChance = true;
-      this.statCounter.recordHit();
       return;
     }
 
@@ -55,6 +54,7 @@ export class SC<K extends Key, V> implements Policy<K, V> {
       // Moving the item at the end of the list
       this.pointers.pushBack(pointer);
     } else {
+      this.statCounter.recordEviction();
       let p = this.pointers.front;
       let found = false;
 
@@ -78,14 +78,16 @@ export class SC<K extends Key, V> implements Policy<K, V> {
         this.pointers.moveToBack(this.pointers.front);
       }
     }
-
-    this.statCounter.recordMiss();
   }
 
   get(key: K) {
     const pointer = this.items[key];
-    if (pointer === undefined) return undefined;
+    if (pointer === undefined) {
+      this.statCounter.recordMiss();
+      return undefined;
+    }
     this.arrayMap[pointer].sChance = true;
+    this.statCounter.recordHit();
     return this.arrayMap[pointer].value;
   }
 
