@@ -1,3 +1,5 @@
+import { Key } from "../../models/cache.ts";
+
 /**
  * A probabilistic set for estimating the frequency of elements within a time
  * window to use as _freshness_ metric for the TinyLFU [1] admission policy.
@@ -5,8 +7,8 @@
  *
  * The maximum frequency is 15(4 bits). Employs a 4-bit Count-Min Sketch[2].
  * The counter matrix is implemented as a single dimensional array, holding 16
- * counters (4 * 16 = 64 bit) per index. Length of the array equals the capacity
- * of the cache for accuracy, but is increased to the next power of two.
+ * counters (4 * 16 = 64 bit) per index. Length of the array is at least the
+ * capacity of the cache for accuracy, but is increased to the next power of two.
  *
  * The frequency of all entries is aged periodically using a sampling window
  * based on the maximum number of entries in the cache. This is referred to as
@@ -18,7 +20,7 @@
  * - [2] An Improved Data Stream Summary: The Count-Min Sketch and its Applications
  * http://dimacs.rutgers.edu/~graham/pubs/papers/cm-full.pdf
  */
-export class FrequencySketch<T> {
+export class FrequencySketch<T extends Key> {
   private table: Float64Array = new Float64Array(8);
   private size = 0;
   private samplingSize = 0;
@@ -86,8 +88,13 @@ export class FrequencySketch<T> {
     return 1 << (32 - Math.clz32(value - 1));
   }
 
-  private hash(_item: T) {
-    return 0;
+  private hash(item: T) {
+    const str = item.toString();
+    let h = 0;
+    for (let i = 0; i < str.length; i++) {
+      h = (Math.imul(31, h) + str.charCodeAt(i)) | 0;
+    }
+    return h;
   }
 
   private getCount(hash: number, counterIndex: number) {

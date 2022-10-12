@@ -1,29 +1,26 @@
 import { getTypedArray, TypedArray } from "./typed_array.ts";
 
 /**
- * Implements a fixed size doubly linked list of referebce pointers. This
- * implementation relies on a custom pointer system utilizing TypedArrays.
+ * Implements a fixed size double-linked list of reference pointers. This
+ * implementation relies on a custom pointer system [1]. Utilizing TypedArrays
+ * for better engine optimization.
  *
- * Reference: https://yomguithereal.github.io/posts/lru-cache#a-custom-pointer-system
- *
- * To simplify the internals the list is implemented as a ring with
- * a root indicating the first element. This allows for easy access to the front
- * and back elements of the list.
- *
- * The list will allow pushing any values if it is not full. To not
- * destroy the index based structure use the `newPointer()` method to create a
- * safe index.
+ * The list internally relies on an incrementing index. To not destroy the index
+ * based structure use the `newPointer()` method to create a index that can be
+ * safely inserted.
  *
  *     const list = new PointerList(10);
- *     const pointer = list.newPointer();
- *     list.pushFront(pointer);
+ *     const p = list.newPointer();
+ *     list.pushFront(p);
+ *
+ * - [1] https://yomguithereal.github.io/posts/lru-cache#a-custom-pointer-system
  */
 export class PointerList {
+  /** The capacity of the list */
+  readonly capacity: number;
+
   /** Index of the root */
   private _root = 0;
-
-  /** The capacity of the list */
-  private readonly _capacity: number;
 
   /** The size*/
   private _size = 0;
@@ -39,14 +36,9 @@ export class PointerList {
    * @param capacity The fixed maximum size of the list
    */
   constructor(capacity: number) {
-    this._capacity = capacity;
-    this.next = getTypedArray(this._capacity);
-    this.prev = getTypedArray(this._capacity);
-  }
-
-  /** The capacity of the list */
-  get capacity() {
-    return this._capacity;
+    this.capacity = capacity;
+    this.next = getTypedArray(this.capacity);
+    this.prev = getTypedArray(this.capacity);
   }
 
   /** The first element of the list */
@@ -65,7 +57,8 @@ export class PointerList {
   }
 
   /**
-   * Inserts a pointer after a given reference pointer into the list
+   * Inserts a pointer after a given reference pointer into the list if it is
+   * not full.
    *
    * @param pointer The pointer to be inserted
    * @param after The reference pointer in the list
@@ -127,7 +120,7 @@ export class PointerList {
   }
 
   /**
-   * Convenience wrapper to move a pointer to the front
+   * Convenience method to move a pointer to the front
    *
    * @param pointer The pointer to move
    */
@@ -139,7 +132,7 @@ export class PointerList {
   }
 
   /**
-   * Convenience wrapper to move a pointer to the back
+   * Convenience method to move a pointer to the back
    *
    * @param pointer The pointer to move
    */
@@ -161,7 +154,7 @@ export class PointerList {
       this._root = this.next[this._root];
     }
 
-    if (this._size >= this._capacity) {
+    if (this._size >= this.capacity) {
       this.nextIndex.push(pointer);
     }
 
@@ -197,8 +190,9 @@ export class PointerList {
   clear(): void {
     this._root = 0;
     this._size = 0;
-    this.next = getTypedArray(this._capacity);
-    this.prev = getTypedArray(this._capacity);
+    this.next = getTypedArray(this.capacity);
+    this.prev = getTypedArray(this.capacity);
+    this.nextIndex = [];
   }
 
   /**
@@ -229,11 +223,12 @@ export class PointerList {
    * @returns True if size >= capacity
    */
   isFull(): boolean {
-    return this._size >= this._capacity;
+    return this._size >= this.capacity;
   }
 
   /**
-   * Method to create a save pointer to be inserted into the list.
+   * Method to create a save pointer to be inserted into the list. This new pointer
+   * is not stored in the list. Use {@link insert} to do that.
    *
    * @returns A new pointer or undefined if the list is full
    */
