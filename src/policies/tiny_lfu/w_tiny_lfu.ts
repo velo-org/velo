@@ -24,7 +24,7 @@ import { FrequencySketch } from "./frequency_sketch.ts";
  */
 export class WindowTinyLfu<K extends Key, V> implements Policy<K, V> {
   /**
-   * A global cache entry map that maps entries to their segment and their 
+   * A global cache entry map that maps entries to their segment and their
    * local pointer inside that segment.
    */
   private entryMap: { [key in Key]: EntryIdent };
@@ -156,18 +156,15 @@ export class WindowTinyLfu<K extends Key, V> implements Policy<K, V> {
 
   private onHit(ident: EntryIdent) {
     this.statCounter.recordHit();
-    let value: V;
+    const value: V = this.executeOnCache(ident, LruPointerList.prototype.get);
     switch (ident.segment) {
       case Segment.Window:
-        value = this.window.get(ident.pointer);
         this.onWindowHit(ident.pointer);
         break;
       case Segment.Protected:
-        value = this.protected.get(ident.pointer);
         this.onProtectedHit(ident.pointer);
         break;
       case Segment.Probation:
-        value = this.probation.get(ident.pointer);
         this.onProbationHit(ident.pointer);
     }
     return value;
