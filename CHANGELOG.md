@@ -2,11 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to
+The document format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## unreleased
+
+- Add Builder API for creating a cache (`Velo.builder()`)
+- Add value loading functionality with `VeloLoadingCache` 
+- Add statistics recording for evictions and loads
+- Add the W-TinyLFU admission policy
+- Update and add examples
+- Remove multiple cache policies:
+  - Random Replacement (`RR`)
+  - Segmented LRU (`SLRU`)
 
 ## [0.1.6]
 

@@ -18,10 +18,8 @@
 
 ## Table of Contents
 
-- [Table of Contents](#table-of-contents)
 - [Introduction](#introduction)
-- [Quick start](#quick-start)
-- [Caches](#caches)
+- [Quick start](#installation)
 - [Usage](#usage)
 - [Contributing](#contributing)
 - [Benchmarks](#benchmarks)
@@ -30,7 +28,7 @@
 
 Velo is an in-memory caching library for Deno. We provide a high-performance cache implementation with an API inspired by [Google Guava's Cache](https://github.com/google/guava/wiki/CachesExplained). While it can be ineffectual to optimize JavaScript we draw significant performance increases from using a [custom pointer system](https://yomguithereal.github.io/posts/lru-cache#a-custom-pointer-system). For more details, see our [examples](./examples/) and browse the [API documentation](https://doc.deno.land/https/deno.land/x/velo@0.1.6/mod.ts).
 
-## Install
+## Installation
 
 Import `Velo` from one of the following urls.
 
@@ -49,19 +47,27 @@ import { Velo } from "https://x.nest.land/velo@0.1.6/mod.ts";
 ## Usage
 
 ```ts
-const cache = Velo.capacity(10_000)
+const cache = Velo.builder()
+  .capacity(10_000)
   .ttl(2 * 60 * 1000) // 2 minutes
   .events()
-  .lru()
   .build();
 ```
 
-Velo provides a builder class to create a cache. Multipe optional features can be enabled:
+Velo provides a builder class to create a cache. Multipe optional features can be enabled via their builder methods:
 
 - `ttl()`: time-based eviction of keys
 - `events()`: uses an `EventEmitter` to notify you about certain cache events
-- ``
+- `stats()`: enables statistics recording
+- choose from a number of caching policies:
+  - `lru()`: least recently used
+  - `lfu()`: least frequently used
+  - `tinyLfu()`: W-TinyLFU
+  - `arc()`: adaptive replacement cache
+  - `sc()`: second cache
+- loading functionality with `build(loadFunction)`
 
+For more detailed explanation and usage guides look at the [examples](./examples/).
 
 ## Contributing
 

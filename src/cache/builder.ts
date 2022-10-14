@@ -1,24 +1,29 @@
 import { VeloCache, VeloLoadingCache } from "./velo.ts";
 import { Key, LoaderFunction } from "../models/cache.ts";
 import { EventName, EventOptions } from "../models/events.ts";
-import { ARC } from "../policies/arc.ts";
-import { LRU } from "../policies/lru.ts";
-import { SC } from "../policies/sc.ts";
+import { ARC } from "../policy/arc.ts";
+import { LRU } from "../policy/lru.ts";
+import { SC } from "../policy/sc.ts";
 import { Policy } from "../models/policy.ts";
-import { LFU } from "../policies/lfu.ts";
+import { LFU } from "../policy/lfu.ts";
+import { WindowTinyLfu } from "../policy/tiny_lfu/w_tiny_lfu.ts";
 import { VeloOptions } from "./options.ts";
-import { WindowTinyLfu } from "../policies/tiny_lfu/w_tiny_lfu.ts";
+
+export const VELO_EVENT_DEFAULTS = {
+  remove: true,
+  expire: true,
+  set: false,
+  get: false,
+  clear: false,
+  load: false,
+  loaded: false,
+};
 
 export class Velo<K extends Key, V> {
   _capacity = 0;
   _policy?: Policy<K, V>;
   _events = false;
-  _eventOptions = {
-    expired: true,
-    removed: true,
-    set: false,
-    clear: false,
-  };
+  _eventOptions = VELO_EVENT_DEFAULTS;
   _stats = false;
   _ttl = 0;
 
@@ -62,6 +67,10 @@ export class Velo<K extends Key, V> {
   }
 
   public setEvent(name: EventName, active?: boolean) {
+    this.requireExpr(
+      this._events,
+      "Events are not enabled. Use events() before setEvent()"
+    );
     this._eventOptions[name] = active ?? true;
     return this;
   }
@@ -70,7 +79,7 @@ export class Velo<K extends Key, V> {
     this.requireExpr(this._policy === undefined, "Policy is already set");
     this.requireExpr(
       this._capacity > 0,
-      "Provide capacity before policy and build"
+      "Invalid or missing capacity. Provide capacity before policy() and build()"
     );
     this._policy = policy;
     return this;
@@ -112,6 +121,9 @@ export class Velo<K extends Key, V> {
         loader
       );
     }
+
+    this.requireExpr(this._eventOptions.load === false, "Load event requires a loading cache. Use .build(LoaderFunction)");
+    this.requireExpr(this._eventOptions.loaded === false, "Loaded event requires a loading cache. Use .build(LoaderFunction)");
 
     return new VeloCache<K, V>(
       this

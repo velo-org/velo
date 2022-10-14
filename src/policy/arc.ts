@@ -5,7 +5,17 @@ import { StatCounter } from "../models/stats.ts";
 import { PointerList } from "../utils/pointer_list.ts";
 
 /**
- * Adaptive Replacement Cache (ARC)
+ * Implementation of an Adaptive Replacement Cache (ARC) [1]. It adapitvely balances
+ * between recency and frequency. This is achieved by keeping track of evicted
+ * keys and their frequencies in _ghost lists_ (b1 and b2). This increases the
+ * overall size of the cache, but allows for a better hit rate.
+ *
+ * - t1: for recent cache entries.
+ * - t2: for frequent entries, referenced at least twice.
+ * - b1: ghost entries recently evicted from the T1 cache, but are still tracked.
+ * - b2: similar ghost entries, but evicted from T2.
+ *
+ * [1]https://www.usenix.org/legacy/events/fast03/tech/full_papers/megiddo/megiddo.pdf
  */
 export class ARC<K extends Key, V> implements Policy<K, V> {
   statCounter: StatCounter = new NoopCounter();

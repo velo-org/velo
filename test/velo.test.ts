@@ -34,7 +34,7 @@ Deno.test("Cache, should fire expired event", async () => {
   cache.set("key", "value");
 
   let fired = false;
-  cache.events.on("expired", (key, _) => {
+  cache.events.on("expire", (key) => {
     assertEquals(key, "key");
     fired = true;
   });
@@ -77,7 +77,7 @@ Deno.test("Cache, should fire remove event", () => {
   const cache = Velo.builder().capacity(5).events().build();
   cache.set("key", "value");
 
-  cache.events.on("removed", (key, _) => {
+  cache.events.on("remove", (key) => {
     assertEquals(key, "key");
   });
 
@@ -156,7 +156,7 @@ Deno.test("LoadingCache, should collect loading stats", () => {
   cache.get(2);
   cache.get(3);
 
-  assertEquals(cache.stats.loadingSuccessCount, 3);
-  assertEquals(cache.stats.loadingFailureCount, 1);
+  assertEquals(cache.stats.loadSuccessCount, 3);
+  assertEquals(cache.stats.loadFailCount, 1);
   assertEquals(cache.stats.loadFailureRate, 0.25);
 });

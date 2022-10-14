@@ -130,7 +130,7 @@ export class LFU<K extends Key, V> implements Policy<K, V> {
 
   *[Symbol.iterator]() {
     for (const k of this.keys) {
-      yield { key: k, value: this._keys[k].data };
+      yield { key: k, value: this._keys[k].data! };
     }
   }
 

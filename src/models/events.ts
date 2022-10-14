@@ -1,17 +1,32 @@
 export interface EventOptions {
+  remove: boolean;
+  expire: boolean;
   set: boolean;
-  removed: boolean;
+  get: boolean;
   clear: boolean;
-  expired: boolean;
+  load: boolean;
+  loaded: boolean;
 }
 
-export type EventName = "set" | "removed" | "clear" | "expired";
-export type KeyValueEventFunction<K, V> = (key: K, value: V) => void;
-export type EmptyEventFunction = () => void;
-export type EventFunction<K, V> =
-  | KeyValueEventFunction<K, V>
-  | EmptyEventFunction;
+export type EventName =
+  | "set"
+  | "remove"
+  | "clear"
+  | "expire"
+  | "get"
+  | "load"
+  | "loaded";
+
+type KeyEventFunction<K> = (key: K) => void;
+type KeyValueEventFunction<K, V> = (key: K, value: V) => void;
+type EmptyEventFunction = () => void;
 
 export interface VeloEventEmitter<K, V> {
-  on(name: EventName, listener: EventFunction<K, V>): this;
+  on(name: "remove", listener: KeyEventFunction<K>): this;
+  on(name: "expire", listener: KeyEventFunction<K>): this;
+  on(name: "set", listener: KeyValueEventFunction<K, V>): this;
+  on(name: "get", listener: KeyValueEventFunction<K, V | undefined>): this;
+  on(name: "clear", listener: EmptyEventFunction): this;
+  on(name: "load", listener: KeyEventFunction<K>): this;
+  on(name: "loaded", listener: KeyValueEventFunction<K, V>): this;
 }

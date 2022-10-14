@@ -37,7 +37,9 @@ export class VeloCache<K extends Key, V> {
   }
 
   get(key: K): V | undefined {
-    return this._policy.get(key);
+    const value = this._policy.get(key);
+    this.fireEvent("get", key, value);
+    return value;
   }
 
   set(key: K, value: V): void {
@@ -60,7 +62,7 @@ export class VeloCache<K extends Key, V> {
 
     const id = setTimeout(() => {
       this._policy.remove(key);
-      this.fireEvent("expired", key, value);
+      this.fireEvent("expire", key, value);
     }, this._ttl!);
 
     this._timeouts?.set(key, id);
@@ -68,7 +70,7 @@ export class VeloCache<K extends Key, V> {
 
   remove(key: K): void {
     this._policy.remove(key);
-    this.fireEvent("removed", key);
+    this.fireEvent("remove", key);
   }
 
   take(key: K): V | undefined {
@@ -120,14 +122,14 @@ export class VeloCache<K extends Key, V> {
     return this._stats.stats();
   }
 
-  get events(): VeloEventEmitter<K, V> {
+  get events() {
     if (!this._eventEmitter) {
       throw new Error();
     }
-    return this._eventEmitter;
+    return this._eventEmitter as VeloEventEmitter<K, V>;
   }
 
-  private fireEvent(name: EventName, ...args: (K | V)[]) {
+  protected fireEvent(name: EventName, ...args: (K | V | undefined)[]) {
     if (this._events && this._events[name]) {
       this._eventEmitter?.emit(name, ...args);
     }
@@ -140,9 +142,11 @@ export class VeloLoadingCache<K extends Key, V> extends VeloCache<K, V> {
   constructor(builder: Velo<K, V>, loader: LoaderFunction<K, V>) {
     super(builder);
     this._loaderFunction = (k) => {
+      this.fireEvent("load", k);
       try {
         const value = loader(k);
         this._stats.recordLoadingSuccess();
+        this.fireEvent("loaded", k, value);
         return value;
       } catch (e) {
         this._stats.recordLoadingFail();
@@ -151,7 +155,7 @@ export class VeloLoadingCache<K extends Key, V> extends VeloCache<K, V> {
     };
   }
 
-  get(key: K): V | undefined {
+  get(key: K): V {
     let value = this._policy.get(key);
     if (!value) {
       value = this._loaderFunction(key);

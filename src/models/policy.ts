@@ -77,5 +77,5 @@ export interface Policy<K, V> {
    */
   forEach(callback: (item: { key: K; value: V }, index: number) => void): void;
 
-  [Symbol.iterator](): IterableIterator<{ key: K; value: V | undefined }>;
+  [Symbol.iterator](): IterableIterator<{ key: K; value: V }>;
 }

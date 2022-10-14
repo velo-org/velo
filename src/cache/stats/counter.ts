@@ -40,8 +40,8 @@ export class VeloCounter implements StatCounter {
       hitCount: this._hits,
       missCount: this._misses,
       evictCount: this._evictions,
-      loadingSuccessCount: this._loadingSuccesses,
-      loadingFailureCount: this._loadingFailures,
+      loadSuccessCount: this._loadingSuccesses,
+      loadFailCount: this._loadingFailures,
       hitRate: this._hits / (this._hits + this._misses),
       missRate: this._misses / (this._hits + this._misses),
       loadFailureRate:

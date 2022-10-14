@@ -73,6 +73,28 @@ Deno.test(
   }
 );
 
+Deno.test(
+  "TinyLFU full cache acces twice, should promote and increase size",
+  () => {
+    const cache = Velo.builder().capacity(100).tinyLfu().build();
+    for (let i = 0; i < 100; i++) {
+      cache.set(i, i);
+    }
+    assertEquals(cache.size, 21);
+    assertEquals((cache as any)._policy.window.size(), 1);
+    assertEquals((cache as any)._policy.probation.size(), 20);
+
+    cache.get(98);
+    cache.set(1000, 1000);
+
+    assertEquals(cache.size, 22);
+    assertEquals((cache as any)._policy.window.size(), 1);
+    assertEquals((cache as any)._policy.probation.size(), 20);
+    assertEquals((cache as any)._policy.protected.size(), 1);
+    assertEquals((cache as any)._policy.protected.keys(), [98]);
+  }
+);
+
 Deno.test("TinyLFU should place entries in correct segment", () => {
   const cache = Velo.builder().capacity(200).tinyLfu().build();
   cache.set("1", 1);

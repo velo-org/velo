@@ -1,4 +1,3 @@
-import { getTypedArray, TypedArray } from "../utils/typed_array.ts";
 import { PointerList } from "../utils/pointer_list.ts";
 import { Key } from "../models/cache.ts";
 import { Policy } from "../models/policy.ts";
@@ -10,14 +9,7 @@ import { NoopCounter } from "../cache/stats/noopCounter.ts";
  */
 export class SC<K extends Key, V> implements Policy<K, V> {
   statCounter: StatCounter = new NoopCounter();
-  private head: number;
-  private tail: number;
-  private arrayMap: {
-    key: K | undefined;
-    value: V | undefined;
-    sChance: boolean;
-  }[];
-  private backward: TypedArray;
+  private arrayMap: SecondChanceEntry<K, V>[];
   private pointers: PointerList;
   private items: { [key in Key]: number };
   private _size: number;
@@ -26,17 +18,14 @@ export class SC<K extends Key, V> implements Policy<K, V> {
 
   constructor(capacity: number) {
     this.capacity = capacity;
-    this.backward = getTypedArray(this.capacity);
-    this.head = 0;
     this._size = 0;
-    this.tail = 0;
     this.items = {};
     this.pointers = new PointerList(this.capacity);
     this.arrayMap = new Array(this.capacity);
   }
 
   set(key: K, value: V) {
-    let pointer = this.items[key];
+    let pointer: number = this.items[key];
     if (pointer !== undefined) {
       this.arrayMap[pointer].value = value;
       this.arrayMap[pointer].sChance = true;
@@ -46,7 +35,7 @@ export class SC<K extends Key, V> implements Policy<K, V> {
     if (this._size < this.capacity!) {
       pointer = this._size++;
       if (!this.pointers.isFull()) {
-        pointer = this.pointers.newPointer()!;
+        pointer = this.pointers.newPointer();
       }
       this.items[key] = pointer;
       this.arrayMap[pointer] = { key, value, sChance: false };
@@ -110,10 +99,7 @@ export class SC<K extends Key, V> implements Policy<K, V> {
   }
 
   clear() {
-    this.backward = getTypedArray(this.capacity!);
-    this.head = 0;
     this._size = 0;
-    this.tail = 0;
     this.items = {};
     this.arrayMap = new Array(this.capacity);
   }
@@ -121,15 +107,13 @@ export class SC<K extends Key, V> implements Policy<K, V> {
   remove(key: K) {
     const pointer = this.items[key];
     this.pointers.remove(pointer);
-    this.arrayMap[pointer].key = undefined;
-    this.arrayMap[pointer].value = undefined;
-    this.arrayMap[pointer].sChance = false;
+    delete this.arrayMap[pointer];
     this._size--;
     delete this.items[key];
   }
 
   has(key: Key) {
-    return this.items[key] !== undefined ? true : false;
+    return this.items[key] !== undefined;
   }
 
   get keys() {
@@ -147,4 +131,10 @@ export class SC<K extends Key, V> implements Policy<K, V> {
   get size() {
     return this._size;
   }
+}
+
+interface SecondChanceEntry<K, V> {
+  key: K;
+  value: V;
+  sChance: boolean;
 }

@@ -1,4 +1,3 @@
-import { ERROR_TLW_WITH_WSCHILD } from "https://deno.land/std@0.155.0/node/internal_binding/_winerror.ts";
 import { NoopCounter } from "../../cache/stats/noopCounter.ts";
 import { Key } from "../../models/cache.ts";
 import { Policy } from "../../models/policy.ts";
@@ -6,8 +5,19 @@ import { StatCounter } from "../../models/stats.ts";
 import { PointerList } from "../../utils/pointer_list.ts";
 import { FrequencySketch } from "./frequency_sketch.ts";
 
+interface EntryIdent {
+  segment: Segment;
+  pointer: number;
+}
+
+enum Segment {
+  Window,
+  Protected,
+  Probation,
+}
+
 /**
- * Window-TinyLFU implementation as per https://dl.acm.org/citation.cfm?id=3149371
+ * Window-TinyLFU (W-TinyLFU) implementation as per https://dl.acm.org/citation.cfm?id=3149371
  * inspired by Caffeine's implementation: https://github.com/ben-manes/caffeine.
  *
  * A new cache entry is first placed into a small window cache and remains
@@ -40,7 +50,7 @@ export class WindowTinyLfu<K extends Key, V> implements Policy<K, V> {
   constructor(capacity: number) {
     this.capacity = capacity;
     const maxWindow = Math.ceil(0.01 * capacity);
-    const maxProtected = Math.ceil(0.8 * (capacity - maxWindow));
+    const maxProtected = Math.floor(0.8 * (capacity - maxWindow));
     const maxProbation = Math.ceil(0.2 * (capacity - maxWindow));
     this.window = new LruPointerList(maxWindow);
     this.protected = new LruPointerList(maxProtected);
@@ -250,6 +260,11 @@ export class WindowTinyLfu<K extends Key, V> implements Policy<K, V> {
     };
   }
 
+  /**
+   * Executes a function on the cache segment that the entry belongs to. Passes
+   * the entries pointer to the function.
+   */
+  // deno-lint-ignore no-explicit-any
   private executeOnCache(target: EntryIdent, fn: (p: number) => any) {
     switch (target.segment) {
       case Segment.Window:
@@ -260,17 +275,6 @@ export class WindowTinyLfu<K extends Key, V> implements Policy<K, V> {
         return fn.call(this.probation, target.pointer);
     }
   }
-}
-
-interface EntryIdent {
-  segment: Segment;
-  pointer: number;
-}
-
-enum Segment {
-  Window,
-  Protected,
-  Probation,
 }
 
 /**
