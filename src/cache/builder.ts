@@ -93,6 +93,7 @@ export class Velo<K extends Key, V> {
   }
 
   public tinyLfu() {
+    this.requireExpr(this._capacity >= 100, "TinyLFU requires capacity >= 100");
     return this.withPolicy(new WindowTinyLfu<K, V>(this._capacity));
   }
 

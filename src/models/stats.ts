@@ -2,7 +2,7 @@ export interface CacheStatistics {
   readonly hitCount: number;
   readonly missCount: number;
   readonly evictCount: number;
-  readonly loadingCount: number;
+  readonly loadingSuccessCount: number;
   readonly loadingFailureCount: number;
   readonly hitRate: number;
   readonly missRate: number;

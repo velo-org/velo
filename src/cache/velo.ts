@@ -48,7 +48,7 @@ export class VeloCache<K extends Key, V> {
     this.fireEvent("set", key, value);
   }
 
-  setTTL(key: K, value: V) {
+  private setTTL(key: K, value: V) {
     if (!this._ttl) {
       throw new Error();
     }

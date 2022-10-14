@@ -16,7 +16,7 @@ export class NoopCounter implements StatCounter {
       hitCount: 0,
       missCount: 0,
       evictCount: 0,
-      loadingCount: 0,
+      loadingSuccessCount: 0,
       loadingFailureCount: 0,
       hitRate: 0,
       missRate: 0,
