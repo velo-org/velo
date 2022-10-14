@@ -1,10 +1,6 @@
 import { Velo } from "../src/cache/builder.ts";
 import { sleep } from "../src/utils/sleep.ts";
-import { assertEquals } from "../dev_deps.ts";
-import {
-  assert,
-  assertThrows,
-} from "https://deno.land/std@0.155.0/testing/asserts.ts";
+import { assert, assertEquals, assertThrows } from "../dev_deps.ts";
 import { VeloLoadingCache } from "../src/cache/velo.ts";
 
 Deno.test("CacheBuilder, should reject non-positive capacity", () => {
@@ -135,11 +131,32 @@ Deno.test(
       .capacity(5)
       .build((k) => {
         if (k === 0) {
-          throw new Deno.errors.InvalidData("No Null");
+          throw new Deno.errors.InvalidData("Zero Key");
         }
         return k + 1;
       });
 
-    assertThrows(() => cache.get(0), Deno.errors.InvalidData);
+    assertThrows(() => cache.get(0), Deno.errors.InvalidData, "Zero Key");
   }
 );
+
+Deno.test("LoadingCache, should collect loading stats", () => {
+  const cache = Velo.builder<number, number>()
+    .capacity(5)
+    .stats()
+    .build((k) => {
+      if (k === 0) {
+        throw new Error();
+      }
+      return k;
+    });
+
+  assertThrows(() => cache.get(0));
+  cache.get(1);
+  cache.get(2);
+  cache.get(3);
+
+  assertEquals(cache.stats.loadingSuccessCount, 3);
+  assertEquals(cache.stats.loadingFailureCount, 1);
+  assertEquals(cache.stats.loadFailureRate, 0.25);
+});

@@ -1,6 +1,6 @@
-import { assert, assertEquals } from "../dev_deps.ts";
-import { Velo } from "../src/cache/builder.ts";
-import { sleep } from "../src/utils/sleep.ts";
+import { assert, assertEquals } from "../../dev_deps.ts";
+import { Velo } from "../../src/cache/builder.ts";
+import { sleep } from "../../src/utils/sleep.ts";
 
 Deno.test("ARC create cache, should create a new empty cache", () => {
   const arcCache = Velo.builder().capacity(5).arc().build();
@@ -41,7 +41,7 @@ Deno.test("ARC get removed entry, should return undefined", () => {
 });
 
 Deno.test(
-  "ARC set one more than allowed capacity, should not increase amount of keys",
+  "ARC set after capacity reached, should evict to maintain capacity",
   () => {
     const arcCache = Velo.builder().capacity(5).arc().build();
     arcCache.set("1", 1);
@@ -55,7 +55,7 @@ Deno.test(
 );
 
 Deno.test(
-  "ARC set one more than allowed capacity, should evict first inserted key",
+  "ARC set after capacity reached, should evict first inserted key",
   () => {
     const arcCache = Velo.builder().capacity(5).arc().build();
     arcCache.set("1", 1);
@@ -68,7 +68,7 @@ Deno.test(
   }
 );
 
-Deno.test("ARC set double the allowed capacity, should evict all keys", () => {
+Deno.test("ARC immediate full scan, should evict all keys", () => {
   const arcCache = Velo.builder().capacity(3).arc().build();
   arcCache.set("1", 1);
   arcCache.set("2", 2);
@@ -133,3 +133,23 @@ Deno.test(
     assertEquals((arcCache as any)._policy.t2.keys, ["1"]); // frequently set
   }
 );
+
+Deno.test("ARC should collect cache stats", () => {
+  const arcCache = Velo.builder().capacity(3).arc().stats().build();
+  assertEquals(arcCache.stats.evictCount, 0);
+  assertEquals(arcCache.stats.hitCount, 0);
+  assertEquals(arcCache.stats.missCount, 0);
+
+  arcCache.set("1", 1);
+  arcCache.set("2", 2);
+  arcCache.set("3", 3);
+  arcCache.set("4", 4); // evict
+  arcCache.get("1"); // miss
+  arcCache.get("2"); // hit
+  arcCache.get("3"); // hit
+  arcCache.get("4"); // hit
+
+  assertEquals(arcCache.stats.hitCount, 3);
+  assertEquals(arcCache.stats.missCount, 1);
+  assertEquals(arcCache.stats.evictCount, 1);
+});
