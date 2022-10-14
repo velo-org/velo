@@ -277,7 +277,7 @@ class ARCList<K extends Key, V> {
     let p = this.items[key];
 
     if (p === undefined) {
-      p = this.pointers.newPointer()!;
+      p = this.pointers.newPointer();
       this.pointers.pushFront(p);
       this._keys[p] = key;
       this.items[key] = p;

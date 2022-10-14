@@ -232,17 +232,17 @@ export class PointerList {
    *
    * @returns A new pointer or undefined if the list is full
    */
-  newPointer(): number | undefined {
+  newPointer(): number {
     const hasFreeIndex = this.nextIndex.length > 0;
 
     if (hasFreeIndex) {
-      return this.nextIndex.shift();
+      return this.nextIndex.shift()!;
     }
 
-    if (!this.isFull()) {
-      return this._size;
+    if (this.isFull()) {
+      throw new Error("no valid pointer available");
     }
 
-    return undefined;
+    return this._size;
   }
 }

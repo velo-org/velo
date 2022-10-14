@@ -1,3 +1,4 @@
+import { ERROR_TLW_WITH_WSCHILD } from "https://deno.land/std@0.155.0/node/internal_binding/_winerror.ts";
 import { NoopCounter } from "../../cache/stats/noopCounter.ts";
 import { Key } from "../../models/cache.ts";
 import { Policy } from "../../models/policy.ts";
@@ -38,9 +39,9 @@ export class WindowTinyLfu<K extends Key, V> implements Policy<K, V> {
 
   constructor(capacity: number) {
     this.capacity = capacity;
-    const maxWindow = 0.01 * capacity;
-    const maxProtected = 0.8 * (capacity - maxWindow);
-    const maxProbation = 0.2 * (capacity - maxWindow);
+    const maxWindow = Math.ceil(0.01 * capacity);
+    const maxProtected = Math.ceil(0.8 * (capacity - maxWindow));
+    const maxProbation = Math.ceil(0.2 * (capacity - maxWindow));
     this.window = new LruPointerList(maxWindow);
     this.protected = new LruPointerList(maxProtected);
     this.probation = new LruPointerList(maxProbation);
@@ -193,11 +194,16 @@ export class WindowTinyLfu<K extends Key, V> implements Policy<K, V> {
 
     if (this.protected.isFull()) {
       const demoted = this.protected.removeLru();
-      this.entryMap[demoted.key].segment = Segment.Probation;
-      this.probation.insertMru(demoted.key, demoted.value);
+      this.entryMap[demoted.key] = {
+        segment: Segment.Probation,
+        pointer: this.probation.insertMru(demoted.key, demoted.value),
+      };
     }
 
-    this.protected.insertMru(promoted.key, promoted.value);
+    this.entryMap[promoted.key] = {
+      segment: Segment.Protected,
+      pointer: this.protected.insertMru(promoted.key, promoted.value),
+    };
   }
 
   /**
@@ -219,6 +225,9 @@ export class WindowTinyLfu<K extends Key, V> implements Policy<K, V> {
         this.evictFromWindow();
       }
     } else {
+      if (this.probation.isFull()) {
+        this.evictFromMain();
+      }
       this.transferFromWindowToMain();
     }
   }
@@ -235,7 +244,10 @@ export class WindowTinyLfu<K extends Key, V> implements Policy<K, V> {
 
   private transferFromWindowToMain() {
     const windowVictim = this.window.removeLru();
-    this.probation.insertMru(windowVictim.key, windowVictim.value);
+    this.entryMap[windowVictim.key] = {
+      segment: Segment.Probation,
+      pointer: this.probation.insertMru(windowVictim.key, windowVictim.value),
+    };
   }
 
   private executeOnCache(target: EntryIdent, fn: (p: number) => any) {
@@ -243,9 +255,9 @@ export class WindowTinyLfu<K extends Key, V> implements Policy<K, V> {
       case Segment.Window:
         return fn.call(this.window, target.pointer);
       case Segment.Protected:
-        return fn.call(this.window, target.pointer);
+        return fn.call(this.protected, target.pointer);
       case Segment.Probation:
-        return fn.call(this.window, target.pointer);
+        return fn.call(this.probation, target.pointer);
     }
   }
 }
@@ -282,11 +294,11 @@ class LruPointerList<K extends Key, V> {
   }
 
   keys() {
-    return this._keys;
+    return this._keys.filter((k) => k !== undefined);
   }
 
   values() {
-    return this._values;
+    return this._values.filter((v) => v !== undefined);
   }
 
   size() {
@@ -295,6 +307,10 @@ class LruPointerList<K extends Key, V> {
 
   isFull() {
     return this.pointers.isFull();
+  }
+
+  isEmpty() {
+    return this.pointers.size === 0;
   }
 
   get(pointer: number) {
@@ -311,7 +327,7 @@ class LruPointerList<K extends Key, V> {
   }
 
   insertMru(key: K, value: V): number {
-    const p = this.pointers.newPointer()!;
+    const p = this.pointers.newPointer();
     this.pointers.pushFront(p);
     this._keys[p] = key;
     this._values[p] = value;
@@ -323,29 +339,39 @@ class LruPointerList<K extends Key, V> {
   }
 
   erase(pointer: number) {
-    this.pointers.remove(pointer);
-    const key = this._keys[pointer];
+    const p = this.pointers.remove(pointer);
+    const key = this._keys[p];
     delete this.items[key];
+    delete this._keys[p];
+    delete this._values[p];
   }
 
   removeLru() {
     const p = this.pointers.removeBack();
     const key = this._keys[p];
+    const value = this._values[p];
     delete this.items[key];
-    return { key, value: this._values[p] };
+    delete this._keys[p];
+    delete this._values[p];
+    return { key, value };
   }
 
   remove(pointer: number) {
     this.pointers.remove(pointer);
     const key = this._keys[pointer];
+    const value = this._values[pointer];
     delete this.items[key];
-    return { key, value: this._values[pointer] };
+    delete this._keys[pointer];
+    delete this._values[pointer];
+    return { key, value };
   }
 
   evict() {
     const p = this.pointers.removeBack();
     const key = this._keys[p];
     delete this.items[key];
+    delete this._keys[p];
+    delete this._values[p];
     return key;
   }
 
@@ -360,6 +386,9 @@ class LruPointerList<K extends Key, V> {
     startIndex: number,
     callback: (item: { key: K; value: V }, index: number) => void
   ) {
+    if (this.isEmpty()) {
+      return;
+    }
     let p: number | undefined = this.pointers.front;
     for (let i = startIndex; p !== undefined; i++) {
       callback({ key: this._keys[p], value: this._values[p] }, i);
@@ -368,8 +397,11 @@ class LruPointerList<K extends Key, V> {
   }
 
   *[Symbol.iterator]() {
+    if (this.isEmpty()) {
+      return;
+    }
     let p: number | undefined = this.pointers.front;
-    for (let i = 0; p != undefined; i++) {
+    for (let i = 0; p !== undefined; i++) {
       yield { key: this._keys[p], value: this._values[p] };
       p = this.pointers.nextOf(p);
     }

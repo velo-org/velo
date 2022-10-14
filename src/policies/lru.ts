@@ -25,7 +25,7 @@ export class LRU<K extends Key, V> implements Policy<K, V> {
   }
 
   set(key: K, value: V) {
-    let pointer = this.items[key];
+    let pointer: number = this.items[key];
 
     if (pointer) {
       this.pointers.moveToFront(pointer);
@@ -35,12 +35,12 @@ export class LRU<K extends Key, V> implements Policy<K, V> {
 
     // The cache is not yet full
     if (!this.pointers.isFull()) {
-      pointer = this.pointers.newPointer()!;
+      pointer = this.pointers.newPointer();
     } // Cache is full, we need to drop the last value
     else {
       pointer = this.pointers.removeBack();
       delete this.items[this._keys[pointer]!];
-      pointer = this.pointers.newPointer()!;
+      pointer = this.pointers.newPointer();
       this.statCounter.recordEviction();
     }
 
