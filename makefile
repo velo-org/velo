@@ -1,6 +1,6 @@
 #usage: make bench filter=LRU out=md
-bench:
-	deno run --allow-hrtime --allow-write --allow-read --unstable --allow-env --allow-run ./benchmark/runBenchmarks.ts $(filter) $(out)
+benchmark:
+	deno bench --unstable ./benchmark/run_groups.ts
 
 examples:
 	cd ./examples

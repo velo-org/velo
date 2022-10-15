@@ -26,7 +26,7 @@
 
 ## Introduction
 
-Velo is an in-memory caching library for Deno. We provide a high-performance cache implementation with an API inspired by [Google Guava's Cache](https://github.com/google/guava/wiki/CachesExplained). While it can be ineffectual to optimize JavaScript we draw significant performance increases from using a [custom pointer system](https://yomguithereal.github.io/posts/lru-cache#a-custom-pointer-system). For more details, see our [examples](./examples/) and browse the [API documentation](https://doc.deno.land/https/deno.land/x/velo@0.1.6/mod.ts).
+Velo is an in-memory caching library for Deno. We provide a high-performance cache implementation with an API inspired by [Google Guava's Cache](https://github.com/google/guava/wiki/CachesExplained). While it can be ineffectual to optimize JavaScript we draw significant performance increases from using a [custom pointer system](https://yomguithereal.github.io/posts/lru-cache#a-custom-pointer-system). For more details, take a look at our [examples](./examples/) and browse the [documentation](https://doc.deno.land/https/deno.land/x/velo@0.1.6/mod.ts).
 
 ## Installation
 

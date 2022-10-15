@@ -1,53 +1,37 @@
-import { bench } from "../../dev_deps.ts";
-import { DATA_1, DATA_2, EVICT, MAX_KEYS, RUNS } from "../benchmark.config.ts";
-import { LFU } from "../../src/caches/lfu.ts";
+import {
+  lfu,
+  DATA_1,
+  DATA_2,
+  MAX_KEYS,
+  MISSING_KEY,
+} from "../benchmark.config.ts";
 
-const cache = new LFU({ capacity: MAX_KEYS });
-
-bench({
-  name: `LFU set x${MAX_KEYS}`,
-  runs: RUNS,
-  func(b): void {
-    b.start();
-    for (let i = 0; i < MAX_KEYS; i++) {
-      cache.set(DATA_1[i][0], DATA_1[i][1]);
-    }
-    b.stop();
-  },
+Deno.bench({ name: "LFU set", group: "set" }, () => {
+  for (let i = 0; i < MAX_KEYS; i++) {
+    lfu.set(DATA_1[i][0], DATA_1[i][1]);
+  }
 });
 
-bench({
-  name: `LFU get x${MAX_KEYS}`,
-  runs: RUNS,
-  func(b): void {
-    b.start();
-    for (let i = 0; i < MAX_KEYS; i++) {
-      cache.get(DATA_1[i][0]);
-    }
-    b.stop();
-  },
+Deno.bench({ name: "LFU get (hit)", group: "get (hit)" }, () => {
+  for (let i = 0; i < MAX_KEYS; i++) {
+    lfu.get(DATA_1[i][0]);
+  }
 });
 
-bench({
-  name: `LFU update x${MAX_KEYS}`,
-  runs: RUNS,
-  func(b): void {
-    b.start();
-    for (let i = 0; i < MAX_KEYS; i++) {
-      cache.set(DATA_1[i][0], DATA_2[i][1]);
-    }
-    b.stop();
-  },
+Deno.bench({ name: "LFU get (miss)", group: "get (miss)" }, () => {
+  for (let i = 0; i < MAX_KEYS; i++) {
+    lfu.get(MISSING_KEY);
+  }
 });
 
-bench({
-  name: `LFU evict x${MAX_KEYS}`,
-  runs: RUNS,
-  func(b): void {
-    b.start();
-    for (let i = MAX_KEYS; i < EVICT; i++) {
-      cache.set(DATA_1[i][0], DATA_1[i][1]);
-    }
-    b.stop();
-  },
+Deno.bench({ name: "LFU update", group: "update" }, () => {
+  for (let i = 0; i < MAX_KEYS; i++) {
+    lfu.set(DATA_1[i][0], DATA_2[i][1]);
+  }
+});
+
+Deno.bench({ name: "LFU evict", group: "evict" }, () => {
+  for (let i = 0; i < MAX_KEYS; i++) {
+    lfu.set(DATA_2[i][0], DATA_2[i][1]);
+  }
 });

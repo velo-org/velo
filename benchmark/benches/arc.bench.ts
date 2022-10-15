@@ -1,53 +1,37 @@
-import { bench } from "../../dev_deps.ts";
-import { DATA_1, DATA_2, EVICT, MAX_KEYS, RUNS } from "../benchmark.config.ts";
-import { ARC } from "../../src/caches/arc.ts";
+import {
+  arc,
+  DATA_1,
+  DATA_2,
+  MAX_KEYS,
+  MISSING_KEY,
+} from "../benchmark.config.ts";
 
-const cache = new ARC({ capacity: MAX_KEYS });
-
-bench({
-  name: `ARC set x${MAX_KEYS}`,
-  runs: RUNS,
-  func(b): void {
-    b.start();
-    for (let i = 0; i < MAX_KEYS; i++) {
-      cache.set(DATA_1[i][0], DATA_1[i][1]);
-    }
-    b.stop();
-  },
+Deno.bench({ name: "ARC set", group: "set" }, () => {
+  for (let i = 0; i < MAX_KEYS; i++) {
+    arc.set(DATA_1[i][0], DATA_1[i][1]);
+  }
 });
 
-bench({
-  name: `ARC get x${MAX_KEYS}`,
-  runs: RUNS,
-  func(b): void {
-    b.start();
-    for (let i = 0; i < MAX_KEYS; i++) {
-      cache.get(DATA_1[i][0]);
-    }
-    b.stop();
-  },
+Deno.bench({ name: "ARC get (hit)", group: "get (hit)" }, () => {
+  for (let i = 0; i < MAX_KEYS; i++) {
+    arc.get(DATA_1[i][0]);
+  }
 });
 
-bench({
-  name: `ARC update x${MAX_KEYS}`,
-  runs: RUNS,
-  func(b): void {
-    b.start();
-    for (let i = 0; i < MAX_KEYS; i++) {
-      cache.set(DATA_1[i][0], DATA_2[i][1]);
-    }
-    b.stop();
-  },
+Deno.bench({ name: "ARC get (miss)", group: "get (miss)" }, () => {
+  for (let i = 0; i < MAX_KEYS; i++) {
+    arc.get(MISSING_KEY);
+  }
 });
 
-bench({
-  name: `ARC evict x${MAX_KEYS}`,
-  runs: RUNS,
-  func(b): void {
-    b.start();
-    for (let i = MAX_KEYS; i < EVICT; i++) {
-      cache.set(DATA_1[i][0], DATA_1[i][1]);
-    }
-    b.stop();
-  },
+Deno.bench({ name: "ARC update", group: "update" }, () => {
+  for (let i = 0; i < MAX_KEYS; i++) {
+    arc.set(DATA_1[i][0], DATA_2[i][1]);
+  }
+});
+
+Deno.bench({ name: "ARC evict", group: "evict" }, () => {
+  for (let i = 0; i < MAX_KEYS; i++) {
+    arc.set(DATA_2[i][0], DATA_2[i][1]);
+  }
 });
