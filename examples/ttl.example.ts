@@ -9,7 +9,7 @@ import { sleep } from "../src/utils/sleep.ts";
   const cache = Velo.builder().capacity(10_000).events().ttl(500).build();
 
   cache.events.on("expire", (key) => {
-    console.log(`Expired: ${key}`);
+    console.log(`(on expire) Expired: ${key}`);
   });
 
   cache.set("key", "value");

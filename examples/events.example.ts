@@ -8,15 +8,25 @@ import { User } from "./common/User.ts";
  */
 
 /**
- * Cache with default event settings ({@link VELO_EVENT_DEFAULTS})
+ * Cache with default event settings ({@link DEFAULT.eventOptions}):
+ *
+ *        DEFAULT.eventOptions === {
+ *         remove: true,
+ *         expire: true,
+ *         set: false,
+ *         get: false,
+ *         clear: false,
+ *         load: false,
+ *         loaded: false,
+ *        }
  */
-const _cache1 = Velo.builder<string, User>().capacity(10_000).events().build();
+const _cache1 = Velo.builder().capacity(10_000).events().build();
 
 /**
- * Cache with custom event settings by providing an {@link EventOptions} object.
- * You can use `Options.default().eventOptions` and override the settings you want
+ * Cache with custom event settings by providing an EventOptions object.
+ * You can use the defaults and override specific properties.
  */
-const _cache2 = Velo.builder<string, User>()
+const _cache2 = Velo.builder()
   .capacity(10_000)
   .events({
     ...DEFAULT.eventOptions,
@@ -29,46 +39,35 @@ const _cache2 = Velo.builder<string, User>()
 /**
  * Additionally you can use setEvent() to enable or disable a specifc event
  */
-const _cache3 = Velo.builder<string, User>()
+const _cache3 = Velo.builder()
   .capacity(10_000)
   .events()
   .setEvent("get") // true
   .setEvent("clear", true)
-  .setEvent("expire", false)
+  .setEvent("remove", false)
   .build();
 
 /**
- * The default options are:
- * {
- *  remove: true,
- *  expire: false,
- *  set: false,
- *  get: false,
- *  clear: false,
- *  load: false,
- *  loaded: false,
- * }
+ * Set the cache types to enable type checking for event listeners
  */
 const cache = Velo.builder<string, User>()
   .capacity(10_000)
-  .events()
-  .setEvent("set")
-  .setEvent("clear")
+  .events({ ...DEFAULT.eventOptions, set: true, clear: true })
   .build();
 
 // register listener
 cache.events.on("remove", (key) => {
-  console.log(`Removed: ${key}`);
+  console.log(`(on remove) Removed: ${key}`);
 });
 
 // register listener
 cache.events.on("set", (key, value) => {
-  console.log(`Set: ${key}, ${value.getDisplayName()}`);
+  console.log(`(on set) Set: ${key}, ${value.getDisplayName()}`);
 });
 
 // register listener
 cache.events.on("clear", () => {
-  console.log(`Cleared`);
+  console.log(`(on clear) Cleared`);
 });
 
 cache.set("1", new User("John Doe", "mail@example.com"));
