@@ -5,7 +5,6 @@ import { VeloLoadingCache } from "../src/cache/velo.ts";
 
 Deno.test("CacheBuilder, should reject non-positive capacity", () => {
   assertThrows(() => Velo.builder().capacity(-5));
-  assertThrows(() => Velo.builder().capacity(0));
 });
 
 Deno.test("CacheBuilder, should reject non-positive TTL", () => {
@@ -13,20 +12,18 @@ Deno.test("CacheBuilder, should reject non-positive TTL", () => {
   assertThrows(() => Velo.builder().ttl(0));
 });
 
-Deno.test(
-  "CacheBuilder, should reject policy if no capacity is provided",
-  () => {
-    assertThrows(() => Velo.builder().lru());
-  }
-);
-
 Deno.test("CacheBuilder, should reject multiple calls to same method", () => {
   assertThrows(() => Velo.builder().capacity(5).capacity(10));
   assertThrows(() => Velo.builder().ttl(5).ttl(10));
   assertThrows(() => Velo.builder().stats().stats());
   assertThrows(() => Velo.builder().events().events());
-  assertThrows(() => Velo.builder().capacity(5).lru().lru());
-  assertThrows(() => Velo.builder().capacity(5).lru().lfu());
+});
+
+Deno.test("CacheBuilder, create a cache from Options object", () => {
+  const cache_1 = Velo.builder().capacity(5).build();
+  const cache_2 = Velo.from(cache_1.options).build();
+  assertEquals(cache_1.options, cache_2.options);
+  assertEquals(cache_1.capacity, cache_2.capacity);
 });
 
 Deno.test("Cache, should fire expired event", async () => {
@@ -83,6 +80,7 @@ Deno.test("Cache, should fire remove event", () => {
 
   cache.remove("key");
 });
+
 Deno.test("LoadingCache, should be a loading Cache", () => {
   const cache = Velo.builder<string, string>()
     .capacity(5)
@@ -103,12 +101,11 @@ Deno.test("LoadingCache, should load value if not present", () => {
 Deno.test("LoadingCache, should not load value if already in the cache", () => {
   const cache = Velo.builder<number, string>()
     .capacity(5)
-    .build((_) => {
+    .build(() => {
       return "loaded";
     });
 
   cache.set(1, "valid value");
-
   assertEquals(cache.get(1), "valid value");
 });
 
@@ -118,7 +115,7 @@ Deno.test("LoadingCache, should refresh value", () => {
     .build((k) => {
       return k + 1;
     });
-  cache.get(1);
+  cache.set(1, -2);
   cache.refresh(1);
 
   assertEquals(cache.get(1), 2);

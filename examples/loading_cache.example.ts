@@ -2,7 +2,8 @@
  * This example highlights the loading cache functionality.
  */
 
-import { Velo, VELO_EVENT_DEFAULTS } from "../src/cache/builder.ts";
+import { Velo } from "../src/cache/builder.ts";
+import { DEFAULT } from "../src/cache/options.ts";
 import { LoaderFunction } from "../src/models/cache.ts";
 
 /**
@@ -49,7 +50,7 @@ console.log(
  */
 const loadingCache2 = Velo.builder<string, number>()
   .capacity(10_000)
-  .events({ ...VELO_EVENT_DEFAULTS, load: true, loaded: true })
+  .events({ ...DEFAULT.eventOptions, load: true, loaded: true })
   .build(loadFunc);
 
 loadingCache2.events.on("load", (key) => {

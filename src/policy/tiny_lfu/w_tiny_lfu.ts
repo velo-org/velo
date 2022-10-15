@@ -48,6 +48,9 @@ export class WindowTinyLfu<K extends Key, V> implements Policy<K, V> {
   statCounter: StatCounter = new NoopCounter();
 
   constructor(capacity: number) {
+    if (capacity < 100) {
+      throw new Error("TinyLFU requires capacity >= 100");
+    }
     this.capacity = capacity;
     const maxWindow = Math.ceil(0.01 * capacity);
     const maxProtected = Math.floor(0.8 * (capacity - maxWindow));

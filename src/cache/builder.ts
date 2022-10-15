@@ -1,31 +1,17 @@
 import { VeloCache, VeloLoadingCache } from "./velo.ts";
-import { Key, LoaderFunction } from "../models/cache.ts";
+import { CacheOptions, Key, LoaderFunction } from "../models/cache.ts";
 import { EventName, EventOptions } from "../models/events.ts";
 import { ARC } from "../policy/arc.ts";
 import { LRU } from "../policy/lru.ts";
 import { SC } from "../policy/sc.ts";
-import { Policy } from "../models/policy.ts";
+import { Policy, updateCapacity } from "../models/policy.ts";
 import { LFU } from "../policy/lfu.ts";
 import { WindowTinyLfu } from "../policy/tiny_lfu/w_tiny_lfu.ts";
-import { VeloOptions } from "./options.ts";
-
-export const VELO_EVENT_DEFAULTS = {
-  remove: true,
-  expire: true,
-  set: false,
-  get: false,
-  clear: false,
-  load: false,
-  loaded: false,
-};
+import { Options } from "./options.ts";
 
 export class Velo<K extends Key, V> {
-  _capacity = 0;
-  _policy?: Policy<K, V>;
-  _events = false;
-  _eventOptions = VELO_EVENT_DEFAULTS;
-  _stats = false;
-  _ttl = 0;
+  private _options: CacheOptions<K, V> = Options.default<K, V>();
+  private _is_unset_policy = true;
 
   private constructor() {}
 
@@ -33,77 +19,87 @@ export class Velo<K extends Key, V> {
     return new Velo<K1, V1>();
   }
 
-  public capacity(capacity: number) {
-    this.requireExpr(capacity > 0, "Capacity must be greater than 0");
-    this.requireExpr(this._capacity === 0, "Capacity already set");
-    this._capacity = capacity;
-    return this;
-  }
-
-  public from(options: VeloOptions<K, V>) {
+  static from<K1 extends Key, V1>(options: Options<K1, V1>) {
     return options.toBuilder();
   }
 
-  public ttl(timeout: number) {
-    this.requireExpr(timeout > 0, "TTL must be greater than 0");
-    this.requireExpr(this._ttl === 0, "TTL already set");
-    this._ttl = timeout;
-    return this;
-  }
-
-  public stats() {
-    this.requireExpr(!this._stats, "Stats already enabled");
-    this._stats = true;
-    return this;
-  }
-
-  public events(options?: EventOptions) {
-    this.requireExpr(!this._events, "Events already enabled");
-    this._events = true;
-    if (options) {
-      this._eventOptions = options;
+  public capacity(capacity: number) {
+    this.requireExpr(capacity >= 0, "Capacity must be >= 0");
+    this.requireExpr(this._options.capacity === 0, "Capacity already set");
+    this._options.capacity = capacity;
+    if (this._is_unset_policy) {
+      this._options.policy = updateCapacity(this._options.policy, capacity);
     }
     return this;
   }
 
-  public setEvent(name: EventName, active?: boolean) {
-    this.requireExpr(
-      this._events,
-      "Events are not enabled. Use events() before setEvent()"
-    );
-    this._eventOptions[name] = active ?? true;
+  public ttl(timeout: number) {
+    this.requireExpr(timeout > 0, "TTL must be greater than 0");
+    this.requireExpr(this._options.ttl === 0, "TTL already set");
+    this._options.ttl = timeout;
     return this;
   }
 
-  public withPolicy(policy: Policy<K, V>) {
-    this.requireExpr(this._policy === undefined, "Policy is already set");
+  public stats() {
+    this.requireExpr(!this._options.stats, "Stats already enabled");
+    this._options.stats = true;
+    return this;
+  }
+
+  public events(options?: EventOptions) {
+    this.requireExpr(!this._options.events, "Events already enabled");
+    this._options.events = true;
+    if (options) {
+      this._options.eventOptions = options;
+    }
+    return this;
+  }
+
+  public allEvents(option?: { loading: boolean }) {
+    return this.events({
+      remove: true,
+      expire: true,
+      set: true,
+      get: true,
+      clear: true,
+      load: option?.loading ?? false,
+      loaded: option?.loading ?? false,
+    });
+  }
+
+  public setEvent(name: EventName, active?: boolean) {
     this.requireExpr(
-      this._capacity > 0,
-      "Invalid or missing capacity. Provide capacity before policy() and build()"
+      this._options.events,
+      "Events are not enabled. Use events() before setEvent()"
     );
-    this._policy = policy;
+    this._options.eventOptions[name] = active ?? true;
+    return this;
+  }
+
+  public policy(policy: Policy<K, V>) {
+    this._options.policy = policy;
+    this._is_unset_policy = false;
     return this;
   }
 
   public arc() {
-    return this.withPolicy(new ARC<K, V>(this._capacity));
+    return this.policy(new ARC<K, V>(this._options.capacity));
   }
 
   public lru() {
-    return this.withPolicy(new LRU<K, V>(this._capacity));
+    return this.policy(new LRU<K, V>(this._options.capacity));
   }
 
   public sc() {
-    return this.withPolicy(new SC<K, V>(this._capacity));
+    return this.policy(new SC<K, V>(this._options.capacity));
   }
 
   public lfu() {
-    return this.withPolicy(new LFU<K, V>(this._capacity));
+    return this.policy(new LFU<K, V>(this._options.capacity));
   }
 
   public tinyLfu() {
-    this.requireExpr(this._capacity >= 100, "TinyLFU requires capacity >= 100");
-    return this.withPolicy(new WindowTinyLfu<K, V>(this._capacity));
+    return this.policy(new WindowTinyLfu<K, V>(this._options.capacity));
   }
 
   public build(): VeloCache<K, V>;
@@ -111,23 +107,17 @@ export class Velo<K extends Key, V> {
   public build(loader: LoaderFunction<K, V>): VeloLoadingCache<K, V>;
   //prettier-ignore
   public build(loader?: LoaderFunction<K, V>): VeloCache<K, V> | VeloLoadingCache<K, V> {
-    if (!this._policy) {
-      this.lru();
-    }
-
     if (loader) {
       return new VeloLoadingCache<K, V>(
-        this,
+        this._options,
         loader
       );
     }
 
-    this.requireExpr(this._eventOptions.load === false, "Load event requires a loading cache. Use .build(LoaderFunction)");
-    this.requireExpr(this._eventOptions.loaded === false, "Loaded event requires a loading cache. Use .build(LoaderFunction)");
+    this.requireExpr(this._options.eventOptions.load === false, "Load event requires a loading cache. Use .build(LoaderFunction)");
+    this.requireExpr(this._options.eventOptions.loaded === false, "Loaded event requires a loading cache. Use .build(LoaderFunction)");
 
-    return new VeloCache<K, V>(
-      this
-    );
+    return new VeloCache<K, V>(this._options);
   }
 
   private requireExpr(expression: boolean, message?: string) {

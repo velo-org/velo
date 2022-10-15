@@ -1,4 +1,5 @@
-import { VELO_EVENT_DEFAULTS, Velo } from "../src/cache/builder.ts";
+import { Velo } from "../src/cache/builder.ts";
+import { DEFAULT } from "../src/cache/options.ts";
 import { User } from "./common/User.ts";
 
 /**
@@ -13,12 +14,12 @@ const _cache1 = Velo.builder<string, User>().capacity(10_000).events().build();
 
 /**
  * Cache with custom event settings by providing an {@link EventOptions} object.
- * You can use ({@link VELO_EVENT_DEFAULTS}) and override the settings you want
+ * You can use `Options.default().eventOptions` and override the settings you want
  */
 const _cache2 = Velo.builder<string, User>()
   .capacity(10_000)
   .events({
-    ...VELO_EVENT_DEFAULTS,
+    ...DEFAULT.eventOptions,
     set: true,
     get: true,
     clear: true,
