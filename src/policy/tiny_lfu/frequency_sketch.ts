@@ -21,9 +21,10 @@ import { Key } from "../../models/cache.ts";
  * http://dimacs.rutgers.edu/~graham/pubs/papers/cm-full.pdf
  */
 export class FrequencySketch<T extends Key> {
-  private table: Float64Array = new Float64Array(8);
+  private table: BigUint64Array = new BigUint64Array(8);
   private size = 0;
   private samplingSize = 0;
+  private readonly thresholdFactor = 10;
 
   constructor(capacity: number) {
     this.changeCapacity(capacity);
@@ -31,9 +32,9 @@ export class FrequencySketch<T extends Key> {
 
   changeCapacity(capacity: number) {
     const maximum = Math.min(capacity, Number.MAX_SAFE_INTEGER >>> 2);
-    this.table = new Float64Array(Math.max(this.nextPowerOfTwo(maximum), 8));
+    this.table = new BigUint64Array(Math.max(this.nextPowerOfTwo(maximum), 8));
     this.size = 0;
-    this.samplingSize = this.table.length * 10;
+    this.samplingSize = this.table.length * this.thresholdFactor;
   }
 
   contains(item: T) {
@@ -45,10 +46,10 @@ export class FrequencySketch<T extends Key> {
    */
   frequency(item: T) {
     const hash = this.hash(item);
-    let frequency = 0;
+    let frequency = Number.MAX_SAFE_INTEGER;
 
     for (let i = 0; i < 4; i++) {
-      frequency = Math.min(frequency, this.getCount(hash, i));
+      frequency = Math.min(frequency, Number(this.getCount(hash, i)));
     }
 
     return frequency;
@@ -66,7 +67,7 @@ export class FrequencySketch<T extends Key> {
       wasIncremented = this.tryIncrementCounterAt(hash, i) || wasIncremented;
     }
 
-    if (wasIncremented && ++this.size === this.samplingSize) {
+    if (wasIncremented && ++this.size >= this.samplingSize) {
       this.reset();
     }
   }
@@ -79,7 +80,7 @@ export class FrequencySketch<T extends Key> {
       // halving the counters via right shift
       // the bitwise AND on a 4-bit counter with 0111 (=7) will clear the bit
       // that was shifted over from the other counter by the right shift.
-      this.table[i] = (this.table[i] >> 1) & 0x7777777777777777;
+      this.table[i] = (this.table[i] >> 1n) & 0x7777777777777777n;
     }
     this.size /= 2;
   }
@@ -90,31 +91,33 @@ export class FrequencySketch<T extends Key> {
 
   private hash(item: T) {
     const str = item.toString();
-    let h = 0;
+    let h = 0n;
     for (let i = 0; i < str.length; i++) {
-      h = (Math.imul(31, h) + str.charCodeAt(i)) | 0;
+      h = (31n * h + BigInt(str.charCodeAt(i))) | 0n;
     }
     return h;
   }
 
-  private getCount(hash: number, counterIndex: number) {
+  private getCount(hash: bigint, counterIndex: number) {
     const tableIndex = this.tableIndex(hash, counterIndex);
     const offset = this.counterOffset(hash, counterIndex);
-    return (this.table[tableIndex] >>> offset) & 0xf;
+    return (BigInt(this.table[tableIndex]) >> offset) & 0xfn;
   }
 
   /**
    * Returns the index of the 64-bit block in the table, where the counter with
    * given index and hashing function is stored.
    */
-  private tableIndex(hash: number, counterIndex: number) {
+  private tableIndex(hash: bigint, counterIndex: number) {
     const seeds = [
-      0x7137449112835b01, 0xab1c5ed5c19bf174, 0xa4506ceb4ed8aa4a,
-      0x27b70a854d2c6dfc,
+      0x7137449112835b01n,
+      0xab1c5ed5c19bf174n,
+      0xa4506ceb4ed8aa4an,
+      0x27b70a854d2c6dfcn,
     ];
     let h = seeds[counterIndex] * hash;
-    h += h >> 32;
-    return h & (this.table.length - 1);
+    h += h >> 32n;
+    return Number(h & (BigInt(this.table.length) - 1n));
   }
 
   /**
@@ -122,15 +125,19 @@ export class FrequencySketch<T extends Key> {
    * function. An entry is 64 bits, so the offset is in the interval [0, 60] and
    * a multiple of 4.
    */
-  private counterOffset(hash: number, counterIndex: number) {
-    const offsetMultiplier = (hash & 3) << 2;
-    return (offsetMultiplier + counterIndex) << 2;
+  private counterOffset(hash: bigint, counterIndex: number) {
+    const offsetMultiplier = (hash & 3n) << 2n;
+    return (offsetMultiplier + BigInt(counterIndex)) << 2n;
   }
 
-  private tryIncrementCounterAt(hash: number, counterIndex: number) {
+  /**
+   * Increments counter at given index by 1 if it is not already at maximum (15).
+   * Returns true if the counter was incremented, false otherwise.
+   */
+  private tryIncrementCounterAt(hash: bigint, counterIndex: number) {
     const index = this.tableIndex(hash, counterIndex);
     const offset = this.counterOffset(hash, counterIndex);
-    const mask = 0xf << offset;
+    const mask = 0xfn << offset; // 4-bit mask at offset
 
     // maximum of 15 reached
     if (!((this.table[index] & mask) != mask)) {
@@ -138,7 +145,7 @@ export class FrequencySketch<T extends Key> {
     }
 
     // increment counter
-    this.table[index] += 1 << offset;
+    this.table[index] += 1n << offset;
     return true;
   }
 }

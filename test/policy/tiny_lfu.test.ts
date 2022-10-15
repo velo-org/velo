@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 import { assert, assertEquals, assertThrows } from "../../dev_deps.ts";
 import { Velo } from "../../src/cache/builder.ts";
 import { sleep } from "../../src/utils/sleep.ts";
