@@ -3,12 +3,12 @@ import { Key } from "../../models/cache.ts";
 /**
  * A probabilistic set for estimating the frequency of elements within a time
  * window to use as _freshness_ metric for the TinyLFU [1] admission policy.
- * Inspired by Caffeine's implementation: https://github.com/ben-manes/caffeine.
  *
- * The maximum frequency is 15(4 bits). Employs a 4-bit Count-Min Sketch[2].
- * The counter matrix is implemented as a single dimensional array, holding 16
- * counters (4 * 16 = 64 bit) per index. Length of the array is at least the
- * capacity of the cache for accuracy, but is increased to the next power of two.
+ * The maximum frequency is 15. Employing a 4-bit Count-Min Sketch[2].
+ * The counter matrix is implemented as a single 2d array, holding 16
+ * counters per index. Length of the array is at least the capacity of the cache
+ * for accuracy, but is increased to the next power of two. The depth is fixed
+ * to 4.
  *
  * The frequency of all entries is aged periodically using a sampling window
  * based on the maximum number of entries in the cache. This is referred to as
@@ -21,7 +21,7 @@ import { Key } from "../../models/cache.ts";
  * http://dimacs.rutgers.edu/~graham/pubs/papers/cm-full.pdf
  */
 export class FrequencySketch<T extends Key> {
-  private table: BigUint64Array = new BigUint64Array(8);
+  private table: Array<number[]> = new Array(8);
   private size = 0;
   private samplingSize = 0;
   private readonly thresholdFactor = 10;
@@ -32,7 +32,10 @@ export class FrequencySketch<T extends Key> {
 
   changeCapacity(capacity: number) {
     const maximum = Math.min(capacity, Number.MAX_SAFE_INTEGER >>> 2);
-    this.table = new BigUint64Array(Math.max(this.nextPowerOfTwo(maximum), 8));
+    this.table = new Array(Math.max(this.nextPowerOfTwo(maximum), 8));
+    for (let i = 0; i < this.table.length; i++) {
+      this.table[i] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    }
     this.size = 0;
     this.samplingSize = this.table.length * this.thresholdFactor;
   }
@@ -49,7 +52,7 @@ export class FrequencySketch<T extends Key> {
     let frequency = Number.MAX_SAFE_INTEGER;
 
     for (let i = 0; i < 4; i++) {
-      frequency = Math.min(frequency, Number(this.getCount(hash, i)));
+      frequency = Math.min(frequency, this.getCount(hash, i));
     }
 
     return frequency;
@@ -77,10 +80,7 @@ export class FrequencySketch<T extends Key> {
    */
   private reset() {
     for (let i = 0; i < this.table.length; i++) {
-      // halving the counters via right shift
-      // the bitwise AND on a 4-bit counter with 0111 (=7) will clear the bit
-      // that was shifted over from the other counter by the right shift.
-      this.table[i] = (this.table[i] >> 1n) & 0x7777777777777777n;
+      this.table[i] = this.table[i].map((c) => c / 2);
     }
     this.size /= 2;
   }
@@ -98,54 +98,55 @@ export class FrequencySketch<T extends Key> {
     return h;
   }
 
-  private getCount(hash: bigint, counterIndex: number) {
-    const tableIndex = this.tableIndex(hash, counterIndex);
-    const offset = this.counterOffset(hash, counterIndex);
-    return (BigInt(this.table[tableIndex]) >> offset) & 0xfn;
+  private getCount(hash: bigint, depthIndex: number) {
+    const tableIndex = this.tableIndex(hash, depthIndex);
+    const index = this.counterIndex(hash, depthIndex);
+    return this.table[tableIndex][index];
   }
 
   /**
-   * Returns the index of the 64-bit block in the table, where the counter with
-   * given index and hashing function is stored.
+   * Since for every item 4 counters are stored, this function returns the index
+   * of the counter associated with the given hash and depth index.
    */
-  private tableIndex(hash: bigint, counterIndex: number) {
+  private tableIndex(hash: bigint, depthIndex: number) {
+    // fixed depth of 4
     const seeds = [
-      0x7137449112835b01n,
-      0xab1c5ed5c19bf174n,
-      0xa4506ceb4ed8aa4an,
-      0x27b70a854d2c6dfcn,
+      0xc3a5c85c97cb3127n,
+      0x9ae16a3b2f90404fn,
+      0xb492b66fbe98f273n,
+      0xfa2ff09a397c92e5n,
     ];
-    let h = seeds[counterIndex] * hash;
+    let h = seeds[depthIndex] * hash;
     h += h >> 32n;
-    return Number(h & (BigInt(this.table.length) - 1n));
+    return Number(h & BigInt(this.table.length - 1));
   }
 
   /**
-   * Returns offset of the `counterIndex`th 4-bit counter given by its hashing
-   * function. An entry is 64 bits, so the offset is in the interval [0, 60] and
-   * a multiple of 4.
+   * Returns offset of the `counterIndex`th 4-bit counter given by its hashin.
+   * An entry a number array (length 16), so the index is in [0, 15].
+   * Counter index must be [0, 3].
    */
-  private counterOffset(hash: bigint, counterIndex: number) {
-    const offsetMultiplier = (hash & 3n) << 2n;
-    return (offsetMultiplier + BigInt(counterIndex)) << 2n;
+  private counterIndex(hash: bigint, depthIndex: number) {
+    // we look at the 2 lsb of the hash. offset mult is in [0, 4, 8, 12]
+    const offsetMultiplier = Number(hash & 3n) * 4;
+    return offsetMultiplier + depthIndex;
   }
 
   /**
-   * Increments counter at given index by 1 if it is not already at maximum (15).
+   * Increments counter if it is not already at maximum (15).
    * Returns true if the counter was incremented, false otherwise.
    */
-  private tryIncrementCounterAt(hash: bigint, counterIndex: number) {
-    const index = this.tableIndex(hash, counterIndex);
-    const offset = this.counterOffset(hash, counterIndex);
-    const mask = 0xfn << offset; // 4-bit mask at offset
+  private tryIncrementCounterAt(hash: bigint, depthIndex: number) {
+    const index = this.tableIndex(hash, depthIndex);
+    const counterIndex = this.counterIndex(hash, depthIndex);
 
     // maximum of 15 reached
-    if (!((this.table[index] & mask) != mask)) {
+    if (this.table[index][counterIndex] >= 15) {
       return false;
     }
 
     // increment counter
-    this.table[index] += 1n << offset;
+    this.table[index][counterIndex] += 1;
     return true;
   }
 }
