@@ -1,14 +1,11 @@
-import { NoopCounter } from "../cache/stats/noopCounter.ts";
-import { Key } from "../models/cache.ts";
-import { Policy } from "../models/policy.ts";
-import { StatCounter } from "../models/stats.ts";
+import { Key } from "../cache/key.ts";
 import { DoublyLinkedList, Node } from "../utils/doubly_linked_list.ts";
+import { Policy } from "./policy.ts";
 
 /**
  * Least Frequently Used (LFU)
  */
 export class LFU<K extends Key, V> implements Policy<K, V> {
-  statCounter: StatCounter = new NoopCounter();
   private _keys: { [key in Key]: Node<V> };
   private frequency: { [key: number]: DoublyLinkedList<V> };
   private _size: number;
@@ -93,7 +90,6 @@ export class LFU<K extends Key, V> implements Policy<K, V> {
   get(key: K) {
     const node = this._keys[key];
     if (node == undefined) {
-      this.statCounter.recordMiss();
       return undefined;
     }
 
@@ -117,8 +113,6 @@ export class LFU<K extends Key, V> implements Policy<K, V> {
       this.minFrequency++;
       delete this.frequency[oldFrequencyCount];
     }
-
-    this.statCounter.recordHit();
     return node.data;
   }
 
@@ -126,12 +120,6 @@ export class LFU<K extends Key, V> implements Policy<K, V> {
     this.keys.forEach((val, i) => {
       callback.call(this, { key: val, value: this._keys[val].data as V }, i);
     });
-  }
-
-  *[Symbol.iterator]() {
-    for (const k of this.keys) {
-      yield { key: k, value: this._keys[k].data! };
-    }
   }
 
   remove(key: K) {

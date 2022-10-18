@@ -1,8 +1,6 @@
-import { NoopCounter } from "../cache/stats/noopCounter.ts";
-import { Key } from "../models/cache.ts";
-import { Policy } from "../models/policy.ts";
-import { StatCounter } from "../models/stats.ts";
+import { Key } from "../cache/key.ts";
 import { PointerList } from "../utils/pointer_list.ts";
+import { Policy } from "./policy.ts";
 
 /**
  * Implementation of an Adaptive Replacement Cache (ARC) [1]. It adapitvely balances
@@ -18,7 +16,6 @@ import { PointerList } from "../utils/pointer_list.ts";
  * [1]https://www.usenix.org/legacy/events/fast03/tech/full_papers/megiddo/megiddo.pdf
  */
 export class ARC<K extends Key, V> implements Policy<K, V> {
-  statCounter: StatCounter = new NoopCounter();
   private partition = 0;
 
   private t1: ARCList<K, V>;
@@ -37,7 +34,6 @@ export class ARC<K extends Key, V> implements Policy<K, V> {
   }
 
   private replace(in_t2: boolean) {
-    this.statCounter.recordEviction();
     const t1Size = this.t1.size();
 
     if (
@@ -135,13 +131,6 @@ export class ARC<K extends Key, V> implements Policy<K, V> {
       this.t2.insert(key, value);
     }
     value = this.t2.get(key);
-
-    if (value) {
-      this.statCounter.recordHit();
-    } else {
-      this.statCounter.recordMiss();
-    }
-
     return value;
   }
 
@@ -216,15 +205,6 @@ export class ARC<K extends Key, V> implements Policy<K, V> {
   forEach(callback: (item: { key: K; value: V }, index: number) => void) {
     this.t1.forEach(0, callback);
     this.t2.forEach(this.t1.size(), callback);
-  }
-
-  *[Symbol.iterator]() {
-    for (const entry of this.t1) {
-      yield entry;
-    }
-    for (const entry of this.t2) {
-      yield entry;
-    }
   }
 }
 
@@ -334,15 +314,6 @@ class ARCList<K extends Key, V> {
       } else {
         break;
       }
-    }
-  }
-
-  *[Symbol.iterator]() {
-    let p: number | undefined = this.pointers.front;
-
-    for (let i = 0; p != undefined; i++) {
-      yield { key: this._keys[p]!, value: this._values[p]! };
-      p = this.pointers.nextOf(p);
     }
   }
 

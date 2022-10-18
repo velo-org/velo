@@ -1,4 +1,4 @@
-import { Velo } from "../src/cache/builder.ts";
+import { Velo } from "../mod.ts";
 import { DEFAULT } from "../src/cache/options.ts";
 import { User } from "./common/User.ts";
 
@@ -12,12 +12,9 @@ import { User } from "./common/User.ts";
  *
  *        DEFAULT.eventOptions === {
  *         remove: true,
- *         expire: true,
  *         set: false,
  *         get: false,
  *         clear: false,
- *         load: false,
- *         loaded: false,
  *        }
  */
 const _cache1 = Velo.builder().capacity(10_000).events().build();

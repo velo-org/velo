@@ -1,14 +1,11 @@
 import { PointerList } from "../utils/pointer_list.ts";
-import { Key } from "../models/cache.ts";
-import { Policy } from "../models/policy.ts";
-import { StatCounter } from "../models/stats.ts";
-import { NoopCounter } from "../cache/stats/noopCounter.ts";
+import { Key } from "../cache/key.ts";
+import { Policy } from "./policy.ts";
 
 /**
  * Second Chance (SC)
  */
 export class SC<K extends Key, V> implements Policy<K, V> {
-  statCounter: StatCounter = new NoopCounter();
   private arrayMap: SecondChanceEntry<K, V>[];
   private pointers: PointerList;
   private items: { [key in Key]: number };
@@ -43,7 +40,6 @@ export class SC<K extends Key, V> implements Policy<K, V> {
       // Moving the item at the end of the list
       this.pointers.pushBack(pointer);
     } else {
-      this.statCounter.recordEviction();
       let p = this.pointers.front;
       let found = false;
 
@@ -72,11 +68,9 @@ export class SC<K extends Key, V> implements Policy<K, V> {
   get(key: K) {
     const pointer = this.items[key];
     if (pointer === undefined) {
-      this.statCounter.recordMiss();
       return undefined;
     }
     this.arrayMap[pointer].sChance = true;
-    this.statCounter.recordHit();
     return this.arrayMap[pointer].value;
   }
 
@@ -92,10 +86,6 @@ export class SC<K extends Key, V> implements Policy<K, V> {
       .forEach((val, i) => {
         callback.call(this, { key: val.key!, value: val.value! }, i);
       });
-  }
-
-  *[Symbol.iterator]() {
-    yield { key: this.arrayMap[0].key!, value: this.arrayMap[0].value };
   }
 
   clear() {
@@ -117,15 +107,11 @@ export class SC<K extends Key, V> implements Policy<K, V> {
   }
 
   get keys() {
-    return this.arrayMap
-      .filter((am) => am.key != undefined)
-      .map((v) => v.key) as K[];
+    return this.arrayMap.filter((am) => am.key != undefined).map((v) => v.key) as K[];
   }
 
   get values() {
-    return this.arrayMap
-      .filter((am) => am.key != undefined)
-      .map((v) => v.value) as V[];
+    return this.arrayMap.filter((am) => am.key != undefined).map((v) => v.value) as V[];
   }
 
   get size() {

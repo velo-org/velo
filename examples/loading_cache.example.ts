@@ -1,10 +1,10 @@
+import { Velo } from "../mod.ts";
+import { LoaderFunction } from "../src/cache/capability/loading/loading_capability.ts";
+import { DEFAULT } from "../src/cache/options.ts";
+
 /**
  * This example highlights the loading cache functionality.
  */
-
-import { Velo } from "../src/cache/builder.ts";
-import { DEFAULT } from "../src/cache/options.ts";
-import { LoaderFunction } from "../src/models/cache.ts";
 
 /**
  * Loader function that generates the value for a given key.
@@ -36,27 +36,3 @@ try {
 
 // the refresh function will reapply the loader function to the given key
 loadingCache.refresh("a");
-
-// with stats enabled we can see how many times the loader function was called
-console.log(
-  `LoaderFunction 
-  success count: ${loadingCache.stats.loadSuccessCount}
-  failure count: ${loadingCache.stats.loadFailCount}
-  failure rate: ${loadingCache.stats.loadFailureRate}`
-);
-
-/**
- * The LoadingCache also supports specifc loading events.
- */
-const loadingCache2 = Velo.builder<string, number>()
-  .capacity(10_000)
-  .events({ ...DEFAULT.eventOptions, load: true, loaded: true })
-  .build(loadFunc);
-
-loadingCache2.events.on("load", (key) => {
-  console.log(`Started loading key: ${key}`);
-});
-
-loadingCache2.events.on("loaded", (key, value) => {
-  console.log(`Finnished loading key: ${key} and generated value: ${value}`);
-});

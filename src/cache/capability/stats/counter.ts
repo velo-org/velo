@@ -1,4 +1,4 @@
-import { StatCounter } from "../../models/stats.ts";
+import { StatCounter } from "./stats.ts";
 
 export class VeloCounter implements StatCounter {
   private _hits: number;

@@ -1,4 +1,4 @@
-import { Key } from "../models/cache.ts";
+import { Key } from "../cache/key.ts";
 
 export class DoublyLinkedList<V> {
   head: Node<V | undefined>;

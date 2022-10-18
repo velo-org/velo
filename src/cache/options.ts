@@ -1,12 +1,19 @@
-import { CacheOptions, Key } from "../models/cache.ts";
-import { EventOptions } from "../models/events.ts";
-import { Policy } from "../models/policy.ts";
-import { LRU } from "../policy/lru.ts";
-import { Velo } from "./builder.ts";
+import { Policy, Velo } from "../../mod.ts";
+import { EventOptions } from "./capability/events/events.ts";
+import { Key } from "./key.ts";
+
+export interface CacheOptions<K, V> {
+  capacity: number;
+  policy: Policy<K, V> | null;
+  events: boolean;
+  eventOptions: EventOptions;
+  ttl: number;
+  stats: boolean;
+}
 
 export class Options<K extends Key, V> implements CacheOptions<K, V> {
   capacity: number;
-  policy: Policy<K, V>;
+  policy: Policy<K, V> | null;
   events: boolean;
   eventOptions: EventOptions;
   ttl: number;
@@ -29,16 +36,13 @@ export class Options<K extends Key, V> implements CacheOptions<K, V> {
   static default<K extends Key, V>(): CacheOptions<K, V> {
     return {
       capacity: 0,
-      policy: new LRU<K, V>(0),
+      policy: null,
       events: false,
       eventOptions: {
         remove: true,
-        expire: true,
         set: false,
         get: false,
         clear: false,
-        load: false,
-        loaded: false,
       },
       ttl: 0,
       stats: false,
@@ -46,9 +50,11 @@ export class Options<K extends Key, V> implements CacheOptions<K, V> {
   }
 
   toBuilder() {
-    let builder = Velo.builder<K, V>()
-      .capacity(this.capacity)
-      .policy(this.policy);
+    let builder = Velo.builder<K, V>().capacity(this.capacity);
+
+    if (this.policy) {
+      builder = builder.policy(this.policy);
+    }
 
     if (this.events) {
       builder = builder.events(this.eventOptions);

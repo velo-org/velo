@@ -1,14 +1,11 @@
-import { NoopCounter } from "../cache/stats/noopCounter.ts";
-import { Key } from "../models/cache.ts";
-import { Policy } from "../models/policy.ts";
-import { StatCounter } from "../models/stats.ts";
+import { Key } from "../cache/key.ts";
 import { PointerList } from "../utils/pointer_list.ts";
+import { Policy } from "./policy.ts";
 
 /**
  * Least Recently Used (LRU)
  */
 export class LRU<K extends Key, V> implements Policy<K, V> {
-  statCounter: StatCounter = new NoopCounter();
   private _keys: Array<K | undefined>;
   private _values: Array<V | undefined>;
   private items: { [key in Key]: number };
@@ -41,7 +38,6 @@ export class LRU<K extends Key, V> implements Policy<K, V> {
       pointer = this.pointers.removeBack();
       delete this.items[this._keys[pointer]!];
       pointer = this.pointers.newPointer();
-      this.statCounter.recordEviction();
     }
 
     // Storing key & value
@@ -73,11 +69,9 @@ export class LRU<K extends Key, V> implements Policy<K, V> {
     const pointer = this.items[key];
 
     if (pointer === undefined) {
-      this.statCounter.recordMiss();
       return undefined;
     }
-
-    this.statCounter.recordHit();
+    
     this.pointers.moveToFront(pointer);
     return this._values[pointer];
   }
@@ -109,15 +103,6 @@ export class LRU<K extends Key, V> implements Policy<K, V> {
 
     for (let i = 0; p != undefined; i++) {
       callback({ key: this._keys[p]!, value: this._values[p]! }, i);
-      p = this.pointers.nextOf(p);
-    }
-  }
-
-  *[Symbol.iterator]() {
-    let p: number | undefined = this.pointers.front;
-
-    for (let i = 0; p != undefined; i++) {
-      yield { key: this._keys[p]!, value: this._values[p]! };
       p = this.pointers.nextOf(p);
     }
   }

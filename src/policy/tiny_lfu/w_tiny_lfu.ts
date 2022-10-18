@@ -1,8 +1,6 @@
-import { NoopCounter } from "../../cache/stats/noopCounter.ts";
-import { Key } from "../../models/cache.ts";
-import { Policy } from "../../models/policy.ts";
-import { StatCounter } from "../../models/stats.ts";
+import { Key } from "../../cache/key.ts";
 import { PointerList } from "../../utils/pointer_list.ts";
+import { Policy } from "../policy.ts";
 import { FrequencySketch } from "./frequency_sketch.ts";
 
 interface EntryIdent {
@@ -45,7 +43,6 @@ export class WindowTinyLfu<K extends Key, V> implements Policy<K, V> {
   private filter: FrequencySketch<K>;
 
   readonly capacity: number;
-  statCounter: StatCounter = new NoopCounter();
 
   constructor(capacity: number) {
     if (capacity < 100) {
@@ -116,7 +113,6 @@ export class WindowTinyLfu<K extends Key, V> implements Policy<K, V> {
       return this.onHit(ident);
     }
 
-    this.statCounter.recordMiss();
     return undefined;
   }
 
@@ -156,20 +152,7 @@ export class WindowTinyLfu<K extends Key, V> implements Policy<K, V> {
     );
   }
 
-  *[Symbol.iterator]() {
-    for (const entry of this.window) {
-      yield entry;
-    }
-    for (const entry of this.protected) {
-      yield entry;
-    }
-    for (const entry of this.probation) {
-      yield entry;
-    }
-  }
-
   private onHit(ident: EntryIdent) {
-    this.statCounter.recordHit();
     const value: V = this.executeOnCache(ident, LruPointerList.prototype.get);
     switch (ident.segment) {
       case Segment.Window:
@@ -227,7 +210,6 @@ export class WindowTinyLfu<K extends Key, V> implements Policy<K, V> {
    * with the worse frequency is evicted.
    */
   private evict() {
-    this.statCounter.recordEviction();
     if (this.size >= this.capacity) {
       const windowVictimFreq = this.filter.frequency(this.window.getLruKey());
       const mainVictimFreq = this.filter.frequency(this.probation.getLruKey());

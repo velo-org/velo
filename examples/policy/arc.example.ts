@@ -1,5 +1,4 @@
-import { Velo } from "../../src/cache/builder.ts";
-
+import { Velo } from "../../mod.ts";
 /**
  * This example highlights the Adaptive Replacement Cache (ARC) policy.
  *

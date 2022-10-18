@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import { assert, assertEquals, assertFalse } from "../../dev_deps.ts";
-import { Key } from "../../src/models/cache.ts";
+import { Key } from "../../src/cache/key.ts";
 import { FrequencySketch } from "../../src/policy/tiny_lfu/frequency_sketch.ts";
 
 function countersFromTable<T extends Key>(

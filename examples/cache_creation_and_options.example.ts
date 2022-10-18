@@ -1,4 +1,4 @@
-import { LRU, Options, Velo } from "../mod.ts";
+import { Options, LRU, Velo } from "../mod.ts";
 import { User } from "./common/User.ts";
 
 /**
@@ -10,12 +10,9 @@ options.capacity = 10_000;
 options.events = true;
 options.eventOptions = {
   remove: true,
-  expire: true,
   set: true,
   get: true,
   clear: true,
-  load: false,
-  loaded: false,
 };
 options.policy = new LRU(options.capacity);
 options.stats = true;
@@ -49,8 +46,7 @@ const options_2 = _cache_3.options;
 const _cache_3_clone = Velo.from(options_2).build();
 
 /**
- * Caches with default settings {@link DEFAULT}. Beware that the default capacity
- * is 0.
+ * Caches with default settings {@link DEFAULT}.
  */
 const _cache_4 = Velo.builder<string, User>().build();
 const _cache_5 = Velo.from(new Options<string, User>()).build();

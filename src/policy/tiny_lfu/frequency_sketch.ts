@@ -1,4 +1,4 @@
-import { Key } from "../../models/cache.ts";
+import { Key } from "../../cache/key.ts";
 
 /**
  * A probabilistic set for estimating the frequency of elements within a time

@@ -1,5 +1,5 @@
 import { assert, assertEquals } from "../../dev_deps.ts";
-import { Velo } from "../../src/cache/builder.ts";
+import { Velo } from "../../src/builder/builder.ts";
 import { sleep } from "../../src/utils/sleep.ts";
 
 Deno.test("LRU create cache, should create a new empty cache", () => {
@@ -110,7 +110,6 @@ Deno.test("LRU use with ttl", async () => {
 
 Deno.test("LRU should collect cache stats", () => {
   const arcCache = Velo.builder().capacity(3).arc().stats().build();
-  assertEquals(arcCache.stats.evictCount, 0);
   assertEquals(arcCache.stats.hitCount, 0);
   assertEquals(arcCache.stats.missCount, 0);
 
@@ -125,5 +124,4 @@ Deno.test("LRU should collect cache stats", () => {
 
   assertEquals(arcCache.stats.hitCount, 3);
   assertEquals(arcCache.stats.missCount, 1);
-  assertEquals(arcCache.stats.evictCount, 1);
 });

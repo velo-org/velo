@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import { assert, assertEquals } from "../../dev_deps.ts";
-import { Velo } from "../../src/cache/builder.ts";
+import { Velo } from "../../src/builder/builder.ts";
 import { sleep } from "../../src/utils/sleep.ts";
 
 Deno.test("ARC create cache, should create a new empty cache", () => {
@@ -14,13 +14,10 @@ Deno.test("ARC get existing entry, should return the value", () => {
   assert(arcCache.get("key"));
 });
 
-Deno.test(
-  "ARC get (non-existent) entry from empty cache, should return undefined",
-  () => {
-    const arcCache = Velo.builder().capacity(5).arc().build();
-    assertEquals(arcCache.get("key"), undefined);
-  }
-);
+Deno.test("ARC get (non-existent) entry from empty cache, should return undefined", () => {
+  const arcCache = Velo.builder().capacity(5).arc().build();
+  assertEquals(arcCache.get("key"), undefined);
+});
 
 Deno.test("ARC get non-existent entry, should return undefined", () => {
   const arcCache = Velo.builder().capacity(5).arc().build();
@@ -41,33 +38,27 @@ Deno.test("ARC get removed entry, should return undefined", () => {
   assertEquals(arcCache.get("3"), undefined);
 });
 
-Deno.test(
-  "ARC set after capacity reached, should evict to maintain capacity",
-  () => {
-    const arcCache = Velo.builder().capacity(5).arc().build();
-    arcCache.set("1", 1);
-    arcCache.set("2", 2);
-    arcCache.set("3", 3);
-    arcCache.set("4", 4);
-    arcCache.set("5", 5);
-    arcCache.set("6", 6);
-    assertEquals(arcCache.size, 5);
-  }
-);
+Deno.test("ARC set after capacity reached, should evict to maintain capacity", () => {
+  const arcCache = Velo.builder().capacity(5).arc().build();
+  arcCache.set("1", 1);
+  arcCache.set("2", 2);
+  arcCache.set("3", 3);
+  arcCache.set("4", 4);
+  arcCache.set("5", 5);
+  arcCache.set("6", 6);
+  assertEquals(arcCache.size, 5);
+});
 
-Deno.test(
-  "ARC set after capacity reached, should evict first inserted key",
-  () => {
-    const arcCache = Velo.builder().capacity(5).arc().build();
-    arcCache.set("1", 1);
-    arcCache.set("2", 2);
-    arcCache.set("3", 3);
-    arcCache.set("4", 4);
-    arcCache.set("5", 5);
-    arcCache.set("6", 6);
-    assert(!arcCache.has("1"));
-  }
-);
+Deno.test("ARC set after capacity reached, should evict first inserted key", () => {
+  const arcCache = Velo.builder().capacity(5).arc().build();
+  arcCache.set("1", 1);
+  arcCache.set("2", 2);
+  arcCache.set("3", 3);
+  arcCache.set("4", 4);
+  arcCache.set("5", 5);
+  arcCache.set("6", 6);
+  assert(!arcCache.has("1"));
+});
 
 Deno.test("ARC immediate full scan, should evict all keys", () => {
   const arcCache = Velo.builder().capacity(3).arc().build();
@@ -114,7 +105,7 @@ Deno.test("ARC getting entry from t1, should move it to t2", () => {
   arcCache.set("2", 2);
   arcCache.set("3", 3);
   arcCache.get("3");
-  assertEquals((arcCache as any)._policy.t2.keys, ["3"]); // frequently set
+  assertEquals((arcCache as any).policy.t2.keys, ["3"]); // frequently set
 });
 
 Deno.test(
@@ -127,17 +118,16 @@ Deno.test(
     arcCache.set("4", 4);
     arcCache.set("5", 5);
     arcCache.set("6", 6);
-    assertEquals((arcCache as any)._policy.b1.keys, ["1"]); // recently evicted
+    assertEquals((arcCache as any).policy.b1.keys, ["1"]); // recently evicted
     arcCache.set("1", 1);
-    assertEquals((arcCache as any)._policy.b1.keys, ["2"]); // recently evicted
-    assertEquals((arcCache as any)._policy.t1.keys, ["6", "3", "4", "5"]); // recently set
-    assertEquals((arcCache as any)._policy.t2.keys, ["1"]); // frequently set
+    assertEquals((arcCache as any).policy.b1.keys, ["2"]); // recently evicted
+    assertEquals((arcCache as any).policy.t1.keys, ["6", "3", "4", "5"]); // recently set
+    assertEquals((arcCache as any).policy.t2.keys, ["1"]); // frequently set
   }
 );
 
 Deno.test("ARC should collect cache stats", () => {
   const arcCache = Velo.builder().capacity(3).arc().stats().build();
-  assertEquals(arcCache.stats.evictCount, 0);
   assertEquals(arcCache.stats.hitCount, 0);
   assertEquals(arcCache.stats.missCount, 0);
 
@@ -152,5 +142,4 @@ Deno.test("ARC should collect cache stats", () => {
 
   assertEquals(arcCache.stats.hitCount, 3);
   assertEquals(arcCache.stats.missCount, 1);
-  assertEquals(arcCache.stats.evictCount, 1);
 });

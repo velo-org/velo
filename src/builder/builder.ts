@@ -1,17 +1,18 @@
-import { VeloCache, VeloLoadingCache } from "./velo.ts";
-import { CacheOptions, Key, LoaderFunction } from "../models/cache.ts";
-import { EventName, EventOptions } from "../models/events.ts";
-import { ARC } from "../policy/arc.ts";
-import { LRU } from "../policy/lru.ts";
-import { SC } from "../policy/sc.ts";
-import { Policy, updateCapacity } from "../models/policy.ts";
-import { LFU } from "../policy/lfu.ts";
-import { WindowTinyLfu } from "../policy/tiny_lfu/w_tiny_lfu.ts";
-import { Options } from "./options.ts";
+import { VeloCache } from "../cache/velo.ts";
+import { CacheOptions, Options } from "../cache/options.ts";
+import { Key } from "../cache/key.ts";
+import { Policy } from "../policy/policy.ts";
+import { LRU, SC, ARC, LFU, WindowTinyLfu } from "../policy/index.ts";
+import { Cache } from "../cache/cache.ts";
+import { StatisticsCapability } from "../cache/capability/stats/stats_capability.ts";
+import { VeloCounter } from "../cache/capability/stats/counter.ts";
+import { LoaderFunction, LoadingCache, LoadingCapability } from "../cache/capability/loading/loading_capability.ts";
+import { ExpireCapability } from "../cache/capability/expire/expire_capability.ts";
+import { EventName, EventOptions } from "../cache/capability/events/events.ts";
+import { EventCapability } from "../cache/capability/events/event_capability.ts";
 
 export class Velo<K extends Key, V> {
   private _options: CacheOptions<K, V> = Options.default<K, V>();
-  private _is_unset_policy = true;
 
   private constructor() {}
 
@@ -27,9 +28,6 @@ export class Velo<K extends Key, V> {
     this.requireExpr(capacity >= 0, "Capacity must be >= 0");
     this.requireExpr(this._options.capacity === 0, "Capacity already set");
     this._options.capacity = capacity;
-    if (this._is_unset_policy) {
-      this._options.policy = updateCapacity(this._options.policy, capacity);
-    }
     return this;
   }
 
@@ -55,30 +53,24 @@ export class Velo<K extends Key, V> {
     return this;
   }
 
-  public allEvents(option?: { loading: boolean }) {
+  public allEvents() {
     return this.events({
       remove: true,
-      expire: true,
       set: true,
       get: true,
       clear: true,
-      load: option?.loading ?? false,
-      loaded: option?.loading ?? false,
     });
   }
 
   public setEvent(name: EventName, active?: boolean) {
-    this.requireExpr(
-      this._options.events,
-      "Events are not enabled. Use events() before setEvent()"
-    );
+    this.requireExpr(this._options.events, "Events are not enabled. Use events() before setEvent()");
     this._options.eventOptions[name] = active ?? true;
     return this;
   }
 
   public policy(policy: Policy<K, V>) {
+    this.requireExpr(this._options.capacity !== 0, "Capacity must be set before policy");
     this._options.policy = policy;
-    this._is_unset_policy = false;
     return this;
   }
 
@@ -102,22 +94,28 @@ export class Velo<K extends Key, V> {
     return this.policy(new WindowTinyLfu<K, V>(this._options.capacity));
   }
 
-  public build(): VeloCache<K, V>;
-  //prettier-ignore
-  public build(loader: LoaderFunction<K, V>): VeloLoadingCache<K, V>;
-  //prettier-ignore
-  public build(loader?: LoaderFunction<K, V>): VeloCache<K, V> | VeloLoadingCache<K, V> {
+  public build(): Cache<K, V>;
+  public build(loader: LoaderFunction<K, V>): LoadingCache<K, V>;
+  public build(loader?: LoaderFunction<K, V>): Cache<K, V> | LoadingCache<K, V> {
+    let cache: Cache<K, V> = new VeloCache(this._options);
+
     if (loader) {
-      return new VeloLoadingCache<K, V>(
-        this._options,
-        loader
-      );
+      cache = new LoadingCapability<K, V>(cache, loader);
     }
 
-    this.requireExpr(this._options.eventOptions.load === false, "Load event requires a loading cache. Use .build(LoaderFunction)");
-    this.requireExpr(this._options.eventOptions.loaded === false, "Loaded event requires a loading cache. Use .build(LoaderFunction)");
+    if (this._options.events) {
+      cache = new EventCapability<K, V>(cache, this._options.eventOptions);
+    }
 
-    return new VeloCache<K, V>(this._options);
+    if (this._options.ttl) {
+      cache = new ExpireCapability<K, V>(cache, this._options.ttl);
+    }
+
+    if (this._options.stats) {
+      cache = new StatisticsCapability<K, V>(cache, new VeloCounter());
+    }
+
+    return cache;
   }
 
   private requireExpr(expression: boolean, message?: string) {
