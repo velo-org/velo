@@ -5,6 +5,7 @@ import { CapabilityRecord } from "../record.ts";
 import { CapabilityWrapper } from "../wrapper.ts";
 
 export class ExpireCapability<K extends Key, V> extends CapabilityWrapper<K, V> {
+  static ID = "ttl";
   private ttl: number;
   private timeouts: Map<K, number>;
   private onTimeout: ((key: K, value: V) => void) | null;
@@ -17,7 +18,7 @@ export class ExpireCapability<K extends Key, V> extends CapabilityWrapper<K, V> 
   }
 
   initCapability(record: CapabilityRecord<K, V>): void {
-    const events = record.get("events") as EventCapability<K, V>;
+    const events = record.get(EventCapability.ID) as EventCapability<K, V>;
     if (events) {
       this.onTimeout = (key, value) => {
         events.fireEvent("expire", key, value);

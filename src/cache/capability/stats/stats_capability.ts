@@ -4,9 +4,9 @@ import { CapabilityRecord } from "../record.ts";
 import { CapabilityWrapper } from "../wrapper.ts";
 import { CacheStatistics, StatCounter } from "./stats.ts";
 
-export const STATS_ID = "stats";
 
 export class StatisticsCapability<K extends Key, V> extends CapabilityWrapper<K, V> {
+  static ID = "stats";
   private counter: StatCounter;
 
   constructor(inner: Cache<K, V>, counter: StatCounter) {

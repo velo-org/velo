@@ -65,7 +65,7 @@ export class Velo<K extends Key, V> {
     });
   }
 
-  public setEvent(name: EventName, active?: boolean) {
+  public withEvent(name: EventName, active?: boolean) {
     this.requireExpr(this._options.events, "Events are not enabled. Use events() before setEvent()");
     this._options.eventOptions[name] = active ?? true;
     return this;
@@ -104,24 +104,26 @@ export class Velo<K extends Key, V> {
 
     if (loader) {
       const loading = new LoadingCapability<K, V>(cache, loader);
-      this._capabilities.set("loading", loading);
+      this._capabilities.set(LoadingCapability.ID, loading);
       cache = loading;
     }
 
     if (this._options.events) {
       const events = new EventCapability<K, V>(cache, this._options.eventOptions);
-      this._capabilities.set("events", events);
+      this._capabilities.set(EventCapability.ID, events);
       cache = events;
     }
 
     if (this._options.ttl) {
       const ttl = new ExpireCapability<K, V>(cache, this._options.ttl);
-      this._capabilities.set("ttl", ttl);
+      this._capabilities.set(ExpireCapability.ID, ttl);
       cache = ttl;
     }
 
     if (this._options.stats) {
-      cache = new StatisticsCapability<K, V>(cache, new VeloCounter());
+      const stats = new StatisticsCapability<K, V>(cache, new VeloCounter());
+      this._capabilities.set(StatisticsCapability.ID, stats);
+      cache = stats;
     }
 
     this._capabilities.initAll();

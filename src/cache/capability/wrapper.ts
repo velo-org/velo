@@ -3,6 +3,7 @@ import { Key } from "../key.ts";
 import { CapabilityRecord } from "./record.ts";
 
 export abstract class CapabilityWrapper<K extends Key, V> implements Cache<K, V> {
+  public static ID: string;
   private inner: Cache<K, V>;
 
   constructor(inner: Cache<K, V>) {

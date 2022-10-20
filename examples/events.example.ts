@@ -34,14 +34,14 @@ const _cache2 = Velo.builder()
   .build();
 
 /**
- * Additionally you can use setEvent() to enable or disable a specifc event
+ * Additionally you can use withEvent() to enable or disable a specifc event
  */
 const _cache3 = Velo.builder()
   .capacity(10_000)
   .events()
-  .setEvent("get") // true
-  .setEvent("clear", true)
-  .setEvent("remove", false)
+  .withEvent("get") // true
+  .withEvent("clear", true)
+  .withEvent("remove", false)
   .build();
 
 /**

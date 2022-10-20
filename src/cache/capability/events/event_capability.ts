@@ -6,6 +6,7 @@ import { CapabilityWrapper } from "../wrapper.ts";
 import { EventName, EventOptions, VeloEventEmitter } from "./events.ts";
 
 export class EventCapability<K extends Key, V> extends CapabilityWrapper<K, V> {
+  static ID = "events";
   private eventoptions: EventOptions;
   private eventEmitter: EventEmitter;
 

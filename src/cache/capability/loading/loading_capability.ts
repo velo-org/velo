@@ -11,6 +11,7 @@ export interface LoadingCache<K extends Key, V> extends Omit<Cache<K, V>, "get">
 }
 
 export class LoadingCapability<K extends Key, V> extends CapabilityWrapper<K, V> implements LoadingCache<K, V> {
+  static ID = "loading";
   private loader: LoaderFunction<K, V>;
 
   constructor(inner: Cache<K, V>, loader: LoaderFunction<K, V>) {
