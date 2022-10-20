@@ -2,18 +2,14 @@ import { Cache } from "../cache.ts";
 import { Key } from "../key.ts";
 import { CapabilityRecord } from "./record.ts";
 
-export abstract class CapabilityWrapper<K extends Key, V> implements Cache<K, V>, CapabilityRecord<K, V> {
+export abstract class CapabilityWrapper<K extends Key, V> implements Cache<K, V> {
   private inner: Cache<K, V>;
-  capabilityMap: Map<string, CapabilityWrapper<K, V>> = new Map();
 
-  constructor(name: string, inner: Cache<K, V>) {
-    this.capabilityMap.set(name, this);
+  constructor(inner: Cache<K, V>) {
     this.inner = inner;
   }
 
-  getCapability(id: string): CapabilityWrapper<K, V> {
-    return this.capabilityMap.get(id)!;
-  }
+  abstract initCapability(record: CapabilityRecord<K, V>): void;
 
   get capacity() {
     return this.inner.capacity;

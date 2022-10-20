@@ -1,10 +1,4 @@
-import {
-  lru,
-  DATA_1,
-  DATA_2,
-  MAX_KEYS,
-  MISSING_KEY,
-} from "../benchmark.config.ts";
+import { lru, DATA_1, DATA_2, MAX_KEYS, MISSING_KEY } from "../benchmark.config.ts";
 
 Deno.bench({ name: "LRU set", group: "set" }, () => {
   for (let i = 0; i < MAX_KEYS; i++) {

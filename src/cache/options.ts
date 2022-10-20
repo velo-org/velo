@@ -40,6 +40,7 @@ export class Options<K extends Key, V> implements CacheOptions<K, V> {
       events: false,
       eventOptions: {
         remove: true,
+        expire: true,
         set: false,
         get: false,
         clear: false,

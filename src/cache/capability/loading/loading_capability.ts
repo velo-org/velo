@@ -1,8 +1,8 @@
 import { Cache } from "../../cache.ts";
 import { Key } from "../../key.ts";
+import { CapabilityRecord } from "../record.ts";
 import { CapabilityWrapper } from "../wrapper.ts";
 
-export const LOADING_ID = "loading";
 export type LoaderFunction<K, V> = (key: K) => V;
 
 export interface LoadingCache<K extends Key, V> extends Omit<Cache<K, V>, "get"> {
@@ -14,7 +14,7 @@ export class LoadingCapability<K extends Key, V> extends CapabilityWrapper<K, V>
   private loader: LoaderFunction<K, V>;
 
   constructor(inner: Cache<K, V>, loader: LoaderFunction<K, V>) {
-    super(LOADING_ID, inner);
+    super(inner);
     this.loader = (k) => {
       try {
         return loader(k);
@@ -23,6 +23,8 @@ export class LoadingCapability<K extends Key, V> extends CapabilityWrapper<K, V>
       }
     };
   }
+
+  initCapability(_record: CapabilityRecord<K, V>): void {}
 
   get(key: K): V {
     let value = super.get(key);

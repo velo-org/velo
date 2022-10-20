@@ -10,9 +10,11 @@ import { LoaderFunction, LoadingCache, LoadingCapability } from "../cache/capabi
 import { ExpireCapability } from "../cache/capability/expire/expire_capability.ts";
 import { EventName, EventOptions } from "../cache/capability/events/events.ts";
 import { EventCapability } from "../cache/capability/events/event_capability.ts";
+import { CapabilityRecord } from "../cache/capability/record.ts";
 
 export class Velo<K extends Key, V> {
   private _options: CacheOptions<K, V> = Options.default<K, V>();
+  private _capabilities: CapabilityRecord<K, V> = new CapabilityRecord<K, V>();
 
   private constructor() {}
 
@@ -56,6 +58,7 @@ export class Velo<K extends Key, V> {
   public allEvents() {
     return this.events({
       remove: true,
+      expire: true,
       set: true,
       get: true,
       clear: true,
@@ -100,21 +103,28 @@ export class Velo<K extends Key, V> {
     let cache: Cache<K, V> = new VeloCache(this._options);
 
     if (loader) {
-      cache = new LoadingCapability<K, V>(cache, loader);
+      const loading = new LoadingCapability<K, V>(cache, loader);
+      this._capabilities.set("loading", loading);
+      cache = loading;
     }
 
     if (this._options.events) {
-      cache = new EventCapability<K, V>(cache, this._options.eventOptions);
+      const events = new EventCapability<K, V>(cache, this._options.eventOptions);
+      this._capabilities.set("events", events);
+      cache = events;
     }
 
     if (this._options.ttl) {
-      cache = new ExpireCapability<K, V>(cache, this._options.ttl);
+      const ttl = new ExpireCapability<K, V>(cache, this._options.ttl);
+      this._capabilities.set("events", ttl);
+      cache = ttl;
     }
 
     if (this._options.stats) {
       cache = new StatisticsCapability<K, V>(cache, new VeloCounter());
     }
 
+    this._capabilities.initAll();
     return cache;
   }
 

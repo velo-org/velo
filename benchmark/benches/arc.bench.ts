@@ -1,10 +1,4 @@
-import {
-  arc,
-  DATA_1,
-  DATA_2,
-  MAX_KEYS,
-  MISSING_KEY,
-} from "../benchmark.config.ts";
+import { arc, DATA_1, DATA_2, MAX_KEYS, MISSING_KEY } from "../benchmark.config.ts";
 
 Deno.bench({ name: "ARC set", group: "set" }, () => {
   for (let i = 0; i < MAX_KEYS; i++) {

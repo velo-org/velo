@@ -1,6 +1,6 @@
 import { Velo } from "../mod.ts";
 import { DEFAULT } from "../src/cache/options.ts";
-import { User } from "./common/User.ts";
+import { User } from "./common/user.ts";
 
 /**
  * This example shows how to use cache events. Provide cache types with the

@@ -1,5 +1,5 @@
 import { Options, LRU, Velo } from "../mod.ts";
-import { User } from "./common/User.ts";
+import { User } from "./common/user.ts";
 
 /**
  * This example shows different methods of initializing a cache.
@@ -10,6 +10,7 @@ options.capacity = 10_000;
 options.events = true;
 options.eventOptions = {
   remove: true,
+  expire: true,
   set: true,
   get: true,
   clear: true,

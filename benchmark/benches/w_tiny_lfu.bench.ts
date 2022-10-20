@@ -1,10 +1,4 @@
-import {
-  tinyLfu,
-  DATA_1,
-  DATA_2,
-  MAX_KEYS,
-  MISSING_KEY,
-} from "../benchmark.config.ts";
+import { tinyLfu, DATA_1, DATA_2, MAX_KEYS, MISSING_KEY } from "../benchmark.config.ts";
 
 Deno.bench({ name: "W-TinyLFU set", group: "set" }, () => {
   for (let i = 0; i < MAX_KEYS; i++) {

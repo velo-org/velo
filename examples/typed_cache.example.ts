@@ -1,5 +1,5 @@
 import { Velo } from "../mod.ts";
-import { User } from "./common/User.ts";
+import { User } from "./common/user.ts";
 
 /**
  * This example shows a typed cache.
