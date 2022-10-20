@@ -17,4 +17,4 @@ jobs:
         with:
           deno-version: ${{ matrix.deno }}
 
-      - run: make utest
+      - run: make test
