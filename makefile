@@ -1,4 +1,5 @@
-#usage: make bench filter=LRU out=md
+.PHONY: benchmark examples test debug bundle
+
 benchmark:
 	deno bench --unstable ./benchmark/run_groups.ts
 
@@ -12,7 +13,7 @@ examples:
 	deno run --allow-env ttl.example.ts
 	deno run --allow-env typed_cache.example.ts
 
-utest:
+test:
 	deno test --unstable --allow-read --allow-env ./test
 
 debug:

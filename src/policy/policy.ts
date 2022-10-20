@@ -1,13 +1,3 @@
-import { WindowTinyLfu } from "../../mod.ts";
-import { Key } from "../cache/key.ts";
-import { ARC } from "../policy/arc.ts";
-import { LFU } from "../policy/lfu.ts";
-import { LRU } from "../policy/lru.ts";
-import { SC } from "../policy/sc.ts";
-
-/**
- * A cache replacement policy
- */
 export interface Policy<K, V> {
   readonly capacity: number;
   readonly size: number;

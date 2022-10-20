@@ -5,6 +5,7 @@ import { FrequencySketch } from "./frequency_sketch.ts";
 
 interface EntryIdent {
   segment: Segment;
+  hash: number;
   pointer: number;
 }
 
@@ -64,19 +65,11 @@ export class WindowTinyLfu<K extends Key, V> implements Policy<K, V> {
   }
 
   get keys(): K[] {
-    return [
-      ...this.window.keys(),
-      ...this.protected.keys(),
-      ...this.probation.keys(),
-    ];
+    return [...this.window.keys(), ...this.protected.keys(), ...this.probation.keys()];
   }
 
   get values(): V[] {
-    return [
-      ...this.window.values(),
-      ...this.protected.values(),
-      ...this.probation.values(),
-    ];
+    return [...this.window.values(), ...this.protected.values(), ...this.probation.values()];
   }
 
   set(key: K, value: V) {
@@ -101,15 +94,16 @@ export class WindowTinyLfu<K extends Key, V> implements Policy<K, V> {
       this.entryMap[key] = {
         segment: Segment.Window,
         pointer: this.window.insertMru(key, value),
+        hash: this.filter.hash(key),
       };
     }
   }
 
   get(key: K) {
-    this.filter.increment(key);
     const ident = this.entryMap[key];
 
     if (ident) {
+      this.filter.increment(ident.hash);
       return this.onHit(ident);
     }
 
@@ -146,10 +140,7 @@ export class WindowTinyLfu<K extends Key, V> implements Policy<K, V> {
   forEach(callback: (item: { key: K; value: V }, index: number) => void) {
     this.window.forEach(0, callback);
     this.protected.forEach(this.window.size(), callback);
-    this.probation.forEach(
-      this.window.size() + this.protected.size(),
-      callback
-    );
+    this.probation.forEach(this.window.size() + this.protected.size(), callback);
   }
 
   private onHit(ident: EntryIdent) {
@@ -190,16 +181,12 @@ export class WindowTinyLfu<K extends Key, V> implements Policy<K, V> {
 
     if (this.protected.isFull()) {
       const demoted = this.protected.removeLru();
-      this.entryMap[demoted.key] = {
-        segment: Segment.Probation,
-        pointer: this.probation.insertMru(demoted.key, demoted.value),
-      };
+      this.entryMap[demoted.key].segment = Segment.Probation;
+      this.entryMap[demoted.key].pointer = this.probation.insertMru(demoted.key, demoted.value);
     }
 
-    this.entryMap[promoted.key] = {
-      segment: Segment.Protected,
-      pointer: this.protected.insertMru(promoted.key, promoted.value),
-    };
+    this.entryMap[promoted.key].segment = Segment.Protected;
+    this.entryMap[promoted.key].pointer = this.protected.insertMru(promoted.key, promoted.value);
   }
 
   /**
@@ -211,8 +198,8 @@ export class WindowTinyLfu<K extends Key, V> implements Policy<K, V> {
    */
   private evict() {
     if (this.size >= this.capacity) {
-      const windowVictimFreq = this.filter.frequency(this.window.getLruKey());
-      const mainVictimFreq = this.filter.frequency(this.probation.getLruKey());
+      const windowVictimFreq = this.filter.frequency(this.entryMap[this.window.getLruKey()].hash);
+      const mainVictimFreq = this.filter.frequency(this.entryMap[this.protected.getLruKey()].hash);
       if (windowVictimFreq > mainVictimFreq) {
         this.evictFromMain();
         this.transferFromWindowToMain();
@@ -239,10 +226,8 @@ export class WindowTinyLfu<K extends Key, V> implements Policy<K, V> {
 
   private transferFromWindowToMain() {
     const windowVictim = this.window.removeLru();
-    this.entryMap[windowVictim.key] = {
-      segment: Segment.Probation,
-      pointer: this.probation.insertMru(windowVictim.key, windowVictim.value),
-    };
+    this.entryMap[windowVictim.key].segment = Segment.Probation;
+    this.entryMap[windowVictim.key].pointer = this.probation.insertMru(windowVictim.key, windowVictim.value);
   }
 
   /**
@@ -371,10 +356,7 @@ class LruPointerList<K extends Key, V> {
     this.items = {};
   }
 
-  forEach(
-    startIndex: number,
-    callback: (item: { key: K; value: V }, index: number) => void
-  ) {
+  forEach(startIndex: number, callback: (item: { key: K; value: V }, index: number) => void) {
     if (this.isEmpty()) {
       return;
     }

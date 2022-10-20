@@ -1,6 +1,5 @@
 import { Velo } from "../mod.ts";
 import { LoaderFunction } from "../src/cache/capability/loading/loading_capability.ts";
-import { DEFAULT } from "../src/cache/options.ts";
 
 /**
  * This example highlights the loading cache functionality.
