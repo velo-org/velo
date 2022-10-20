@@ -116,7 +116,7 @@ export class Velo<K extends Key, V> {
 
     if (this._options.ttl) {
       const ttl = new ExpireCapability<K, V>(cache, this._options.ttl);
-      this._capabilities.set("events", ttl);
+      this._capabilities.set("ttl", ttl);
       cache = ttl;
     }
 
