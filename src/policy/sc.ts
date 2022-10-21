@@ -5,7 +5,7 @@ import { Policy } from "./policy.ts";
 /**
  * Second Chance (SC)
  */
-export class SC<K extends Key, V> implements Policy<K, V> {
+export class SecondChance<K extends Key, V> implements Policy<K, V> {
   private arrayMap: SecondChanceEntry<K, V>[];
   private pointers: PointerList;
   private items: { [key in Key]: number };

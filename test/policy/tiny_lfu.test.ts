@@ -1,14 +1,11 @@
-// deno-lint-ignore-file no-explicit-any
 import { assert, assertEquals, assertThrows } from "../../dev_deps.ts";
 import { Velo } from "../../src/builder/builder.ts";
-import { sleep } from "../../src/utils/sleep.ts";
+import { getPolicy } from "../utils/get_policy.ts";
+import { sleep } from "../utils/sleep.ts";
 
-Deno.test(
-  "TinyLFU create cache with small capacity, should throw error",
-  () => {
-    assertThrows(() => Velo.builder().capacity(5).tinyLfu().build());
-  }
-);
+Deno.test("TinyLFU create cache with small capacity, should throw error", () => {
+  assertThrows(() => Velo.builder().capacity(5).tinyLfu().build());
+});
 
 Deno.test("TinyLFU create cache, should create a new empty cache", () => {
   const cache = Velo.builder().capacity(100).tinyLfu().build();
@@ -21,13 +18,10 @@ Deno.test("TinyLFU get existing entry, should return the value", () => {
   assert(cache.get("key"));
 });
 
-Deno.test(
-  "TinyLFU get (non-existent) entry from empty cache, should return undefined",
-  () => {
-    const cache = Velo.builder().capacity(100).tinyLfu().build();
-    assertEquals(cache.get("key"), undefined);
-  }
-);
+Deno.test("TinyLFU get (non-existent) entry from empty cache, should return undefined", () => {
+  const cache = Velo.builder().capacity(100).tinyLfu().build();
+  assertEquals(cache.get("key"), undefined);
+});
 
 Deno.test("TinyLFU get non-existent entry, should return undefined", () => {
   const cache = Velo.builder().capacity(100).tinyLfu().build();
@@ -48,53 +42,44 @@ Deno.test("TinyLFU get removed entry, should return undefined", () => {
   assertEquals(cache.get("3"), undefined);
 });
 
-Deno.test(
-  "TinyLFU single access entries fill window and probationary, should not enter protected",
-  () => {
-    const cache = Velo.builder().capacity(100).tinyLfu().build();
-    for (let i = 0; i < 100; i++) {
-      cache.set(i, i);
-    }
-    assertEquals(cache.size, 21);
-    assertEquals((cache as any).policy.window.size(), 1);
-    assertEquals((cache as any).policy.probation.size(), 20);
+Deno.test("TinyLFU single access entries fill window and probationary, should not enter protected", () => {
+  const cache = Velo.builder().capacity(100).tinyLfu().build();
+  for (let i = 0; i < 100; i++) {
+    cache.set(i, i);
   }
-);
+  assertEquals(cache.size, 21);
+  assertEquals(getPolicy(cache).window.size(), 1);
+  assertEquals(getPolicy(cache).probation.size(), 20);
+});
 
-Deno.test(
-  "TinyLFU double accessed entry in probation should be promoted to protected segment",
-  () => {
-    const cache = Velo.builder().capacity(100).tinyLfu().build();
-    cache.set("1", 1);
-    cache.set("2", 1); // to fill the window
-    cache.get("1");
+Deno.test("TinyLFU double accessed entry in probation should be promoted to protected segment", () => {
+  const cache = Velo.builder().capacity(100).tinyLfu().build();
+  cache.set("1", 1);
+  cache.set("2", 1); // to fill the window
+  cache.get("1");
 
-    assertEquals(cache.size, 2);
-    assertEquals((cache as any).policy.protected.size(), 1);
+  assertEquals(cache.size, 2);
+  assertEquals(getPolicy(cache).protected.size(), 1);
+});
+
+Deno.test("TinyLFU full cache acces twice, should promote and increase size", () => {
+  const cache = Velo.builder().capacity(100).tinyLfu().build();
+  for (let i = 0; i < 100; i++) {
+    cache.set(i, i);
   }
-);
+  assertEquals(cache.size, 21);
+  assertEquals(getPolicy(cache).window.size(), 1);
+  assertEquals(getPolicy(cache).probation.size(), 20);
 
-Deno.test(
-  "TinyLFU full cache acces twice, should promote and increase size",
-  () => {
-    const cache = Velo.builder().capacity(100).tinyLfu().build();
-    for (let i = 0; i < 100; i++) {
-      cache.set(i, i);
-    }
-    assertEquals(cache.size, 21);
-    assertEquals((cache as any).policy.window.size(), 1);
-    assertEquals((cache as any).policy.probation.size(), 20);
+  cache.get(98);
+  cache.set(1000, 1000);
 
-    cache.get(98);
-    cache.set(1000, 1000);
-
-    assertEquals(cache.size, 22);
-    assertEquals((cache as any).policy.window.size(), 1);
-    assertEquals((cache as any).policy.probation.size(), 20);
-    assertEquals((cache as any).policy.protected.size(), 1);
-    assertEquals((cache as any).policy.protected.keys(), [98]);
-  }
-);
+  assertEquals(cache.size, 22);
+  assertEquals(getPolicy(cache).window.size(), 1);
+  assertEquals(getPolicy(cache).probation.size(), 20);
+  assertEquals(getPolicy(cache).protected.size(), 1);
+  assertEquals(getPolicy(cache).protected.keys(), [98]);
+});
 
 Deno.test("TinyLFU should place entries in correct segment", () => {
   const cache = Velo.builder().capacity(200).tinyLfu().build();
@@ -106,13 +91,13 @@ Deno.test("TinyLFU should place entries in correct segment", () => {
   cache.get("1");
 
   assertEquals(cache.size, 5);
-  assertEquals((cache as any).policy.protected.size(), 1);
-  assertEquals((cache as any).policy.probation.size(), 2);
-  assertEquals((cache as any).policy.window.size(), 2);
+  assertEquals(getPolicy(cache).protected.size(), 1);
+  assertEquals(getPolicy(cache).probation.size(), 2);
+  assertEquals(getPolicy(cache).window.size(), 2);
 
-  assertEquals((cache as any).policy.protected.keys(), ["1"]);
-  assertEquals((cache as any).policy.probation.keys(), ["2", "3"]);
-  assertEquals((cache as any).policy.window.keys(), ["5", "4"]);
+  assertEquals(getPolicy(cache).protected.keys(), ["1"]);
+  assertEquals(getPolicy(cache).probation.keys(), ["2", "3"]);
+  assertEquals(getPolicy(cache).window.keys(), ["5", "4"]);
 });
 
 Deno.test("TinyLFU forEach should print out the right key value pairs", () => {

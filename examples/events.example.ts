@@ -1,5 +1,4 @@
-import { Velo } from "../mod.ts";
-import { DEFAULT } from "../src/cache/options.ts";
+import { DEFAULT, Velo } from "../mod.ts";
 import { User } from "./common/user.ts";
 
 /**

@@ -1,6 +1,6 @@
 import { assert, assertEquals, assertThrows } from "../../dev_deps.ts";
 import { Velo } from "../../mod.ts";
-import { LoadingCapability } from "../../src/cache/capability/loading/loading_capability.ts";
+import { LoadingCapability } from "../../src/cache/capabilities/loading_capability.ts";
 
 Deno.test("LoadingCapability, should create a loading cache instance", () => {
   const cache = Velo.builder<string, string>()

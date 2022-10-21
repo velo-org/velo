@@ -1,8 +1,16 @@
-import { Policy, Velo } from "../../mod.ts";
-import { EventOptions } from "./capability/events/events.ts";
+import { Velo } from "../builder/builder.ts";
+import { Policy } from "../policy/policy.ts";
 import { Key } from "./key.ts";
 
-export interface CacheOptions<K, V> {
+export interface EventOptions {
+  remove: boolean;
+  expire: boolean;
+  set: boolean;
+  get: boolean;
+  clear: boolean;
+}
+
+export interface CacheOptions<K extends Key, V> {
   capacity: number;
   policy: Policy<K, V> | null;
   events: boolean;

@@ -5,7 +5,7 @@ import { Policy } from "./policy.ts";
 /**
  * Least Frequently Used (LFU)
  */
-export class LFU<K extends Key, V> implements Policy<K, V> {
+export class Lfu<K extends Key, V> implements Policy<K, V> {
   private _keys: { [key in Key]: Node<V> };
   private frequency: { [key: number]: DoublyLinkedList<V> };
   private _size: number;

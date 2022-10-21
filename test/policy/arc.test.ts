@@ -1,7 +1,7 @@
-// deno-lint-ignore-file no-explicit-any
 import { assert, assertEquals } from "../../dev_deps.ts";
 import { Velo } from "../../src/builder/builder.ts";
-import { sleep } from "../../src/utils/sleep.ts";
+import { getPolicy } from "../utils/get_policy.ts";
+import { sleep } from "../utils/sleep.ts";
 
 Deno.test("ARC create cache, should create a new empty cache", () => {
   const arcCache = Velo.builder().capacity(5).arc().build();
@@ -105,7 +105,7 @@ Deno.test("ARC getting entry from t1, should move it to t2", () => {
   arcCache.set("2", 2);
   arcCache.set("3", 3);
   arcCache.get("3");
-  assertEquals((arcCache as any).policy.t2.keys, ["3"]); // frequently set
+  assertEquals(getPolicy(arcCache).t2.keys, ["3"]); // frequently set
 });
 
 Deno.test(
@@ -118,11 +118,11 @@ Deno.test(
     arcCache.set("4", 4);
     arcCache.set("5", 5);
     arcCache.set("6", 6);
-    assertEquals((arcCache as any).policy.b1.keys, ["1"]); // recently evicted
+    assertEquals(getPolicy(arcCache).b1.keys, ["1"]); // recently evicted
     arcCache.set("1", 1);
-    assertEquals((arcCache as any).policy.b1.keys, ["2"]); // recently evicted
-    assertEquals((arcCache as any).policy.t1.keys, ["6", "3", "4", "5"]); // recently set
-    assertEquals((arcCache as any).policy.t2.keys, ["1"]); // frequently set
+    assertEquals(getPolicy(arcCache).b1.keys, ["2"]); // recently evicted
+    assertEquals(getPolicy(arcCache).t1.keys, ["6", "3", "4", "5"]); // recently set
+    assertEquals(getPolicy(arcCache).t2.keys, ["1"]); // frequently set
   }
 );
 

@@ -1,7 +1,6 @@
-import { Cache } from "../../cache.ts";
-import { Key } from "../../key.ts";
-import { CapabilityRecord } from "../record.ts";
-import { CapabilityWrapper } from "../wrapper.ts";
+import { Cache } from "../cache.ts";
+import { Key } from "../key.ts";
+import { CapabilityWrapper } from "./wrapper.ts";
 
 export type LoaderFunction<K, V> = (key: K) => V;
 
@@ -24,8 +23,6 @@ export class LoadingCapability<K extends Key, V> extends CapabilityWrapper<K, V>
       }
     };
   }
-
-  initCapability(_record: CapabilityRecord<K, V>): void {}
 
   get(key: K): V {
     let value = super.get(key);

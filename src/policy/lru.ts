@@ -5,7 +5,7 @@ import { Policy } from "./policy.ts";
 /**
  * Least Recently Used (LRU)
  */
-export class LRU<K extends Key, V> implements Policy<K, V> {
+export class Lru<K extends Key, V> implements Policy<K, V> {
   private _keys: Array<K | undefined>;
   private _values: Array<V | undefined>;
   private items: { [key in Key]: number };
@@ -71,7 +71,7 @@ export class LRU<K extends Key, V> implements Policy<K, V> {
     if (pointer === undefined) {
       return undefined;
     }
-    
+
     this.pointers.moveToFront(pointer);
     return this._values[pointer];
   }

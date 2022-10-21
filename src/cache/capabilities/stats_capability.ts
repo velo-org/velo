@@ -1,9 +1,13 @@
-import { Cache } from "../../cache.ts";
-import { Key } from "../../key.ts";
-import { CapabilityRecord } from "../record.ts";
-import { CapabilityWrapper } from "../wrapper.ts";
-import { CacheStatistics, StatCounter } from "./stats.ts";
+import { Cache } from "../cache.ts";
+import { Key } from "../key.ts";
+import { StatCounter } from "./counter.ts";
+import { CapabilityWrapper } from "./wrapper.ts";
 
+export interface CacheStatistics {
+  readonly hitCount: number;
+  readonly missCount: number;
+  readonly hitRate: number;
+}
 
 export class StatisticsCapability<K extends Key, V> extends CapabilityWrapper<K, V> {
   static ID = "stats";
@@ -13,8 +17,6 @@ export class StatisticsCapability<K extends Key, V> extends CapabilityWrapper<K,
     super(inner);
     this.counter = counter;
   }
-
-  initCapability(_record: CapabilityRecord<K, V>): void {}
 
   public get(key: K): V | undefined {
     const result = super.get(key);

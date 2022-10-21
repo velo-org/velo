@@ -1,12 +1,25 @@
-import { EventEmitter } from "../../../../deps.ts";
-import { Cache } from "../../cache.ts";
-import { Key } from "../../key.ts";
-import { CapabilityRecord } from "../record.ts";
-import { CapabilityWrapper } from "../wrapper.ts";
-import { EventName, EventOptions, VeloEventEmitter } from "./events.ts";
+import { EventEmitter } from "../../../deps.ts";
+import { Cache } from "../cache.ts";
+import { Key } from "../key.ts";
+import { EventOptions } from "../options.ts";
+import { CapabilityWrapper } from "./wrapper.ts";
+
+export type EventName = "set" | "remove" | "clear" | "get" | "expire";
+
+type KeyEventFunction<K> = (key: K) => void;
+type KeyValueEventFunction<K, V> = (key: K, value: V) => void;
+type EmptyEventFunction = () => void;
+
+export interface VeloEventEmitter<K, V> {
+  on(name: "remove", listener: KeyEventFunction<K>): this;
+  on(name: "expire", listener: KeyValueEventFunction<K, V>): this;
+  on(name: "set", listener: KeyValueEventFunction<K, V>): this;
+  on(name: "get", listener: KeyValueEventFunction<K, V | undefined>): this;
+  on(name: "clear", listener: EmptyEventFunction): this;
+}
 
 export class EventCapability<K extends Key, V> extends CapabilityWrapper<K, V> {
-  static ID = "events";
+  static ID = "event";
   private eventoptions: EventOptions;
   private eventEmitter: EventEmitter;
 
@@ -15,8 +28,6 @@ export class EventCapability<K extends Key, V> extends CapabilityWrapper<K, V> {
     this.eventoptions = options;
     this.eventEmitter = new EventEmitter();
   }
-
-  initCapability(_record: CapabilityRecord<K, V>): void {}
 
   set(key: K, value: V) {
     super.set(key, value);

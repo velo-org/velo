@@ -1,6 +1,6 @@
 import { assertEquals } from "../../dev_deps.ts";
 import { Velo } from "../../src/builder/builder.ts";
-import { sleep } from "../../src/utils/sleep.ts";
+import { sleep } from "../utils/sleep.ts";
 
 Deno.test("ExpireCapability, should remove entry after timeout", async () => {
   const cache = Velo.builder().capacity(5).lru().ttl(200).build();

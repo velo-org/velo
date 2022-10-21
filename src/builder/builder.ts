@@ -1,16 +1,21 @@
-import { VeloCache } from "../cache/velo.ts";
-import { CacheOptions, Options } from "../cache/options.ts";
-import { Key } from "../cache/key.ts";
-import { Policy } from "../policy/policy.ts";
-import { LRU, SC, ARC, LFU, WindowTinyLfu } from "../policy/index.ts";
 import { Cache } from "../cache/cache.ts";
-import { StatisticsCapability } from "../cache/capability/stats/stats_capability.ts";
-import { VeloCounter } from "../cache/capability/stats/counter.ts";
-import { LoaderFunction, LoadingCache, LoadingCapability } from "../cache/capability/loading/loading_capability.ts";
-import { ExpireCapability } from "../cache/capability/expire/expire_capability.ts";
-import { EventName, EventOptions } from "../cache/capability/events/events.ts";
-import { EventCapability } from "../cache/capability/events/event_capability.ts";
-import { CapabilityRecord } from "../cache/capability/record.ts";
+import { BaseCache } from "../cache/base.ts";
+import { Key } from "../cache/key.ts";
+import { CacheOptions, Options, EventOptions } from "../cache/options.ts";
+import { CapabilityRecord } from "../cache/capabilities/record.ts";
+import { PolicyCapability } from "../cache/capabilities/policy_capability.ts";
+import { EventName, EventCapability } from "../cache/capabilities/event_capability.ts";
+import { ExpireCapability } from "../cache/capabilities/expire_capability.ts";
+import { LoaderFunction, LoadingCache, LoadingCapability } from "../cache/capabilities/loading_capability.ts";
+import { ExtractOptionsCapability } from "../cache/capabilities/extract_options_capability.ts";
+import { StatisticsCapability } from "../cache/capabilities/stats_capability.ts";
+import { Counter } from "../cache/capabilities/counter.ts";
+import { Policy } from "../policy/policy.ts";
+import { Arc } from "../policy/arc.ts";
+import { Lfu } from "../policy/lfu.ts";
+import { Lru } from "../policy/lru.ts";
+import { SecondChance } from "../policy/sc.ts";
+import { WindowTinyLfu } from "../policy/tiny_lfu/w_tiny_lfu.ts";
 
 export class Velo<K extends Key, V> {
   private _options: CacheOptions<K, V> = Options.default<K, V>();
@@ -78,19 +83,19 @@ export class Velo<K extends Key, V> {
   }
 
   public arc() {
-    return this.policy(new ARC<K, V>(this._options.capacity));
+    return this.policy(new Arc<K, V>(this._options.capacity));
   }
 
   public lru() {
-    return this.policy(new LRU<K, V>(this._options.capacity));
+    return this.policy(new Lru<K, V>(this._options.capacity));
   }
 
   public sc() {
-    return this.policy(new SC<K, V>(this._options.capacity));
+    return this.policy(new SecondChance<K, V>(this._options.capacity));
   }
 
   public lfu() {
-    return this.policy(new LFU<K, V>(this._options.capacity));
+    return this.policy(new Lfu<K, V>(this._options.capacity));
   }
 
   public tinyLfu() {
@@ -100,7 +105,15 @@ export class Velo<K extends Key, V> {
   public build(): Cache<K, V>;
   public build(loader: LoaderFunction<K, V>): LoadingCache<K, V>;
   public build(loader?: LoaderFunction<K, V>): Cache<K, V> | LoadingCache<K, V> {
-    let cache: Cache<K, V> = new VeloCache(this._options);
+    let cache: Cache<K, V> = new BaseCache();
+
+    cache = new ExtractOptionsCapability<K, V>(cache, this._options);
+
+    if (this._options.policy) {
+      const policy = new PolicyCapability<K, V>(cache, this._options.policy);
+      this._capabilities.set(PolicyCapability.ID, policy);
+      cache = policy;
+    }
 
     if (loader) {
       const loading = new LoadingCapability<K, V>(cache, loader);
@@ -121,7 +134,7 @@ export class Velo<K extends Key, V> {
     }
 
     if (this._options.stats) {
-      const stats = new StatisticsCapability<K, V>(cache, new VeloCounter());
+      const stats = new StatisticsCapability<K, V>(cache, new Counter());
       this._capabilities.set(StatisticsCapability.ID, stats);
       cache = stats;
     }

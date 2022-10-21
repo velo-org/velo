@@ -1,11 +1,11 @@
-import { Cache } from "../../cache.ts";
-import { Key } from "../../key.ts";
-import { EventCapability } from "../events/event_capability.ts";
-import { CapabilityRecord } from "../record.ts";
-import { CapabilityWrapper } from "../wrapper.ts";
+import { Cache } from "../cache.ts";
+import { Key } from "../key.ts";
+import { EventCapability } from "./event_capability.ts";
+import { CapabilityRecord } from "./record.ts";
+import { CapabilityWrapper } from "./wrapper.ts";
 
 export class ExpireCapability<K extends Key, V> extends CapabilityWrapper<K, V> {
-  static ID = "ttl";
+  static ID = "expire";
   private ttl: number;
   private timeouts: Map<K, number>;
   private onTimeout: ((key: K, value: V) => void) | null;
@@ -27,11 +27,15 @@ export class ExpireCapability<K extends Key, V> extends CapabilityWrapper<K, V> 
   }
 
   set(key: K, value: V): void {
-    this.setTTL(key, value);
+    this.setWithExpire(key, value, this.ttl);
+  }
+
+  setWithExpire(key: K, value: V, ttl: number) {
+    this.setTimeout(key, value, ttl);
     super.set(key, value);
   }
 
-  private setTTL(key: K, value: V) {
+  private setTimeout(key: K, value: V, ttl: number) {
     if (this.timeouts.has(key)) {
       const id = this.timeouts.get(key);
       clearTimeout(id);
@@ -42,7 +46,7 @@ export class ExpireCapability<K extends Key, V> extends CapabilityWrapper<K, V> 
       if (this.onTimeout) {
         this.onTimeout(key, value);
       }
-    }, this.ttl);
+    }, ttl);
 
     this.timeouts.set(key, id);
   }

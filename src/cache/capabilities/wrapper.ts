@@ -10,7 +10,7 @@ export abstract class CapabilityWrapper<K extends Key, V> implements Cache<K, V>
     this.inner = inner;
   }
 
-  abstract initCapability(record: CapabilityRecord<K, V>): void;
+  initCapability(_record: CapabilityRecord<K, V>) {}
 
   get capacity() {
     return this.inner.capacity;
@@ -38,6 +38,9 @@ export abstract class CapabilityWrapper<K extends Key, V> implements Cache<K, V>
   }
   set(key: K, value: V): void {
     return this.inner.set(key, value);
+  }
+  setWithExpire(key: K, value: V, expire: number): void {
+    return this.inner.setWithExpire(key, value, expire);
   }
   peek(key: K): V | undefined {
     return this.inner.peek(key);

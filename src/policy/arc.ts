@@ -15,22 +15,22 @@ import { Policy } from "./policy.ts";
  *
  * [1]https://www.usenix.org/legacy/events/fast03/tech/full_papers/megiddo/megiddo.pdf
  */
-export class ARC<K extends Key, V> implements Policy<K, V> {
+export class Arc<K extends Key, V> implements Policy<K, V> {
   private partition = 0;
 
-  private t1: ARCList<K, V>;
-  private t2: ARCList<K, V>;
-  private b1: ARCList<K, null>;
-  private b2: ARCList<K, null>;
+  private t1: ArcList<K, V>;
+  private t2: ArcList<K, V>;
+  private b1: ArcList<K, null>;
+  private b2: ArcList<K, null>;
 
   readonly capacity: number;
 
   constructor(capacity: number) {
     this.capacity = capacity;
-    this.t1 = new ARCList(this.capacity);
-    this.t2 = new ARCList(this.capacity);
-    this.b1 = new ARCList(this.capacity);
-    this.b2 = new ARCList(this.capacity);
+    this.t1 = new ArcList(this.capacity);
+    this.t2 = new ArcList(this.capacity);
+    this.b1 = new ArcList(this.capacity);
+    this.b2 = new ArcList(this.capacity);
   }
 
   private replace(in_t2: boolean) {
@@ -211,7 +211,7 @@ export class ARC<K extends Key, V> implements Policy<K, V> {
 /**
  * An LRU with some special functions
  */
-class ARCList<K extends Key, V> {
+class ArcList<K extends Key, V> {
   private items: { [key in Key]: number } = {};
   private _keys: Array<K | undefined>;
   private _values: Array<V | undefined>;

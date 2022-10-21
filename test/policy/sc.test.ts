@@ -1,6 +1,6 @@
 import { Velo } from "../../src/builder/builder.ts";
 import { assertEquals } from "../../dev_deps.ts";
-import { sleep } from "../../src/utils/sleep.ts";
+import { sleep } from "../utils/sleep.ts";
 
 Deno.test("SC create Cache, should create a new empty cache", () => {
   const scCache = Velo.builder().capacity(5).sc().build();

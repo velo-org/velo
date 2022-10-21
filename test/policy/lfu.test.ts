@@ -1,6 +1,6 @@
 import { assert, assertEquals } from "../../dev_deps.ts";
 import { Velo } from "../../src/builder/builder.ts";
-import { sleep } from "../../src/utils/sleep.ts";
+import { sleep } from "../utils/sleep.ts";
 
 Deno.test("LFU create cache, should create a new empty cache", () => {
   const lfuCache = Velo.builder().capacity(5).lfu().build();

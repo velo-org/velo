@@ -1,14 +1,14 @@
 import { assertEquals, assertFalse, assertThrows } from "../dev_deps.ts";
 import { Velo } from "../src/builder/builder.ts";
 import { Options } from "../src/cache/options.ts";
-import { LRU } from "../src/policy/lru.ts";
+import { Lru } from "../src/policy/lru.ts";
 
 Deno.test("Cache, should allow to extract cache options", () => {
   const options = new Options<number, string>();
   options.capacity = 5;
   options.ttl = 1000;
   options.stats = true;
-  options.policy = new LRU(100);
+  options.policy = new Lru(5);
 
   const cache = Velo.from(options).build();
   assertEquals(cache.options, options);

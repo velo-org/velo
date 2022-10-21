@@ -1,6 +1,6 @@
 import { Options } from "../../mod.ts";
-import { VeloEventEmitter } from "./capability/events/events.ts";
-import { CacheStatistics } from "./capability/stats/stats.ts";
+import { VeloEventEmitter } from "./capabilities/event_capability.ts";
+import { CacheStatistics } from "./capabilities/stats_capability.ts";
 import { Key } from "./key.ts";
 
 export interface Cache<K extends Key, V> {
@@ -14,6 +14,7 @@ export interface Cache<K extends Key, V> {
 
   get(key: K): V | undefined;
   set(key: K, value: V): void;
+  setWithExpire(key: K, value: V, expire: number): void;
   peek(key: K): V | undefined;
   has(key: K): boolean;
   take(key: K): V | undefined;

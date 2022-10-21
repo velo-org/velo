@@ -1,4 +1,5 @@
 import { Velo } from "../../mod.ts";
+import { getPolicy } from "../../test/utils/get_policy.ts";
 /**
  * This example highlights the W-TinyLFU policy.
  *
@@ -26,5 +27,5 @@ console.log(tinyLfu.size === 21);
 // 99 is in the window cache, 98 is in the MRU position of the probationary segment
 // by accesing it a second time, we promote it to the protected segment
 tinyLfu.get(98);
-// deno-lint-ignore no-explicit-any
-console.log((tinyLfu as any)._policy.protected.keys());
+
+console.log(getPolicy(tinyLfu).protected.keys());
