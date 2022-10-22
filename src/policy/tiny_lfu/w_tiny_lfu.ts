@@ -1,3 +1,4 @@
+import { RemoveCause, RemoveListener } from "../../cache/capabilities/remove_listener_capability.ts";
 import { Key } from "../../cache/key.ts";
 import { PointerList } from "../../utils/pointer_list.ts";
 import { Policy } from "../policy.ts";
@@ -42,6 +43,7 @@ export class WindowTinyLfu<K extends Key, V> implements Policy<K, V> {
   private protected: LruPointerList<K, V>;
   private probation: LruPointerList<K, V>;
   private filter: FrequencySketch<K>;
+  onEvict?: RemoveListener<K, V>;
 
   readonly capacity: number;
 
@@ -77,9 +79,9 @@ export class WindowTinyLfu<K extends Key, V> implements Policy<K, V> {
       this.evict();
     }
 
-    const ident = this.entryMap[key];
+    const ident: EntryIdent = this.entryMap[key];
 
-    if (ident) {
+    if (ident !== undefined) {
       // key in cache, just update the value
       switch (ident.segment) {
         case Segment.Window:
@@ -125,9 +127,11 @@ export class WindowTinyLfu<K extends Key, V> implements Policy<K, V> {
   remove(key: K) {
     const ident = this.entryMap[key];
     if (ident) {
-      this.executeOnCache(ident, LruPointerList.prototype.erase);
+      const oldEntry = this.executeOnCache(ident, LruPointerList.prototype.remove);
       delete this.entryMap[key];
+      return oldEntry.value as V;
     }
+    return undefined;
   }
 
   clear() {
@@ -215,12 +219,12 @@ export class WindowTinyLfu<K extends Key, V> implements Policy<K, V> {
   }
 
   private evictFromWindow() {
-    const key = this.window.evict();
+    const key = this.window.evict(this.onEvict);
     delete this.entryMap[key];
   }
 
   private evictFromMain() {
-    const key = this.probation.evict();
+    const key = this.probation.evict(this.onEvict);
     delete this.entryMap[key];
   }
 
@@ -296,8 +300,10 @@ class LruPointerList<K extends Key, V> {
   }
 
   put(key: K, value: V) {
-    const p = this.items[key];
+    const p: number = this.items[key];
+    const oldValue = this._values[p];
     this._values[p] = value;
+    return oldValue;
   }
 
   insertMru(key: K, value: V): number {
@@ -310,14 +316,6 @@ class LruPointerList<K extends Key, V> {
 
   toMru(pointer: number) {
     this.pointers.moveToFront(pointer);
-  }
-
-  erase(pointer: number) {
-    const p = this.pointers.remove(pointer);
-    const key = this._keys[p];
-    delete this.items[key];
-    delete this._keys[p];
-    delete this._values[p];
   }
 
   removeLru() {
@@ -340,9 +338,12 @@ class LruPointerList<K extends Key, V> {
     return { key, value };
   }
 
-  evict() {
+  evict(onEvict?: RemoveListener<K, V>) {
     const p = this.pointers.removeBack();
     const key = this._keys[p];
+    if (onEvict) {
+      onEvict(key, this._values[p], RemoveCause.Evicted);
+    }
     delete this.items[key];
     delete this._keys[p];
     delete this._values[p];

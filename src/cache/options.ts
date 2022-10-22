@@ -1,5 +1,6 @@
 import { Velo } from "../builder/builder.ts";
 import { Policy } from "../policy/policy.ts";
+import { RemoveListener } from "./capabilities/remove_listener_capability.ts";
 import { Key } from "./key.ts";
 
 export interface EventOptions {
@@ -15,6 +16,7 @@ export interface CacheOptions<K extends Key, V> {
   policy: Policy<K, V> | null;
   events: boolean;
   eventOptions: EventOptions;
+  removeListener: RemoveListener<K, V> | null;
   ttl: number;
   stats: boolean;
 }
@@ -26,6 +28,7 @@ export class Options<K extends Key, V> implements CacheOptions<K, V> {
   eventOptions: EventOptions;
   ttl: number;
   stats: boolean;
+  removeListener: RemoveListener<K, V> | null;
 
   constructor();
   constructor(options: CacheOptions<K, V>);
@@ -39,6 +42,7 @@ export class Options<K extends Key, V> implements CacheOptions<K, V> {
     this.eventOptions = options.eventOptions;
     this.ttl = options.ttl;
     this.stats = options.stats;
+    this.removeListener = options.removeListener;
   }
 
   static default<K extends Key, V>(): CacheOptions<K, V> {
@@ -53,6 +57,7 @@ export class Options<K extends Key, V> implements CacheOptions<K, V> {
         get: false,
         clear: false,
       },
+      removeListener: null,
       ttl: 0,
       stats: false,
     };

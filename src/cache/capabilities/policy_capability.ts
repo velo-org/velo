@@ -1,13 +1,14 @@
 import { Policy } from "../../policy/policy.ts";
-import { Cache } from "../cache.ts";
+import { Cache, CacheInternal } from "../cache.ts";
 import { Key } from "../key.ts";
+import { RemoveCause } from "./remove_listener_capability.ts";
 import { CapabilityWrapper } from "./wrapper.ts";
 
 export class PolicyCapability<K extends Key, V> extends CapabilityWrapper<K, V> {
   static ID = "policy";
   private policy: Policy<K, V>;
 
-  constructor(inner: Cache<K, V>, policy: Policy<K, V>) {
+  constructor(inner: Cache<K, V> & CacheInternal<K, V>, policy: Policy<K, V>) {
     super(inner);
     this.policy = policy;
   }
@@ -17,10 +18,20 @@ export class PolicyCapability<K extends Key, V> extends CapabilityWrapper<K, V> 
   }
 
   set(key: K, value: V): void {
-    this.policy.set(key, value);
+    const oldValue = this.policy.set(key, value);
+    if (oldValue !== undefined && this.onRemove) {
+      this.onRemove(key, oldValue, RemoveCause.Replaced);
+    }
   }
 
   remove(key: K): void {
+    const oldValue = this.policy.remove(key);
+    if (oldValue !== undefined && this.onRemove) {
+      this.onRemove(key, oldValue, RemoveCause.Explicit);
+    }
+  }
+
+  erase(key: K): void {
     this.policy.remove(key);
   }
 

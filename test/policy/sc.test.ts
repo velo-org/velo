@@ -1,6 +1,7 @@
 import { Velo } from "../../src/builder/builder.ts";
 import { assertEquals } from "../../dev_deps.ts";
 import { sleep } from "../utils/sleep.ts";
+import { RemoveCause } from "../../src/cache/capabilities/remove_listener_capability.ts";
 
 Deno.test("SC create Cache, should create a new empty cache", () => {
   const scCache = Velo.builder().capacity(5).sc().build();
@@ -62,13 +63,13 @@ Deno.test("SC clear should reset cache", () => {
 });
 
 Deno.test("SC use with ttl", async () => {
-  const scCache = Velo.builder().capacity(5).sc().ttl(500).build();
+  const scCache = Velo.builder().capacity(5).sc().ttl(100).build();
   scCache.set("1", 1);
   scCache.set("2", 2);
   scCache.set("3", 3);
   scCache.set("4", 4);
   scCache.set("5", 5);
-  await sleep(1000);
+  await sleep(300);
   assertEquals(scCache.size, 0);
   assertEquals(scCache.keys, []);
 });
@@ -112,4 +113,21 @@ Deno.test("SC when getting value it receives a second chance, but should be dele
   assertEquals(scCache.peek("1"), 1);
   scCache.set("7", 7);
   assertEquals(scCache.peek("1"), undefined);
+});
+
+Deno.test("SC should call onEvict listener", () => {
+  const scCache = Velo.builder()
+    .capacity(3)
+    .lru()
+    .removalListener((k, v, cause) => {
+      assertEquals(k, "1");
+      assertEquals(v, 1);
+      assertEquals(cause, RemoveCause.Evicted);
+    })
+    .build();
+
+  scCache.set("1", 1);
+  scCache.set("2", 2);
+  scCache.set("3", 3);
+  scCache.set("4", 4); // evicts "1"
 });

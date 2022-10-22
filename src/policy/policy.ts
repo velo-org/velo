@@ -1,14 +1,16 @@
 import { Key } from "../cache/key.ts";
+import { RemoveListener } from "../cache/capabilities/remove_listener_capability.ts";
 
 export interface Policy<K extends Key, V> {
   readonly capacity: number;
   readonly size: number;
   readonly keys: K[];
   readonly values: V[];
-  set(key: K, value: V): void;
+  onEvict?: RemoveListener<K, V>;
+  set(key: K, value: V): V | undefined;
   get(key: K): V | undefined;
   peek(key: K): V | undefined;
-  remove(key: K): void;
+  remove(key: K): V | undefined;
   clear(): void;
   has(key: K): boolean;
   forEach(callback: (item: { key: K; value: V }, index: number) => void): void;

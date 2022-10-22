@@ -29,6 +29,9 @@ export class BaseCache<K extends Key, V> implements Cache<K, V> {
   remove(_key: K): void {
     throw new Error(NO_POLICY);
   }
+  erase(_key: K): void {
+    throw new Error(NO_POLICY);
+  }
   clear(): void {
     throw new Error(NO_POLICY);
   }

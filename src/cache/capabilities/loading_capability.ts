@@ -1,4 +1,4 @@
-import { Cache } from "../cache.ts";
+import { Cache, CacheInternal } from "../cache.ts";
 import { Key } from "../key.ts";
 import { CapabilityWrapper } from "./wrapper.ts";
 
@@ -13,7 +13,7 @@ export class LoadingCapability<K extends Key, V> extends CapabilityWrapper<K, V>
   static ID = "loading";
   private loader: LoaderFunction<K, V>;
 
-  constructor(inner: Cache<K, V>, loader: LoaderFunction<K, V>) {
+  constructor(inner: Cache<K, V> & CacheInternal<K, V>, loader: LoaderFunction<K, V>) {
     super(inner);
     this.loader = (k) => {
       try {

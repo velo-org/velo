@@ -84,8 +84,6 @@ Deno.test("FrequencySketch, should downsample, halving the counters and size (as
     for (let i = 0; i < resetFactor; i++) {
       frequencySketch.increment(hash);
     }
-    console.log(hash);
-
     assertEquals(frequencySketch.frequency(hash), resetFactor);
   }
 

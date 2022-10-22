@@ -1,11 +1,12 @@
 import { EventEmitter } from "../../../deps.ts";
-import { Cache } from "../cache.ts";
+import { Cache, CacheInternal } from "../cache.ts";
 import { Key } from "../key.ts";
 import { EventOptions } from "../options.ts";
 import { CapabilityWrapper } from "./wrapper.ts";
 
 export type EventName = "set" | "remove" | "clear" | "get" | "expire";
 
+export type FireEventFunction<K, V> = (name: EventName, ...args: (K | V | undefined)[]) => void;
 type KeyEventFunction<K> = (key: K) => void;
 type KeyValueEventFunction<K, V> = (key: K, value: V) => void;
 type EmptyEventFunction = () => void;
@@ -20,13 +21,19 @@ export interface VeloEventEmitter<K, V> {
 
 export class EventCapability<K extends Key, V> extends CapabilityWrapper<K, V> {
   static ID = "event";
-  private eventoptions: EventOptions;
+  private eventOptions: EventOptions;
   private eventEmitter: EventEmitter;
+  fireEvent: FireEventFunction<K, V>;
 
-  constructor(inner: Cache<K, V>, options: EventOptions) {
+  constructor(inner: Cache<K, V> & CacheInternal<K, V>, options: EventOptions) {
     super(inner);
-    this.eventoptions = options;
+    this.eventOptions = options;
     this.eventEmitter = new EventEmitter();
+    this.fireEvent = (name: EventName, ...args: (K | V | undefined)[]) => {
+      if (this.eventOptions[name]) {
+        this.eventEmitter.emit(name, ...args);
+      }
+    };
   }
 
   set(key: K, value: V) {
@@ -52,11 +59,5 @@ export class EventCapability<K extends Key, V> extends CapabilityWrapper<K, V> {
 
   get events(): VeloEventEmitter<K, V> {
     return this.eventEmitter;
-  }
-
-  fireEvent(name: EventName, ...args: (K | V | undefined)[]) {
-    if (this.eventoptions[name]) {
-      this.eventEmitter.emit(name, ...args);
-    }
   }
 }

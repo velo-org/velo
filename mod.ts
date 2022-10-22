@@ -7,3 +7,5 @@ export { Lfu } from "./src/policy/lfu.ts";
 export { SecondChance } from "./src/policy/sc.ts";
 export { WindowTinyLfu } from "./src/policy/tiny_lfu/w_tiny_lfu.ts";
 export type { LoaderFunction } from "./src/cache/capabilities/loading_capability.ts";
+export type { RemoveListener } from "./src/cache/capabilities/remove_listener_capability.ts";
+export { RemoveCause } from "./src/cache/capabilities/remove_listener_capability.ts";

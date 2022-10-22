@@ -1,17 +1,14 @@
-import { assert, assertEquals, assertThrows } from "../../dev_deps.ts";
-import { Velo } from "../../mod.ts";
+import { assertEquals, assertThrows } from "../../dev_deps.ts";
+import { Velo } from "../../src/builder/builder.ts";
+import { BaseCache } from "../../src/cache/base.ts";
+import { Cache, CacheInternal } from "../../src/cache/cache.ts";
 import { LoadingCapability } from "../../src/cache/capabilities/loading_capability.ts";
 
-Deno.test("LoadingCapability, should create a loading cache instance", () => {
-  const cache = Velo.builder<string, string>()
-    .capacity(5)
-    .lru()
-    .build((k: string) => {
-      return k + "1";
-    });
-
-  assert(cache instanceof LoadingCapability);
-  assert(Reflect.has(cache, "refresh"));
+Deno.test("LoadingCapability, should wrap cache", () => {
+  const loadFunc = (_: string) => "";
+  let cache: Cache<string, string> & CacheInternal<string, string> = new BaseCache<string, string>();
+  cache = new LoadingCapability(cache, loadFunc);
+  assertEquals(cache instanceof LoadingCapability, true);
 });
 
 Deno.test("LoadingCapability, should load value if not present", () => {
@@ -28,8 +25,8 @@ Deno.test("LoadingCapability, should not load value if already in the cache", ()
       return "loaded";
     });
 
-  cache.set(1, "valid value");
-  assertEquals(cache.get(1), "valid value");
+  cache.set(1, "already in cache");
+  assertEquals(cache.get(1), "already in cache");
 });
 
 Deno.test("LoadingCapability, should refresh value", () => {

@@ -1,6 +1,7 @@
 import { PointerList } from "../utils/pointer_list.ts";
 import { Key } from "../cache/key.ts";
 import { Policy } from "./policy.ts";
+import { RemoveCause, RemoveListener } from "../cache/capabilities/remove_listener_capability.ts";
 
 /**
  * Second Chance (SC)
@@ -12,6 +13,7 @@ export class SecondChance<K extends Key, V> implements Policy<K, V> {
   private _size: number;
 
   readonly capacity: number;
+  onEvict?: RemoveListener<K, V>;
 
   constructor(capacity: number) {
     this.capacity = capacity;
@@ -24,12 +26,13 @@ export class SecondChance<K extends Key, V> implements Policy<K, V> {
   set(key: K, value: V) {
     let pointer: number = this.items[key];
     if (pointer !== undefined) {
+      const oldValue = this.arrayMap[pointer].value;
       this.arrayMap[pointer].value = value;
       this.arrayMap[pointer].sChance = true;
-      return;
+      return oldValue;
     }
 
-    if (this._size < this.capacity!) {
+    if (this._size < this.capacity) {
       pointer = this._size++;
       if (!this.pointers.isFull()) {
         pointer = this.pointers.newPointer();
@@ -45,7 +48,10 @@ export class SecondChance<K extends Key, V> implements Policy<K, V> {
 
       for (let i = 0; p != undefined; i++) {
         if (!this.arrayMap[p].sChance) {
-          delete this.items[this.arrayMap[p].key!];
+          if (this.onEvict) {
+            this.onEvict(this.arrayMap[p].key, this.arrayMap[p].value, RemoveCause.Evicted);
+          }
+          delete this.items[this.arrayMap[p].key];
           this.items[key] = p;
           this.arrayMap[p] = { key, value, sChance: false };
           this.pointers.moveToBack(p);
@@ -96,10 +102,17 @@ export class SecondChance<K extends Key, V> implements Policy<K, V> {
 
   remove(key: K) {
     const pointer = this.items[key];
+
+    if (pointer === undefined) {
+      return undefined;
+    }
+
+    const oldValue = this.arrayMap[pointer].value;
     this.pointers.remove(pointer);
     delete this.arrayMap[pointer];
     this._size--;
     delete this.items[key];
+    return oldValue;
   }
 
   has(key: Key) {

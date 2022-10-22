@@ -3,7 +3,8 @@ import { User } from "./common/user.ts";
 
 /**
  * This example shows how to use cache events. Provide cache types with the
- * builder method.
+ * builder method to have events correctly typed. The cache will emit events
+ * via an EventEmitter.
  */
 
 /**
@@ -11,6 +12,7 @@ import { User } from "./common/user.ts";
  *
  *        DEFAULT.eventOptions === {
  *         remove: true,
+ *         expire: true,
  *         set: false,
  *         get: false,
  *         clear: false,

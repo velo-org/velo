@@ -1,5 +1,6 @@
 import { assert, assertEquals, assertThrows } from "../../dev_deps.ts";
 import { Velo } from "../../src/builder/builder.ts";
+import { RemoveCause } from "../../src/cache/capabilities/remove_listener_capability.ts";
 import { getPolicy } from "../utils/get_policy.ts";
 import { sleep } from "../utils/sleep.ts";
 
@@ -116,31 +117,48 @@ Deno.test("TinyLFU forEach should print out the right key value pairs", () => {
 });
 
 Deno.test("TinyLFU use with ttl", async () => {
-  const cache = Velo.builder().capacity(100).ttl(200).tinyLfu().build();
+  const cache = Velo.builder().capacity(100).ttl(100).tinyLfu().build();
   cache.set("1", 1);
   cache.set("2", 2);
   cache.set("3", 3);
   cache.set("4", 4);
   cache.set("5", 5);
-  await sleep(1000);
+  await sleep(300);
   assertEquals(cache.size, 0);
   assertEquals(cache.keys, []);
 });
 
 Deno.test("TinyLFU should collect cache stats", () => {
-  const arcCache = Velo.builder().capacity(3).arc().stats().build();
-  assertEquals(arcCache.stats.hitCount, 0);
-  assertEquals(arcCache.stats.missCount, 0);
+  const cache = Velo.builder().capacity(3).arc().stats().build();
+  assertEquals(cache.stats.hitCount, 0);
+  assertEquals(cache.stats.missCount, 0);
 
-  arcCache.set("1", 1);
-  arcCache.set("2", 2);
-  arcCache.set("3", 3);
-  arcCache.set("4", 4); // evict
-  arcCache.get("1"); // miss
-  arcCache.get("2"); // hit
-  arcCache.get("3"); // hit
-  arcCache.get("4"); // hit
+  cache.set("1", 1);
+  cache.set("2", 2);
+  cache.set("3", 3);
+  cache.set("4", 4); // evict
+  cache.get("1"); // miss
+  cache.get("2"); // hit
+  cache.get("3"); // hit
+  cache.get("4"); // hit
 
-  assertEquals(arcCache.stats.hitCount, 3);
-  assertEquals(arcCache.stats.missCount, 1);
+  assertEquals(cache.stats.hitCount, 3);
+  assertEquals(cache.stats.missCount, 1);
+});
+
+Deno.test("TinyLFU should call onEvict listener", () => {
+  const cache = Velo.builder()
+    .capacity(3)
+    .lru()
+    .removalListener((k, v, cause) => {
+      assertEquals(k, "1");
+      assertEquals(v, 1);
+      assertEquals(cause, RemoveCause.Evicted);
+    })
+    .build();
+
+  cache.set("1", 1);
+  cache.set("2", 2);
+  cache.set("3", 3);
+  cache.set("4", 4); // evicts "1"
 });

@@ -1,5 +1,6 @@
 import { assert, assertEquals } from "../../dev_deps.ts";
 import { Velo } from "../../src/builder/builder.ts";
+import { RemoveCause } from "../../src/cache/capabilities/remove_listener_capability.ts";
 import { getPolicy } from "../utils/get_policy.ts";
 import { sleep } from "../utils/sleep.ts";
 
@@ -88,13 +89,13 @@ Deno.test("ARC forEach should print out the right key value pairs", () => {
 });
 
 Deno.test("ARC use with ttl", async () => {
-  const arcCache = Velo.builder().capacity(5).ttl(500).arc().build();
+  const arcCache = Velo.builder().capacity(5).ttl(100).arc().build();
   arcCache.set("1", 1);
   arcCache.set("2", 2);
   arcCache.set("3", 3);
   arcCache.set("4", 4);
   arcCache.set("5", 5);
-  await sleep(1000);
+  await sleep(300);
   assertEquals(arcCache.size, 0);
   assertEquals(arcCache.keys, []);
 });
@@ -142,4 +143,21 @@ Deno.test("ARC should collect cache stats", () => {
 
   assertEquals(arcCache.stats.hitCount, 3);
   assertEquals(arcCache.stats.missCount, 1);
+});
+
+Deno.test("ARC should call onEvict listener", () => {
+  const arcCache = Velo.builder()
+    .capacity(3)
+    .arc()
+    .removalListener((k, v, cause) => {
+      assertEquals(k, "1");
+      assertEquals(v, 1);
+      assertEquals(cause, RemoveCause.Evicted);
+    })
+    .build();
+
+  arcCache.set("1", 1);
+  arcCache.set("2", 2);
+  arcCache.set("3", 3);
+  arcCache.set("4", 4); // evicts "1"
 });

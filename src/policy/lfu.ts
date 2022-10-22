@@ -1,3 +1,4 @@
+import { RemoveCause, RemoveListener } from "../cache/capabilities/remove_listener_capability.ts";
 import { Key } from "../cache/key.ts";
 import { DoublyLinkedList, Node } from "../utils/doubly_linked_list.ts";
 import { Policy } from "./policy.ts";
@@ -6,11 +7,12 @@ import { Policy } from "./policy.ts";
  * Least Frequently Used (LFU)
  */
 export class Lfu<K extends Key, V> implements Policy<K, V> {
-  private _keys: { [key in Key]: Node<V> };
-  private frequency: { [key: number]: DoublyLinkedList<V> };
+  private _keys: { [key in Key]: Node<K, V> };
+  private frequency: { [key: number]: DoublyLinkedList<K, V> };
   private _size: number;
   private minFrequency: number;
   readonly capacity: number;
+  onEvict?: RemoveListener<K, V>;
 
   constructor(capacity: number) {
     this.capacity = capacity;
@@ -41,8 +43,11 @@ export class Lfu<K extends Key, V> implements Policy<K, V> {
         this._size++;
       } else {
         // else frequency 1 is full and we need to delete a node first so delete tail
-        const oldTail = this.frequency[this.minFrequency].removeAtTail();
-        delete this._keys[oldTail!.key];
+        const oldTail = this.frequency[this.minFrequency].removeAtTail()!;
+        delete this._keys[oldTail.key!];
+        if (this.onEvict) {
+          this.onEvict(oldTail.key!, oldTail.data!, RemoveCause.Evicted);
+        }
 
         // if we deleted frequency 1 then add it back before adding new node
         if (this.frequency[1] === undefined) {
@@ -60,6 +65,7 @@ export class Lfu<K extends Key, V> implements Policy<K, V> {
 
       // save the old frequency of the node and increment (also update data)
       const oldFrequencyCount = node.frequencyCount;
+      const oldValue = node.data;
       node.data = value;
       node.frequencyCount++;
 
@@ -77,13 +83,11 @@ export class Lfu<K extends Key, V> implements Policy<K, V> {
       // if the node we incremented was in the minFrequency list of all lists
       // and there's nothing left in the old list then we know the new minFrequency
       // for any node in any list is in the next freq so increment that now
-      if (
-        oldFrequencyCount === this.minFrequency &&
-        this.frequency[oldFrequencyCount].size === 0
-      ) {
+      if (oldFrequencyCount === this.minFrequency && this.frequency[oldFrequencyCount].size === 0) {
         this.minFrequency++;
         delete this.frequency[oldFrequencyCount];
       }
+      return oldValue;
     }
   }
 
@@ -106,10 +110,7 @@ export class Lfu<K extends Key, V> implements Policy<K, V> {
     this.frequency[node.frequencyCount].insertAtHead(node);
 
     // if old frequency list is empty then update minFrequency
-    if (
-      oldFrequencyCount === this.minFrequency &&
-      this.frequency[oldFrequencyCount].size === 0
-    ) {
+    if (oldFrequencyCount === this.minFrequency && this.frequency[oldFrequencyCount].size === 0) {
       this.minFrequency++;
       delete this.frequency[oldFrequencyCount];
     }
@@ -124,19 +125,18 @@ export class Lfu<K extends Key, V> implements Policy<K, V> {
 
   remove(key: K) {
     const node = this._keys[key];
-    if (!node) return;
+    if (!node) return undefined;
     else {
       this._size--;
       const oldFrequencyCount = node.frequencyCount;
+      const oldValue = node.data;
       this.frequency[oldFrequencyCount].removeNode(node);
       delete this._keys[key];
-      if (
-        oldFrequencyCount === this.minFrequency &&
-        this.frequency[oldFrequencyCount].size === 0
-      ) {
+      if (oldFrequencyCount === this.minFrequency && this.frequency[oldFrequencyCount].size === 0) {
         this.minFrequency++;
         delete this.frequency[oldFrequencyCount];
       }
+      return oldValue;
     }
   }
 

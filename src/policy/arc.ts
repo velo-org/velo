@@ -1,3 +1,4 @@
+import { RemoveCause, RemoveListener } from "../cache/capabilities/remove_listener_capability.ts";
 import { Key } from "../cache/key.ts";
 import { PointerList } from "../utils/pointer_list.ts";
 import { Policy } from "./policy.ts";
@@ -24,6 +25,7 @@ export class Arc<K extends Key, V> implements Policy<K, V> {
   private b2: ArcList<K, null>;
 
   readonly capacity: number;
+  onEvict?: RemoveListener<K, V>;
 
   constructor(capacity: number) {
     this.capacity = capacity;
@@ -36,14 +38,11 @@ export class Arc<K extends Key, V> implements Policy<K, V> {
   private replace(in_t2: boolean) {
     const t1Size = this.t1.size();
 
-    if (
-      t1Size > 0 &&
-      (t1Size > this.partition || (t1Size === this.partition && in_t2))
-    ) {
-      const oldKey = this.t1.removeBack();
+    if (t1Size > 0 && (t1Size > this.partition || (t1Size === this.partition && in_t2))) {
+      const oldKey = this.t1.evict(this.onEvict);
       this.b1.insert(oldKey, null);
     } else {
-      const oldKey = this.t2.removeBack();
+      const oldKey = this.t2.evict(this.onEvict);
       this.b2.insert(oldKey, null);
     }
   }
@@ -51,15 +50,13 @@ export class Arc<K extends Key, V> implements Policy<K, V> {
   set(key: K, value: V) {
     // in frequent set
     if (this.t2.has(key)) {
-      this.t2.insert(key, value);
-      return;
+      return this.t2.insert(key, value);
     }
 
     // in recent set
     if (this.t1.has(key)) {
       this.t1.remove(key);
-      this.t2.insert(key, value);
-      return;
+      return this.t2.insert(key, value);
     }
 
     // in frequent evicted
@@ -79,9 +76,7 @@ export class Arc<K extends Key, V> implements Policy<K, V> {
       }
 
       this.b2.remove(key);
-      this.t2.insert(key, value);
-
-      return;
+      return this.t2.insert(key, value);
     }
 
     // in recent evicted
@@ -101,9 +96,7 @@ export class Arc<K extends Key, V> implements Policy<K, V> {
       }
 
       this.b1.remove(key);
-      this.t2.insert(key, value);
-
-      return;
+      return this.t2.insert(key, value);
     }
 
     // not in cache or ghost lists
@@ -113,11 +106,11 @@ export class Arc<K extends Key, V> implements Policy<K, V> {
     }
 
     if (this.b1.size() > this.capacity - this.partition) {
-      this.b1.removeBack();
+      this.b1.evict();
     }
 
     if (this.b2.size() > this.partition) {
-      this.b2.removeBack();
+      this.b2.evict();
     }
 
     this.t1.insert(key, value);
@@ -154,13 +147,13 @@ export class Arc<K extends Key, V> implements Policy<K, V> {
    * @param key The entries key
    */
   remove(key: K) {
-    const value = this.peek(key);
-    if (value) {
-      this.t1.remove(key);
-      this.t2.remove(key);
-      this.b1.remove(key);
-      this.b2.remove(key);
+    if (this.t1.has(key)) {
+      return this.t1.remove(key);
     }
+    if (this.t2.has(key)) {
+      return this.t2.remove(key);
+    }
+    return undefined;
   }
 
   /**
@@ -241,13 +234,16 @@ class ArcList<K extends Key, V> {
   }
 
   remove(key: K) {
-    const p = this.items[key];
+    const p: number = this.items[key];
     if (p !== undefined) {
+      const oldValue = this._values[p];
       delete this.items[key];
       this._keys[p] = undefined;
       this._values[p] = undefined;
       this.pointers.remove(p);
+      return oldValue;
     }
+    return undefined;
   }
 
   removeWithValue(key: K): V | undefined {
@@ -264,7 +260,8 @@ class ArcList<K extends Key, V> {
   }
 
   insert(key: K, value: V) {
-    let p = this.items[key];
+    let p: number = this.items[key];
+    const oldValue = this._values[p];
 
     if (p === undefined) {
       p = this.pointers.newPointer();
@@ -274,6 +271,7 @@ class ArcList<K extends Key, V> {
     }
 
     this._values[p] = value;
+    return oldValue;
   }
 
   moveToFront(key: K) {
@@ -281,9 +279,12 @@ class ArcList<K extends Key, V> {
     this.pointers.moveToFront(p);
   }
 
-  removeBack(): K {
+  evict(onEvict?: RemoveListener<K, V>): K {
     const p = this.pointers.removeBack();
     const key = this._keys[p]!;
+    if (onEvict) {
+      onEvict(key, this._values[p]!, RemoveCause.Evicted);
+    }
     delete this.items[key];
     this._keys[p] = undefined;
     this._values[p] = undefined;
@@ -301,10 +302,7 @@ class ArcList<K extends Key, V> {
     return this.pointers.size;
   }
 
-  forEach(
-    start: number,
-    callback: (item: { key: K; value: V }, index: number) => void
-  ) {
+  forEach(start: number, callback: (item: { key: K; value: V }, index: number) => void) {
     let p: number | undefined = this.pointers.front;
 
     for (let i = start; p !== undefined; i++) {

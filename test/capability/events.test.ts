@@ -1,6 +1,17 @@
 import { assertEquals, assert } from "../../dev_deps.ts";
+import { DEFAULT } from "../../mod.ts";
 import { Velo } from "../../src/builder/builder.ts";
+import { BaseCache } from "../../src/cache/base.ts";
+import { Cache, CacheInternal } from "../../src/cache/cache.ts";
+import { EventCapability } from "../../src/cache/capabilities/event_capability.ts";
 import { sleep } from "../utils/sleep.ts";
+
+Deno.test("EventCapability, should wrap cache", () => {
+  let cache: Cache<string, string> & CacheInternal<string, string> = new BaseCache<string, string>();
+  cache = new EventCapability(cache, DEFAULT.eventOptions);
+  assertEquals(cache instanceof EventCapability, true);
+  assert(cache.events !== undefined);
+});
 
 Deno.test("EventCapability, should fire clear event", async () => {
   const cache = Velo.builder().capacity(5).lru().events().withEvent("clear").build();
@@ -75,7 +86,7 @@ Deno.test("EventCapability, should fire remove event", () => {
 });
 
 Deno.test("EventCapability, should fire expire event with ExpireCapability", async () => {
-  const cache = Velo.builder<string, string>().capacity(5).lru().ttl(200).events().withEvent("remove").build();
+  const cache = Velo.builder<string, string>().capacity(5).lru().ttl(200).events().withEvent("expire").build();
 
   let fired = false;
   cache.events.on("expire", (key, value) => {

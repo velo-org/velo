@@ -12,6 +12,7 @@ examples:
 	deno run --allow-env loading_cache.example.ts
 	deno run --allow-env ttl.example.ts
 	deno run --allow-env typed_cache.example.ts
+	deno run --allow-env removal_listener.example.ts
 
 test:
 	deno test --unstable --allow-read --allow-env ./test

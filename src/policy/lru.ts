@@ -1,3 +1,4 @@
+import { RemoveCause, RemoveListener } from "../cache/capabilities/remove_listener_capability.ts";
 import { Key } from "../cache/key.ts";
 import { PointerList } from "../utils/pointer_list.ts";
 import { Policy } from "./policy.ts";
@@ -10,6 +11,7 @@ export class Lru<K extends Key, V> implements Policy<K, V> {
   private _values: Array<V | undefined>;
   private items: { [key in Key]: number };
   private pointers: PointerList;
+  onEvict?: RemoveListener<K, V>;
 
   readonly capacity: number;
 
@@ -24,10 +26,11 @@ export class Lru<K extends Key, V> implements Policy<K, V> {
   set(key: K, value: V) {
     let pointer: number = this.items[key];
 
-    if (pointer) {
+    if (pointer !== undefined) {
       this.pointers.moveToFront(pointer);
+      const oldValue = this._values[pointer];
       this._values[pointer] = value;
-      return;
+      return oldValue;
     }
 
     // The cache is not yet full
@@ -36,6 +39,9 @@ export class Lru<K extends Key, V> implements Policy<K, V> {
     } // Cache is full, we need to drop the last value
     else {
       pointer = this.pointers.removeBack();
+      if (this.onEvict) {
+        this.onEvict(this._keys[pointer]!, this._values[pointer]!, RemoveCause.Evicted);
+      }
       delete this.items[this._keys[pointer]!];
       pointer = this.pointers.newPointer();
     }
@@ -46,6 +52,7 @@ export class Lru<K extends Key, V> implements Policy<K, V> {
     this._values[pointer] = value;
 
     this.pointers.pushFront(pointer);
+    return undefined;
   }
 
   clear() {
@@ -57,12 +64,17 @@ export class Lru<K extends Key, V> implements Policy<K, V> {
 
   remove(key: K) {
     const pointer = this.items[key];
-    if (pointer === undefined) return;
+
+    if (pointer === undefined) {
+      return undefined;
+    }
+
+    const oldValue = this._values[pointer];
     this.pointers.remove(pointer);
     this._keys[pointer] = undefined;
     this._values[pointer] = undefined;
-
     delete this.items[key];
+    return oldValue;
   }
 
   get(key: K): V | undefined {

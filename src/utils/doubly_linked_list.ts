@@ -1,19 +1,19 @@
 import { Key } from "../cache/key.ts";
 
-export class DoublyLinkedList<V> {
-  head: Node<V | undefined>;
-  tail: Node<V | undefined>;
+export class DoublyLinkedList<K extends Key, V> {
+  head: Node<K, V | undefined>;
+  tail: Node<K, V | undefined>;
   size: number;
 
   constructor() {
-    this.head = new Node("head", undefined);
-    this.tail = new Node("tail", undefined);
+    this.head = new Node();
+    this.tail = new Node();
     this.head.next = this.tail;
     this.tail.prev = this.head;
     this.size = 0;
   }
 
-  insertAtHead(node: Node<V | undefined>) {
+  insertAtHead(node: Node<K, V | undefined>) {
     // set current head as new node's next
     node.next = this.head.next;
     this.head.next!.prev = node;
@@ -41,7 +41,7 @@ export class DoublyLinkedList<V> {
     return oldTail;
   }
 
-  removeNode(node: Node<V>) {
+  removeNode(node: Node<K, V>) {
     node.prev!.next = node.next;
     node.next!.prev = node.prev;
 
@@ -49,14 +49,14 @@ export class DoublyLinkedList<V> {
   }
 }
 
-export class Node<V> {
-  prev: Node<V> | undefined;
-  next: Node<V> | undefined;
-  key: Key;
+export class Node<K extends Key, V> {
+  prev: Node<K, V> | undefined;
+  next: Node<K, V> | undefined;
+  key: K | undefined;
   data: V | undefined;
   frequencyCount: number;
 
-  constructor(key: Key, value: V | undefined) {
+  constructor(key?: K, value?: V) {
     this.prev = undefined;
     this.next = undefined;
     this.key = key;

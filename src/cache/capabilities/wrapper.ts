@@ -1,16 +1,19 @@
-import { Cache } from "../cache.ts";
+import { Cache, CacheInternal } from "../cache.ts";
 import { Key } from "../key.ts";
-import { CapabilityRecord } from "./record.ts";
+import { FireEventFunction } from "./event_capability.ts";
+import { RemoveListener } from "./remove_listener_capability.ts";
 
-export abstract class CapabilityWrapper<K extends Key, V> implements Cache<K, V> {
+export abstract class CapabilityWrapper<K extends Key, V> implements Cache<K, V>, CacheInternal<K, V> {
   public static ID: string;
-  private inner: Cache<K, V>;
+  private inner: Cache<K, V> & CacheInternal<K, V>;
+  onRemove?: RemoveListener<K, V>;
+  fireEvent?: FireEventFunction<K, V>;
 
-  constructor(inner: Cache<K, V>) {
+  constructor(inner: Cache<K, V> & CacheInternal<K, V>) {
     this.inner = inner;
+    this.onRemove = inner.onRemove;
+    this.fireEvent = inner.fireEvent;
   }
-
-  initCapability(_record: CapabilityRecord<K, V>) {}
 
   get capacity() {
     return this.inner.capacity;
@@ -59,5 +62,9 @@ export abstract class CapabilityWrapper<K extends Key, V> implements Cache<K, V>
   }
   forEach(callback: (item: { key: K; value: V }, index?: number) => void): void {
     return this.inner.forEach(callback);
+  }
+
+  erase(key: K): void {
+    return this.inner.erase(key);
   }
 }

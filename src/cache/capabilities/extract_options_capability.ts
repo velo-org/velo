@@ -1,4 +1,4 @@
-import { Cache } from "../cache.ts";
+import { Cache, CacheInternal } from "../cache.ts";
 import { Key } from "../key.ts";
 import { CacheOptions, Options } from "../options.ts";
 import { CapabilityWrapper } from "./wrapper.ts";
@@ -7,7 +7,7 @@ export class ExtractOptionsCapability<K extends Key, V> extends CapabilityWrappe
   static ID = "extract_options";
   private cacheOptions: CacheOptions<K, V>;
 
-  constructor(inner: Cache<K, V>, options: CacheOptions<K, V>) {
+  constructor(inner: Cache<K, V> & CacheInternal<K, V>, options: CacheOptions<K, V>) {
     super(inner);
     this.cacheOptions = options;
   }

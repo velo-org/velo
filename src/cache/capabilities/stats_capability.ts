@@ -1,4 +1,4 @@
-import { Cache } from "../cache.ts";
+import { Cache, CacheInternal } from "../cache.ts";
 import { Key } from "../key.ts";
 import { StatCounter } from "./counter.ts";
 import { CapabilityWrapper } from "./wrapper.ts";
@@ -13,7 +13,7 @@ export class StatisticsCapability<K extends Key, V> extends CapabilityWrapper<K,
   static ID = "stats";
   private counter: StatCounter;
 
-  constructor(inner: Cache<K, V>, counter: StatCounter) {
+  constructor(inner: Cache<K, V> & CacheInternal<K, V>, counter: StatCounter) {
     super(inner);
     this.counter = counter;
   }

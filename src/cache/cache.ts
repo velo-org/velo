@@ -1,5 +1,6 @@
 import { Options } from "../../mod.ts";
-import { VeloEventEmitter } from "./capabilities/event_capability.ts";
+import { FireEventFunction, VeloEventEmitter } from "./capabilities/event_capability.ts";
+import { RemoveListener } from "./capabilities/remove_listener_capability.ts";
 import { CacheStatistics } from "./capabilities/stats_capability.ts";
 import { Key } from "./key.ts";
 
@@ -21,4 +22,10 @@ export interface Cache<K extends Key, V> {
   remove(key: K): void;
   clear(): void;
   forEach(callback: (item: { key: K; value: V }, index?: number) => void): void;
+}
+
+export interface CacheInternal<K extends Key, V> {
+  onRemove?: RemoveListener<K, V>;
+  fireEvent?: FireEventFunction<K, V>;
+  erase(key: K): void;
 }
