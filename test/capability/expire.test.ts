@@ -9,7 +9,7 @@ Deno.test("ExpireCapability, should wrap cache", () => {
   let cache: Cache<string, string> & CacheInternal<string, string> = new BaseCache<string, string>();
   cache = new ExpireCapability(cache, 500);
   assertEquals(cache instanceof ExpireCapability, true);
-  assert(cache.events !== undefined);
+  assert((cache as any).ttl !== undefined);
 });
 
 Deno.test("ExpireCapability, should remove entry after timeout", async () => {
