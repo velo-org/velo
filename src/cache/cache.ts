@@ -4,6 +4,13 @@ import { RemoveListener } from "./capabilities/remove_listener_capability.ts";
 import { CacheStatistics } from "./capabilities/stats_capability.ts";
 import { Key } from "./key.ts";
 
+/**
+ * Maps keys to values. Entries are manually added via {@link set} and either
+ * evicted by the caching policy or manually removed via {@link remove}.
+ *
+ * @param K The type of keys
+ * @param V The type of values
+ */
 export interface Cache<K extends Key, V> {
   readonly capacity: number;
   readonly size: number;
@@ -24,6 +31,10 @@ export interface Cache<K extends Key, V> {
   forEach(callback: (item: { key: K; value: V }, index?: number) => void): void;
 }
 
+/**
+ * Defines internally used methods for cache wrappers to use. Additionally this
+ * enables interopability between cache wrappers using these methods.
+ */
 export interface CacheInternal<K extends Key, V> {
   onRemove?: RemoveListener<K, V>;
   fireEvent?: FireEventFunction<K, V>;

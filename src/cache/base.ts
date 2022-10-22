@@ -10,6 +10,12 @@ const NO_STATS = "Statistics are not enabled for this cache.";
 const NO_EVENTS = "Events are not enabled for this cache.";
 const NO_EXPIRE = "Expiration is not enabled for this cache.";
 
+/**
+ * The base cache class that all capability wrappers extend.Since it will be
+ * the "most inner" cache, these methods will only becalled if not overwritten
+ * by any capability wrapper. If a method of this class is reached, it will
+ * throw an error.
+ */
 export class BaseCache<K extends Key, V> implements Cache<K, V> {
   get(_key: K): V | undefined {
     throw new Error(NO_POLICY);

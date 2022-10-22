@@ -3,6 +3,13 @@ import { Key } from "../key.ts";
 import { FireEventFunction } from "./event_capability.ts";
 import { RemoveListener } from "./remove_listener_capability.ts";
 
+/**
+ * Wrapper for another cache to extend its capabilities.
+ *
+ * This is base class for all cache capabilities. It wraps an inner cache and provides and
+ * takes care of forwarding all methods to the inner cache. This behaviour is
+ * expected to be overwritten where necessary by the concrete capability implementation.
+ */
 export abstract class CapabilityWrapper<K extends Key, V> implements Cache<K, V>, CacheInternal<K, V> {
   public static ID: string;
   private inner: Cache<K, V> & CacheInternal<K, V>;

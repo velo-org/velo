@@ -11,7 +11,10 @@ type KeyEventFunction<K> = (key: K) => void;
 type KeyValueEventFunction<K, V> = (key: K, value: V) => void;
 type EmptyEventFunction = () => void;
 
-export interface VeloEventEmitter<K, V> {
+/**
+ * Defines the events emitted by the cache
+ */
+export interface VeloEventEmitter<K, V> extends EventEmitter {
   on(name: "remove", listener: KeyEventFunction<K>): this;
   on(name: "expire", listener: KeyValueEventFunction<K, V>): this;
   on(name: "set", listener: KeyValueEventFunction<K, V>): this;
@@ -19,6 +22,10 @@ export interface VeloEventEmitter<K, V> {
   on(name: "clear", listener: EmptyEventFunction): this;
 }
 
+/**
+ * Adds event capabilities to a cache. The {@link events} getter returns an
+ * {@link EventEmitter} that emits events according to {@link VeloEventEmitter}.
+ */
 export class EventCapability<K extends Key, V> extends CapabilityWrapper<K, V> {
   static ID = "event";
   private eventOptions: EventOptions;

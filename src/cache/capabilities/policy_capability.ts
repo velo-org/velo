@@ -4,6 +4,9 @@ import { Key } from "../key.ts";
 import { RemoveCause } from "./remove_listener_capability.ts";
 import { CapabilityWrapper } from "./wrapper.ts";
 
+/**
+ * Adds a policy to the cache.
+ */
 export class PolicyCapability<K extends Key, V> extends CapabilityWrapper<K, V> {
   static ID = "policy";
   private policy: Policy<K, V>;

@@ -9,6 +9,9 @@ export interface CacheStatistics {
   readonly hitRate: number;
 }
 
+/**
+ * Add statistics collection to a cache. 
+ */
 export class StatisticsCapability<K extends Key, V> extends CapabilityWrapper<K, V> {
   static ID = "stats";
   private counter: StatCounter;
