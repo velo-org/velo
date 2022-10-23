@@ -5,7 +5,8 @@ import { RemoveCause } from "./remove_listener_capability.ts";
 import { CapabilityWrapper } from "./wrapper.ts";
 
 /**
- * Adds a policy to the cache.
+ * Adds a policy to the cache. Overwrites methods without passing through to the
+ * inner cache.
  */
 export class PolicyCapability<K extends Key, V> extends CapabilityWrapper<K, V> {
   static ID = "policy";

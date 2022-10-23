@@ -1,4 +1,5 @@
 import { Key } from "../../cache/key.ts";
+import { nextPowerOfTwo } from "../../utils/next_power_of_two.ts";
 import { hash as hashFunction } from "./hash_function.ts";
 /**
  * A probabilistic set for estimating the frequency of elements within a time
@@ -31,7 +32,7 @@ export class FrequencySketch<T extends Key> {
 
   constructor(capacity: number, depth: number = 4) {
     const safeMax = Math.min(capacity, Number.MAX_SAFE_INTEGER >>> 2);
-    this.width = this.nextPowerOfTwo(safeMax);
+    this.width = nextPowerOfTwo(safeMax);
     this.depth = depth;
     this.size = 0;
     this.resetSize = this.width * 10;
@@ -92,10 +93,6 @@ export class FrequencySketch<T extends Key> {
       this.table[i] = Math.floor(this.table[i] >>> 1);
     }
     this.size /= 2;
-  }
-
-  private nextPowerOfTwo(value: number) {
-    return 1 << (32 - Math.clz32(value - 1));
   }
 
   /**
