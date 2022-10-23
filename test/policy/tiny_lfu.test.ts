@@ -123,7 +123,8 @@ Deno.test("TinyLFU use with ttl", async () => {
   cache.set("3", 3);
   cache.set("4", 4);
   cache.set("5", 5);
-  await sleep(300);
+  await sleep(1070);
+  cache.get("");
   assertEquals(cache.size, 0);
   assertEquals(cache.keys, []);
 });

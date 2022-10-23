@@ -16,6 +16,7 @@ Deno.test("ExpireCapability, should wrap cache", () => {
 Deno.test("ExpireCapability, should remove entry after timeout", async () => {
   const cache = Velo.builder().capacity(5).lru().ttl(200).build();
   cache.set("key", "value");
-  await sleep(500);
+  await sleep(1070);
+  cache.get("key");
   assertEquals(cache.size, 0);
 });

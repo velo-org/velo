@@ -79,7 +79,8 @@ Deno.test("LFU use with ttl", async () => {
   lfuCache.set("3", 3);
   lfuCache.set("4", 4);
   lfuCache.set("5", 5);
-  await sleep(300);
+  await sleep(1070);
+  lfuCache.get("");
   assertEquals(lfuCache.size, 0);
   assertEquals(lfuCache.keys, []);
 });

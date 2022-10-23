@@ -95,7 +95,8 @@ Deno.test("ARC use with ttl", async () => {
   arcCache.set("3", 3);
   arcCache.set("4", 4);
   arcCache.set("5", 5);
-  await sleep(300);
+  await sleep(1070);
+  arcCache.get("");
   assertEquals(arcCache.size, 0);
   assertEquals(arcCache.keys, []);
 });

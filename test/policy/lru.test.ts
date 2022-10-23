@@ -95,7 +95,8 @@ Deno.test("LRU use with ttl", async () => {
   lruCache.set("3", 3);
   lruCache.set("4", 4);
   lruCache.set("5", 5);
-  await sleep(300);
+  await sleep(1070);
+  lruCache.get("");
   assertEquals(lruCache.size, 0);
   assertEquals(lruCache.keys, []);
 });

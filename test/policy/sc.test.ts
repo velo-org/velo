@@ -69,7 +69,8 @@ Deno.test("SC use with ttl", async () => {
   scCache.set("3", 3);
   scCache.set("4", 4);
   scCache.set("5", 5);
-  await sleep(300);
+  await sleep(1070);
+  scCache.get("");
   assertEquals(scCache.size, 0);
   assertEquals(scCache.keys, []);
 });

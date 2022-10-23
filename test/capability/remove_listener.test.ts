@@ -87,7 +87,8 @@ Deno.test("RemoveListenerCapability, should call when expired with ExpireCapabil
     .build();
 
   cache.set("key", "value");
-  await sleep(300);
+  await sleep(1070);
+  cache.get("key");
   assert(entered);
 });
 

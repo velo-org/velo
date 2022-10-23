@@ -96,6 +96,7 @@ Deno.test("EventCapability, should fire expire event with ExpireCapability", asy
   });
 
   cache.set("key", "value");
-  await sleep(500);
+  await sleep(1070);
+  cache.get("key");
   assert(fired);
 });
