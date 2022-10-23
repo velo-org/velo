@@ -1,4 +1,4 @@
-import { assertEquals, assertThrows } from "../../dev_deps.ts";
+import { assertEquals, assertThrows } from "../test_deps.ts";
 import { Velo } from "../../src/builder/builder.ts";
 import { BaseCache } from "../../src/cache/base.ts";
 import { Cache, CacheInternal } from "../../src/cache/cache.ts";

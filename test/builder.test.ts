@@ -1,4 +1,4 @@
-import { assert, assertEquals, assertThrows } from "../dev_deps.ts";
+import { assert, assertEquals, assertThrows } from "./test_deps.ts";
 import { Options } from "../mod.ts";
 import { Velo } from "../src/builder/builder.ts";
 import { LoadingCapability } from "../src/cache/capabilities/loading_capability.ts";

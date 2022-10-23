@@ -1,5 +1,5 @@
-import { assertFalse, assertThrows } from "../dev_deps.ts";
 import { BaseCache } from "../src/cache/base.ts";
+import { assertFalse, assertThrows } from "./test_deps.ts";
 
 Deno.test("BaseCache, should throw error on events getter", () => {
   const cache = new BaseCache();

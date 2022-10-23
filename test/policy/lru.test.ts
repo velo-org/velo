@@ -1,4 +1,4 @@
-import { assert, assertEquals } from "../../dev_deps.ts";
+import { assertEquals, assert } from "../test_deps.ts";
 import { Velo } from "../../src/builder/builder.ts";
 import { RemoveCause } from "../../src/cache/capabilities/remove_listener_capability.ts";
 import { sleep } from "../utils/sleep.ts";
