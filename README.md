@@ -2,7 +2,7 @@
 <img src="https://raw.githubusercontent.com/velo-org/velo/master/media/velo-logo.svg" width="200">
 
 <h1 align="center">Velo</h1>
-<blockquote align="center">Performant in-memory caching library for Deno</blockquote>
+<blockquote align="center">A high-performance caching library</blockquote>
 </p>
 <p align="center">
   <a href="https://github.com/velo-org/velo/actions?query=workflow%3Atests">
@@ -19,63 +19,58 @@
 ## Table of Contents
 
 - [Introduction](#introduction)
-- [Quick start](#installation)
 - [Usage](#usage)
-- [Contributing](#contributing)
-- [Benchmarks](#benchmarks)
+- [Features Overview](#features-overview)
+- [Performance](#performance)
 
 ## Introduction
 
-Velo is an in-memory caching library for Deno. We provide a high-performance cache implementation with an API inspired by [Google Guava's Cache](https://github.com/google/guava/wiki/CachesExplained). While it can be ineffectual to optimize JavaScript we draw significant performance increases from using a [custom pointer system](https://yomguithereal.github.io/posts/lru-cache#a-custom-pointer-system). For more details, take a look at our [examples](./examples/) and browse the [documentation](https://doc.deno.land/https/deno.land/x/velo@0.1.6/mod.ts).
+Velo is an in-memory caching library for Deno focusing on high throughput and hit rate. It provides a simple API, multiple cache strategies, and a variety of optional features. For more details, take a look at our [examples](./examples/) and browse the [documentation](https://doc.deno.land/https/deno.land/x/velo@0.1.6/mod.ts).
 
-## Installation
+## Features Overview
+- Size-based eviction
+- Multiple cache strategies (LRU, LFU, ARC, SC, W-TinyLFU)
+- Automated loading of entries into the cache 
+- Time-based expiration of entries
+- Listener for cache removals (eviction, expiration, overwrite, manual removal)
+- EventEmitter for cache events
+- Collecting cache hit and miss statistics
 
-Import `Velo` from one of the following urls.
 
-- from `deno.land/x`
+## Usage
+
+- Install from `deno.land/x`
 
 ```ts
 import { Velo } from "https://deno.land/x/velo@0.1.6/mod.ts";
 ```
-
 - [![nest badge](https://nest.land/badge.svg)](https://nest.land/package/velo)
 
 ```ts
 import { Velo } from "https://x.nest.land/velo@0.1.6/mod.ts";
 ```
 
-## Usage
+`Velo` is a builder class to create a cache instance.
 
 ```ts
-const cache = Velo.builder()
-  .capacity(10_000)
-  .ttl(2 * 60 * 1000) // 2 minutes
+const cache = Velo.builder<string, User>()
+  .capacity(100_000)
+  .ttl(120_000) // 2 minutes
   .events()
   .build();
+
+cache.set("u:1", { id: "1", name: "John Doe" });
+cache.set("u:2", { id: "2", name: "Jane Doe" });
+
+cache.get("u:1"); // { id: "1", name: "John Doe" }
 ```
-
-Velo provides a builder class to create a cache. Multipe optional features can be enabled via their builder methods:
-
-- `ttl()`: time-based eviction of keys
-- `events()`: uses an `EventEmitter` to notify you about certain cache events
-- `stats()`: enables statistics recording
-- choose from a number of caching policies:
-  - `lru()`: least recently used
-  - `lfu()`: least frequently used
-  - `tinyLfu()`: W-TinyLFU
-  - `arc()`: adaptive replacement cache
-  - `sc()`: second cache
-- loading functionality with `build(loadFunction)`
 
 For more detailed explanation and usage guides look at the [examples](./examples/).
 
-## Contributing
+## Performance
 
-If you want to contribute to the project please read through our
-[contributing guidelines](./CONTRIBUTING.md).
+Velo is designed to be fast. It utilizes a fixed-capacity doubly-linked list as internal data structure for policy implementations. This list relies on a custom pointer system inspired by the [mnemonist lru cache](https://github.com/Yomguithereal/mnemonist/blob/master/lru-cache.js), which employs TypedArrays to circumvent bookkeeping overhead.
 
-## Benchmarks
+### Benchmarks
 
-- [Velo Benchmarks](./benchmark/results.md)
-- [Velo LRU compared to other Deno in memory
-  caches](https://github.com/velo-org/velo-benchmarks#readme)
+In [velo-benchmarks](https://github.com/velo-org/velo-benchmarks) we provide a set of benchmarks to compare the performance of Velo with other caching libraries. Both hit rate and throughput are measured.

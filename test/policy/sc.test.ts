@@ -1,5 +1,5 @@
 import { Velo } from "../../src/builder/builder.ts";
-import { assertEquals, assert } from "../test_deps.ts";
+import { assertEquals } from "../test_deps.ts";
 import { sleep } from "../utils/sleep.ts";
 import { RemoveCause } from "../../src/cache/capabilities/remove_listener_capability.ts";
 
