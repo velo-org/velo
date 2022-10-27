@@ -1,20 +1,30 @@
-name: test
+name: CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        deno: ["v1.x"]
     name: Run Tests
     steps:
       - uses: actions/checkout@v3
 
-      - name: Setup Deno
-        uses: denoland/setup-deno@v1.1.0
+      - uses: denoland/setup-deno@v1.1.0
         with:
-          deno-version: ${{ matrix.deno }}
+          deno-version: v1.x
 
-      - run: make test
+      - name: Run tests
+        run: deno test --allow-all --coverage=cov/
+
+      - name: Create coverage report
+        run: deno coverage --lcov cov/ > cov.lcov
+
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: ./cov.lcov
