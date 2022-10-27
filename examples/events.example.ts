@@ -50,6 +50,7 @@ const _cache3 = Velo.builder()
  */
 const cache = Velo.builder<string, User>()
   .capacity(10_000)
+  .lru()
   .events({ ...DEFAULT.eventOptions, set: true, clear: true })
   .build();
 

@@ -7,7 +7,7 @@ import { User } from "./common/user.ts";
  * - V is the generic value type
  */
 
-const cache = Velo.builder<string, User>().capacity(10_000).build();
+const cache = Velo.builder<string, User>().capacity(10_000).lru().build();
 
 cache.set("27b2be78-a75f-4032-920c-eeb4ce00f58a", new User("John Doe", "john.doe@example.com"));
 

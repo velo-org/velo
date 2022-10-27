@@ -21,7 +21,7 @@ const SHIFT = [
   countTrailingZeros(SPANS[4]),
 ];
 
-export type OnExpire<K, V> = (key: K, val: V) => void;
+export type OnExpire<K extends Key, V> = (node: TimerNode<K, V>) => void;
 
 /**
  * Implementation of a timer wheel [1] to manage expiration of cache entries.
@@ -60,6 +60,9 @@ export class TimerWheel<K extends Key, V> {
     return node;
   }
 
+  /**
+   * Creates a node and schedules it.
+   */
   public createNode(key: K, value: V, time: number) {
     if (time <= 0) {
       return null;
@@ -77,10 +80,21 @@ export class TimerWheel<K extends Key, V> {
   }
 
   /**
+   * Reschedules given node with time
+   */
+  public scheduleWithTime(node: TimerNode<K, V>, time: number) {
+    node.remove();
+    node.time = time + this.time;
+    const sentinel = this.findBucket(node.time);
+    node.appendToTail(sentinel);
+  }
+
+  /**
    * Removes a timer event from the wheel if present.
    */
   public deschedule(node: TimerNode<K, V>) {
     node.remove();
+    return node;
   }
 
   public advance(currentTimeMs?: number) {
@@ -107,7 +121,6 @@ export class TimerWheel<K extends Key, V> {
     const start = previousTicks & mask;
     const end = start + steps;
 
-    const expiredKeys = new Array<K>();
     for (let i = start; i < end; i++) {
       const sentinel = timerWheel[i & mask];
       let node = sentinel.next;
@@ -121,8 +134,7 @@ export class TimerWheel<K extends Key, V> {
 
         if (node.time <= this.time && node.key) {
           // node expired
-          expiredKeys.push(node.key);
-          this.onExpire(node.key, node.value!);
+          this.onExpire(node);
         } else {
           // node did not expire, but time passed -> reschedule
           this.schedule(node);
@@ -184,7 +196,7 @@ export class TimerNode<K extends Key, V> {
   }
 }
 
-class SentinelNode<K extends Key, V> extends TimerNode<K, V> {
+export class SentinelNode<K extends Key, V> extends TimerNode<K, V> {
   constructor() {
     super(Number.MAX_SAFE_INTEGER, undefined, undefined);
   }

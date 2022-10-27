@@ -17,6 +17,7 @@ const loadFunc: LoaderFunction<string, number> = (key: string) => {
 
 const loadingCache = Velo.builder<string, number>()
   .capacity(10_000)
+  .lru()
   .stats() // enable stats collection, also collects loading specific stats
   .build(loadFunc);
 
@@ -33,4 +34,5 @@ try {
 }
 
 // the refresh function will reapply the loader function to the given key
+console.log(Reflect.has(loadingCache, "refresh")); // number
 loadingCache.refresh("a");

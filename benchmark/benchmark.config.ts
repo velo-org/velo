@@ -1,4 +1,4 @@
-import { Velo } from "../mod.ts";
+import { Lru, Velo } from "../mod.ts";
 import { Options } from "../src/cache/options.ts";
 
 export const MAX_KEYS = 500_000;
@@ -21,3 +21,11 @@ export const lfu = Velo.from(options).lfu().build();
 export const lru = Velo.from(options).lru().build();
 export const sc = Velo.from(options).sc().build();
 export const tinyLfu = Velo.from(options).tinyLfu().build();
+
+options.policy = new Lru(MAX_KEYS);
+export const loadingCache = Velo.from(options).build((_) => 0xfff);
+export const eventsCache = Velo.from(options).allEvents().build();
+export const ttlCache = Velo.from(options).ttl(5_000).build();
+export const removeListenerCache = Velo.from(options)
+  .removalListener((_) => {})
+  .build();

@@ -11,6 +11,11 @@ export interface EventOptions {
   clear: boolean;
 }
 
+export interface ExpireOptions {
+  refreshOnWrite?: boolean;
+  refreshOnRead?: boolean;
+}
+
 export interface CacheOptions<K extends Key, V> {
   capacity: number;
   policy: Policy<K, V> | null;
@@ -18,6 +23,7 @@ export interface CacheOptions<K extends Key, V> {
   eventOptions: EventOptions;
   removeListener: RemoveListener<K, V> | null;
   ttl: number;
+  ttlOptions: ExpireOptions;
   stats: boolean;
 }
 
@@ -27,6 +33,7 @@ export class Options<K extends Key, V> implements CacheOptions<K, V> {
   events: boolean;
   eventOptions: EventOptions;
   ttl: number;
+  ttlOptions: ExpireOptions;
   stats: boolean;
   removeListener: RemoveListener<K, V> | null;
 
@@ -43,6 +50,7 @@ export class Options<K extends Key, V> implements CacheOptions<K, V> {
     this.ttl = options.ttl;
     this.stats = options.stats;
     this.removeListener = options.removeListener;
+    this.ttlOptions = options.ttlOptions;
   }
 
   static default<K extends Key, V>(): CacheOptions<K, V> {
@@ -59,6 +67,10 @@ export class Options<K extends Key, V> implements CacheOptions<K, V> {
       },
       removeListener: null,
       ttl: 0,
+      ttlOptions: {
+        refreshOnWrite: false,
+        refreshOnRead: false,
+      },
       stats: false,
     };
   }
@@ -75,7 +87,7 @@ export class Options<K extends Key, V> implements CacheOptions<K, V> {
     }
 
     if (this.ttl > 0) {
-      builder = builder.ttl(this.ttl);
+      builder = builder.ttl(this.ttl, this.ttlOptions);
     }
 
     if (this.stats) {

@@ -1,7 +1,7 @@
 import { Cache, CacheInternal } from "../cache/cache.ts";
 import { BaseCache } from "../cache/base.ts";
 import { Key } from "../cache/key.ts";
-import { CacheOptions, Options, EventOptions } from "../cache/options.ts";
+import { CacheOptions, Options, EventOptions, ExpireOptions } from "../cache/options.ts";
 import { PolicyCapability } from "../cache/capabilities/policy_capability.ts";
 import { EventName, EventCapability } from "../cache/capabilities/event_capability.ts";
 import { ExpireCapability } from "../cache/capabilities/expire_capability.ts";
@@ -61,12 +61,17 @@ export class Velo<K extends Key, V> {
   }
 
   /**
-   * Specifies the time-to-live for cache entries.
+   * Specifies the time-to-live for cache entries. Takes optional
+   * {@link ExpireOptions} to specify when to refresh the TTL. By default it
+   * is never refreshed.
    */
-  public ttl(timeout: number) {
+  public ttl(timeout: number, options?: ExpireOptions) {
     this.requireExpr(timeout > 0, "TTL must be greater than 0");
     this.requireExpr(this._options.ttl === 0, "TTL already set");
     this._options.ttl = timeout;
+    if (options) {
+      this._options.ttlOptions = options;
+    }
     return this;
   }
 
@@ -185,20 +190,20 @@ export class Velo<K extends Key, V> {
       cache = new PolicyCapability<K, V>(cache, this._options.policy);
     }
 
-    if (loader) {
-      cache = new LoadingCapability<K, V>(cache, loader);
-    }
-
     if (this._options.events) {
       cache = new EventCapability<K, V>(cache, this._options.eventOptions);
     }
 
     if (this._options.ttl) {
-      cache = new ExpireCapability<K, V>(cache, this._options.ttl);
+      cache = new ExpireCapability<K, V>(cache, this._options.ttl, this._options.ttlOptions);
     }
 
     if (this._options.stats) {
       cache = new StatisticsCapability<K, V>(cache, new Counter());
+    }
+
+    if (loader) {
+      cache = new LoadingCapability<K, V>(cache, loader);
     }
 
     return cache;

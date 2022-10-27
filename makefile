@@ -4,15 +4,14 @@ benchmark:
 	deno bench --unstable ./benchmark/run_groups.ts
 
 examples:
-	cd ./examples
-	deno run --allow-env ./policy/arc.example.ts
-	deno run --allow-env ./policy/w_tiny_lfu.example.ts
-	deno run --allow-env cache_creation_and_options.example.ts
-	deno run --allow-env events.example.ts
-	deno run --allow-env loading_cache.example.ts
-	deno run --allow-env ttl.example.ts
-	deno run --allow-env typed_cache.example.ts
-	deno run --allow-env removal_listener.example.ts
+	deno run --allow-env examples/policy/arc.example.ts
+	deno run --allow-env examples/policy/w_tiny_lfu.example.ts
+	deno run --allow-env examples/cache_creation_and_options.example.ts
+	deno run --allow-env examples/events.example.ts
+	deno run --allow-env examples/loading_cache.example.ts
+	deno run --allow-env examples/ttl.example.ts
+	deno run --allow-env examples/typed_cache.example.ts
+	deno run --allow-env examples/removal_listener.example.ts
 
 test:
 	deno test --unstable --allow-read --allow-env ./test

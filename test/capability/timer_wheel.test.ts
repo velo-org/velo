@@ -1,4 +1,3 @@
-import { RemoveCause } from "../../src/cache/capabilities/remove_listener_capability.ts";
 import { TimerWheel } from "../../src/cache/capabilities/timer_wheel.ts";
 import { assert, assertEquals } from "../test_deps.ts";
 
@@ -23,8 +22,8 @@ Deno.test("TimerWheel, should return null with negative or zero time", () => {
 Deno.test("TimerWheel, should not expire 250ms advance 100ms", () => {
   // should not expire due to coarse granularity of time spans (smallest is seconds)
   const expiredKeys: string[] = [];
-  const wheel = new TimerWheel<string, string>((k) => {
-    expiredKeys.push(k);
+  const wheel = new TimerWheel<string, string>((node) => {
+    expiredKeys.push(node.key!);
   });
   wheel.createAndSchedule("key1", "value1", 250);
   wheel.advance(100);
@@ -34,8 +33,8 @@ Deno.test("TimerWheel, should not expire 250ms advance 100ms", () => {
 Deno.test("TimerWheel, should not expire 250ms advance 500ms", () => {
   // should not expire due to coarse granularity of time spans (smallest is seconds)
   const expiredKeys: string[] = [];
-  const wheel = new TimerWheel<string, string>((k) => {
-    expiredKeys.push(k);
+  const wheel = new TimerWheel<string, string>((node) => {
+    expiredKeys.push(node.key!);
   });
   wheel.createAndSchedule("key1", "value1", 250);
   wheel.advance(500);
@@ -44,8 +43,8 @@ Deno.test("TimerWheel, should not expire 250ms advance 500ms", () => {
 
 Deno.test("TimerWheel, should expire 250ms advance 1.07s", () => {
   const expiredKeys: string[] = [];
-  const wheel = new TimerWheel<string, string>((k) => {
-    expiredKeys.push(k);
+  const wheel = new TimerWheel<string, string>((node) => {
+    expiredKeys.push(node.key!);
   });
   wheel.createAndSchedule("key1", "value1", 250);
   wheel.advance(1070);
@@ -55,8 +54,8 @@ Deno.test("TimerWheel, should expire 250ms advance 1.07s", () => {
 
 Deno.test("TimerWheel, should not expire 2s advance 1.07s", () => {
   const expiredKeys: string[] = [];
-  const wheel = new TimerWheel<string, string>((k) => {
-    expiredKeys.push(k);
+  const wheel = new TimerWheel<string, string>((node) => {
+    expiredKeys.push(node.key!);
   });
   wheel.createAndSchedule("key1", "value1", 2_000);
   wheel.advance(1070);
@@ -65,8 +64,8 @@ Deno.test("TimerWheel, should not expire 2s advance 1.07s", () => {
 
 Deno.test("TimerWheel, should expire 2s advance 4s", () => {
   const expiredKeys: string[] = [];
-  const wheel = new TimerWheel<string, string>((k) => {
-    expiredKeys.push(k);
+  const wheel = new TimerWheel<string, string>((node) => {
+    expiredKeys.push(node.key!);
   });
   wheel.createAndSchedule("key1", "value1", 2_000);
   wheel.advance(4_000);
@@ -76,8 +75,8 @@ Deno.test("TimerWheel, should expire 2s advance 4s", () => {
 
 Deno.test("TimerWheel, should not expire 2min advance 1min", () => {
   const expiredKeys: string[] = [];
-  const wheel = new TimerWheel<string, string>((k) => {
-    expiredKeys.push(k);
+  const wheel = new TimerWheel<string, string>((node) => {
+    expiredKeys.push(node.key!);
   });
   wheel.createAndSchedule("key1", "value1", 2 * 60 * 1_000);
   wheel.advance(60 * 1_000);
@@ -86,8 +85,8 @@ Deno.test("TimerWheel, should not expire 2min advance 1min", () => {
 
 Deno.test("TimerWheel, should expire 2min advance 4min", () => {
   const expiredKeys: string[] = [];
-  const wheel = new TimerWheel<string, string>((k) => {
-    expiredKeys.push(k);
+  const wheel = new TimerWheel<string, string>((node) => {
+    expiredKeys.push(node.key!);
   });
   wheel.createAndSchedule("key1", "value1", 2 * 60 * 1_000);
   wheel.advance(4 * 60 * 1_000);
@@ -97,8 +96,8 @@ Deno.test("TimerWheel, should expire 2min advance 4min", () => {
 
 Deno.test("TimerWheel, should expire 2h advance 4h", () => {
   const expiredKeys: string[] = [];
-  const wheel = new TimerWheel<string, string>((k) => {
-    expiredKeys.push(k);
+  const wheel = new TimerWheel<string, string>((node) => {
+    expiredKeys.push(node.key!);
   });
   wheel.createAndSchedule("key1", "value1", 2 * 60 * 60 * 1_000);
   wheel.advance(4 * 60 * 60 * 1_000);
@@ -108,8 +107,8 @@ Deno.test("TimerWheel, should expire 2h advance 4h", () => {
 
 Deno.test("TimerWheel, should not expire 4x250ms advance 500ms", () => {
   const expiredKeys: string[] = [];
-  const wheel = new TimerWheel<string, string>((k) => {
-    expiredKeys.push(k);
+  const wheel = new TimerWheel<string, string>((node) => {
+    expiredKeys.push(node.key!);
   });
   wheel.createAndSchedule("key1", "value1", 250);
   wheel.createAndSchedule("key2", "value1", 250);
@@ -121,8 +120,8 @@ Deno.test("TimerWheel, should not expire 4x250ms advance 500ms", () => {
 
 Deno.test("TimerWheel, should expire 4x250ms advance 1.07s", () => {
   const expiredKeys: string[] = [];
-  const wheel = new TimerWheel<string, string>((k) => {
-    expiredKeys.push(k);
+  const wheel = new TimerWheel<string, string>((node) => {
+    expiredKeys.push(node.key!);
   });
   wheel.createAndSchedule("key1", "value1", 250);
   wheel.createAndSchedule("key2", "value1", 250);
@@ -135,8 +134,8 @@ Deno.test("TimerWheel, should expire 4x250ms advance 1.07s", () => {
 
 Deno.test("TimerWheel, should expire 4x2s advance 4s", () => {
   const expiredKeys: string[] = [];
-  const wheel = new TimerWheel<string, string>((k) => {
-    expiredKeys.push(k);
+  const wheel = new TimerWheel<string, string>((node) => {
+    expiredKeys.push(node.key!);
   });
   wheel.createAndSchedule("key1", "value1", 2_000);
   wheel.createAndSchedule("key2", "value1", 2_000);
@@ -149,8 +148,8 @@ Deno.test("TimerWheel, should expire 4x2s advance 4s", () => {
 
 Deno.test("TimerWheel, should expire 2min advance 1min then 3min", () => {
   const expiredKeys: string[] = [];
-  const wheel = new TimerWheel<string, string>((k) => {
-    expiredKeys.push(k);
+  const wheel = new TimerWheel<string, string>((node) => {
+    expiredKeys.push(node.key!);
   });
   wheel.createAndSchedule("key1", "value1", 2 * 60 * 1_000);
   wheel.advance(1 * 60 * 1_000);
@@ -161,8 +160,8 @@ Deno.test("TimerWheel, should expire 2min advance 1min then 3min", () => {
 
 Deno.test("TimerWheel, should expire 500ms advance 500ms then 500ms", () => {
   const expiredKeys: string[] = [];
-  const wheel = new TimerWheel<string, string>((k) => {
-    expiredKeys.push(k);
+  const wheel = new TimerWheel<string, string>((node) => {
+    expiredKeys.push(node.key!);
   });
   wheel.createAndSchedule("key1", "value1", 500);
   wheel.advance(500);
