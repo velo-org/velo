@@ -37,4 +37,4 @@ cache.remove("c"); // explicit
 
 cache.setWithExpire("g", 7, 100); // expired
 await sleep(200);
-cache.clear(); // explicit
+cache.reset(); // explicit

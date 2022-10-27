@@ -31,4 +31,4 @@ arc.set(1, "1"); // removes this key from b1 and inserts it in t2
 arc.peek(4); // returns value for key 4 without changing the queue
 arc.forEach((item, index) => console.log(item, index)); // Array like forEach
 arc.remove(4); // remove key 4
-arc.clear(); // clear cache
+arc.reset(); // clear cache
