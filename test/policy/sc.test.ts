@@ -15,6 +15,11 @@ Deno.test("SC create entry, and retrieve it", () => {
   assertEquals(scCache.get(1), entry);
 });
 
+Deno.test("SC, should return correct capacity", () => {
+  const scCache = Velo.builder().capacity(5).sc().build();
+  assertEquals(scCache.capacity, 5);
+});
+
 Deno.test("SC get (non-existent) entry from empty cache, should return undefined", () => {
   const scCache = Velo.builder().capacity(5).sc().build();
   assertEquals(scCache.get("key"), undefined);

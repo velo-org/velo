@@ -16,6 +16,11 @@ Deno.test("BaseCache, should throw error on options getter", () => {
   assertThrows(() => cache.options);
 });
 
+Deno.test("BaseCache, should throw error for setWithExpire", () => {
+  const cache = new BaseCache();
+  assertThrows(() => cache.setWithExpire("key", "value", 1000));
+});
+
 Deno.test("BaseCache, should not have refresh method", () => {
   const cache = new BaseCache();
   assertFalse(Reflect.has(cache, "refresh"));
@@ -28,6 +33,7 @@ Deno.test("BaseCache, should throw an error for methods that need a policy", () 
   assertThrows(() => cache.keys);
   assertThrows(() => cache.size);
   assertThrows(() => cache.get("key"));
+  assertThrows(() => cache.take("key"));
   assertThrows(() => cache.peek("key"));
   assertThrows(() => cache.has("key"));
   assertThrows(() => cache.set("key", "value"));
@@ -36,3 +42,4 @@ Deno.test("BaseCache, should throw an error for methods that need a policy", () 
   assertThrows(() => cache.has("key"));
   assertThrows(() => cache.forEach(() => {}));
 });
+

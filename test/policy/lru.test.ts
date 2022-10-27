@@ -14,6 +14,11 @@ Deno.test("LRU get existing entry, should return the value", () => {
   assert(lruCache.get("key"));
 });
 
+Deno.test("LRU, should return correct capacity", () => {
+  const lruCache = Velo.builder().capacity(5).lru().build();
+  assertEquals(lruCache.capacity, 5);
+});
+
 Deno.test("LRU get (non-existent) entry from empty cache, should return undefined", () => {
   const lruCache = Velo.builder().capacity(5).lru().build();
   assertEquals(lruCache.get("key"), undefined);

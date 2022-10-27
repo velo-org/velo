@@ -1,7 +1,7 @@
 import { assertEquals, assert } from "../test_deps.ts";
 import { Velo } from "../../src/builder/builder.ts";
 import { RemoveCause } from "../../src/cache/capabilities/remove_listener_capability.ts";
-import { getPolicy } from "../utils/get_policy.ts";
+import { getPolicy } from "./get_policy.test.ts";
 import { sleep } from "../utils/sleep.ts";
 
 Deno.test("ARC create cache, should create a new empty cache", () => {
@@ -18,6 +18,11 @@ Deno.test("ARC get existing entry, should return the value", () => {
 Deno.test("ARC get (non-existent) entry from empty cache, should return undefined", () => {
   const arcCache = Velo.builder().capacity(5).arc().build();
   assertEquals(arcCache.get("key"), undefined);
+});
+
+Deno.test("ARC, should return correct capacity", () => {
+  const arcCache = Velo.builder().capacity(5).arc().build();
+  assertEquals(arcCache.capacity, 5);
 });
 
 Deno.test("ARC get non-existent entry, should return undefined", () => {

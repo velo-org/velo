@@ -19,6 +19,11 @@ Deno.test("LFU get (non-existent) entry from empty cache, should return undefine
   assertEquals(lfuCache.get("key"), undefined);
 });
 
+Deno.test("LFU, should return correct capacity", () => {
+  const lfuCache = Velo.builder().capacity(5).lfu().build();
+  assertEquals(lfuCache.capacity, 5);
+});
+
 Deno.test("LFU get non-existent entry, should return undefined", () => {
   const lfuCache = Velo.builder().capacity(5).lfu().build();
   lfuCache.set("1", 1);

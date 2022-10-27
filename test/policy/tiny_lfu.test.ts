@@ -1,7 +1,7 @@
 import { assert, assertThrows, assertEquals } from "../test_deps.ts";
 import { Velo } from "../../src/builder/builder.ts";
 import { RemoveCause } from "../../src/cache/capabilities/remove_listener_capability.ts";
-import { getPolicy } from "../utils/get_policy.ts";
+import { getPolicy } from "./get_policy.test.ts";
 import { sleep } from "../utils/sleep.ts";
 
 Deno.test("TinyLFU create cache with small capacity, should throw error", () => {
@@ -11,6 +11,11 @@ Deno.test("TinyLFU create cache with small capacity, should throw error", () => 
 Deno.test("TinyLFU create cache, should create a new empty cache", () => {
   const cache = Velo.builder().capacity(100).tinyLfu().build();
   assertEquals(cache.size, 0);
+});
+
+Deno.test("TinyLFU, should return correct capacity", () => {
+  const cache = Velo.builder().capacity(5).sc().build();
+  assertEquals(cache.capacity, 5);
 });
 
 Deno.test("TinyLFU get existing entry, should return the value", () => {
