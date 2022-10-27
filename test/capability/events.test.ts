@@ -23,7 +23,7 @@ Deno.test("EventCapability, should fire clear event", async () => {
     fired = true;
   });
 
-  cache.clear();
+  cache.reset();
   await sleep(500);
   assert(fired);
 });

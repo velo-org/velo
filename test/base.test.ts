@@ -32,7 +32,7 @@ Deno.test("BaseCache, should throw an error for methods that need a policy", () 
   assertThrows(() => cache.has("key"));
   assertThrows(() => cache.set("key", "value"));
   assertThrows(() => cache.remove("key"));
-  assertThrows(() => cache.clear());
+  assertThrows(() => cache.reset());
   assertThrows(() => cache.has("key"));
   assertThrows(() => cache.forEach(() => {}));
 });

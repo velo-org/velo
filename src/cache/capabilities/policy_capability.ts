@@ -53,7 +53,7 @@ export class PolicyCapability<K extends Key, V> extends CapabilityWrapper<K, V> 
     return this.policy.has(key);
   }
 
-  clear(): void {
+  reset(): void {
     this.policy.clear();
   }
 

@@ -60,10 +60,10 @@ export class ExpireCapability<K extends Key, V> extends CapabilityWrapper<K, V> 
     return super.peek(key);
   }
 
-  clear(): void {
+  reset(): void {
     this.timerWheel = new TimerWheel<K, V>(this.onExpireFunction);
     this.scheduledNodes = new Map();
-    return super.clear();
+    return super.reset();
   }
 
   forEach(callback: (item: { key: K; value: V }, index?: number) => void): void {

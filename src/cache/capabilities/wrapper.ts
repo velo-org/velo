@@ -61,8 +61,8 @@ export abstract class CapabilityWrapper<K extends Key, V> implements Cache<K, V>
   remove(key: K): void {
     return this.inner.remove(key);
   }
-  clear(): void {
-    return this.inner.clear();
+  reset(): void {
+    return this.inner.reset();
   }
   take(key: K): V | undefined {
     return this.inner.take(key);

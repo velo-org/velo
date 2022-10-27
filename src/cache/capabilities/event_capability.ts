@@ -59,8 +59,8 @@ export class EventCapability<K extends Key, V> extends CapabilityWrapper<K, V> {
     this.fireEvent("remove", key);
   }
 
-  clear() {
-    super.clear();
+  reset() {
+    super.reset();
     this.fireEvent("clear");
   }
 

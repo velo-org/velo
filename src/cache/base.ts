@@ -38,7 +38,7 @@ export class BaseCache<K extends Key, V> implements Cache<K, V> {
   erase(_key: K): void {
     throw new Error(NO_POLICY);
   }
-  clear(): void {
+  reset(): void {
     throw new Error(NO_POLICY);
   }
   forEach(_callback: (item: { key: K; value: V }, index?: number | undefined) => void): void {

@@ -71,4 +71,4 @@ cache.events.on("clear", () => {
 cache.set("1", new User("John Doe", "mail@example.com"));
 cache.set("2", new User("Tracey Curtis", "mail@example.com"));
 cache.remove("1");
-cache.clear();
+cache.reset();

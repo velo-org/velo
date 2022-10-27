@@ -5,7 +5,15 @@ import { CapabilityWrapper } from "./wrapper.ts";
 export type LoaderFunction<K, V> = (key: K) => V;
 
 export interface LoadingCache<K extends Key, V> extends Omit<Cache<K, V>, "get"> {
+  /**
+   * Returns the value of an entry with given `key`. If the key is not cached,
+   * the loader function is used to generate and automatically insert a new value.
+   */
   get(key: K): V;
+
+  /**
+   * Explicitly call the loader function to re-generate and set a new value for `key`
+   */
   refresh(key: K): void;
 }
 

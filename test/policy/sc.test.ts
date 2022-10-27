@@ -57,7 +57,7 @@ Deno.test("SC clear should reset cache", () => {
   scCache.set("3", 3);
   scCache.set("4", 4);
   scCache.set("5", 5);
-  scCache.clear();
+  scCache.reset();
   assertEquals(scCache.peek("3"), undefined);
   assertEquals(scCache.size, 0);
 });
