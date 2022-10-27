@@ -10,12 +10,17 @@ and adheres to
 
 - Add Builder API for creating a cache (`Velo.builder()`)
 - Add value loading functionality with `VeloLoadingCache` 
-- Add statistics recording for evictions and loads
+- Statistic functionality is now optional and can be enabled via the builder (`.stats()`)
+- Events functionality is now optional and can be enabled via the builder (`.events()`)
+- TTL functionality is now optional and can be enabled via the builder (`.ttl(ms: number)`)
+- Expose cache configuration (`cache.options`)
 - Add the W-TinyLFU admission policy
-- Update and add examples
-- Remove multiple cache policies:
+- Add removal listener functionality
+- Reimplement entry expiration using a TimerWheel  
+- Remove the following cache policies:
   - Random Replacement (`RR`)
   - Segmented LRU (`SLRU`)
+- Update examples according to the new/removed features
 
 ## [0.1.6]
 

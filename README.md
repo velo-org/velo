@@ -2,7 +2,7 @@
 <img src="https://raw.githubusercontent.com/velo-org/velo/master/media/velo-logo.svg" width="200">
 
 <h1 align="center">Velo</h1>
-<blockquote align="center">A high-performance caching library</blockquote>
+<blockquote align="center">A high-performance caching library for Deno</blockquote>
 </p>
 <p align="center">
   <a href="https://github.com/velo-org/velo/actions?query=workflow%3Atests">
