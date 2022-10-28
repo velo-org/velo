@@ -80,8 +80,6 @@ export class WindowTinyLfu<K extends Key, V> implements Policy<K, V> {
     }
 
     const ident: EntryIdent = this.entryMap[key];
-    console.log("ident", ident);
-
     if (ident !== undefined) {
       // key in cache, just update the value
       switch (ident.segment) {
@@ -215,7 +213,6 @@ export class WindowTinyLfu<K extends Key, V> implements Policy<K, V> {
       if (this.probation.isFull()) {
         this.evictFromMain();
       }
-      console.log("yea");
       this.transferFromWindowToMain();
     }
   }
@@ -302,15 +299,9 @@ class LruPointerList<K extends Key, V> {
   }
 
   put(key: K, value: V) {
-    console.log("put", key, value);
-    console.log("items", this.items);
-
     const p: number = this.items[key];
-    console.log("p", p);
-
     const oldValue = this._values[p];
     this._values[p] = value;
-    console.log("after", this._keys, this._values);
     return oldValue;
   }
 
