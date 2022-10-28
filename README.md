@@ -1,18 +1,21 @@
 <p align="center">
-<img src="https://raw.githubusercontent.com/velo-org/velo/master/media/velo-logo.svg" width="200">
+<img src="https://raw.githubusercontent.com/velo-org/velo/master/media/velo-banner.svg">
 
 <h1 align="center">Velo</h1>
 <blockquote align="center">A high-performance caching library for Deno</blockquote>
 </p>
 <p align="center">
+  <a href="https://deno.land/x/velo/mod.ts">
+    <img src="https://img.shields.io/badge/%20-docs-%23329e65?style=for-the-badge&logo=deno">
+  </a>
   <a href="https://github.com/velo-org/velo/actions?query=workflow%3Atests">
-    <img src="https://github.com/velo-org/velo/workflows/tests/badge.svg">
+    <img src="https://img.shields.io/badge/CI-passing-%23329e65?style=for-the-badge&logo=github">
+  </a>
+  <a href='https://coveralls.io/github/velo-org/velo?branch=master'>
+    <img alt="Coveralls" src="https://img.shields.io/coveralls/github/velo-org/velo?color=%23329e65&style=for-the-badge">
   </a>
   <a href="https://github.com/velo-org/velo/releases">
-    <img src="https://img.shields.io/github/v/tag/velo-org/velo?label=version">
-  </a>
-  <a href="https://doc.deno.land/https/deno.land/x/velo@0.1.6/mod.ts">
-    <img src="https://img.shields.io/badge/%E2%80%8E-docs-blue.svg?logo=deno">
+    <img alt="GitHub release (latest SemVer)" src="https://img.shields.io/github/v/release/velo-org/velo?color=%23329e65&label=version&style=for-the-badge">
   </a>
 </p>
 
