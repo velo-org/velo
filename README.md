@@ -45,12 +45,12 @@ Velo is an in-memory caching library for Deno focusing on high throughput and hi
 - Install from `deno.land/x`
 
 ```ts
-import { Velo } from "https://deno.land/x/velo@0.1.6/mod.ts";
+import { Velo } from "https://deno.land/x/velo@1.0.0/mod.ts";
 ```
 - [![nest badge](https://nest.land/badge.svg)](https://nest.land/package/velo)
 
 ```ts
-import { Velo } from "https://x.nest.land/velo@0.1.6/mod.ts";
+import { Velo } from "https://x.nest.land/velo@1.0.0/mod.ts";
 ```
 
 `Velo` is a builder class to create a cache instance.
