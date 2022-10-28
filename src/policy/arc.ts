@@ -179,22 +179,6 @@ export class Arc<K extends Key, V> implements Policy<K, V> {
     return this.t1.values.concat(this.t2.values);
   }
 
-  get recentlySet() {
-    return this.t1;
-  }
-
-  get frequentlySet() {
-    return this.t2;
-  }
-
-  get recentlyEvicted() {
-    return this.b1;
-  }
-
-  get frequentlyEvicted() {
-    return this.b2;
-  }
-
   forEach(callback: (item: { key: K; value: V }, index: number) => void) {
     this.t1.forEach(0, callback);
     this.t2.forEach(this.t1.size(), callback);

@@ -1,158 +1,203 @@
+// deno-lint-ignore-file no-explicit-any
+import { Arc } from "../../src/policy/arc.ts";
 import { assertEquals, assert } from "../test_deps.ts";
 import { Velo } from "../../src/builder/builder.ts";
 import { RemoveCause } from "../../src/cache/capabilities/remove_listener_capability.ts";
-import { getPolicy } from "./get_policy.test.ts";
 import { sleep } from "../utils/sleep.ts";
 
 Deno.test("ARC create cache, should create a new empty cache", () => {
-  const arcCache = Velo.builder().capacity(5).arc().build();
-  assertEquals(arcCache.size, 0);
-});
-
-Deno.test("ARC get existing entry, should return the value", () => {
-  const arcCache = Velo.builder<string, boolean>().capacity(5).arc().build();
-  arcCache.set("key", true);
-  assert(arcCache.get("key"));
-});
-
-Deno.test("ARC get (non-existent) entry from empty cache, should return undefined", () => {
-  const arcCache = Velo.builder().capacity(5).arc().build();
-  assertEquals(arcCache.get("key"), undefined);
+  const arc = new Arc(5);
+  assertEquals(arc.size, 0);
 });
 
 Deno.test("ARC, should return correct capacity", () => {
-  const arcCache = Velo.builder().capacity(5).arc().build();
-  assertEquals(arcCache.capacity, 5);
+  const arc = new Arc(5);
+  assertEquals(arc.capacity, 5);
+});
+
+Deno.test("ARC get existing entry, should return the value", () => {
+  const arc = new Arc(5);
+  arc.set("key", true);
+  assert(arc.get("key"));
+});
+
+Deno.test("ARC get (non-existent) entry from empty cache, should return undefined", () => {
+  const arc = new Arc(5);
+  assertEquals(arc.get("key"), undefined);
 });
 
 Deno.test("ARC get non-existent entry, should return undefined", () => {
-  const arcCache = Velo.builder().capacity(5).arc().build();
-  arcCache.set("1", 1);
-  arcCache.set("2", 2);
-  arcCache.set("3", 3);
-  arcCache.set("4", 4);
-  assertEquals(arcCache.get("key"), undefined);
+  const arc = new Arc(5);
+  arc.set("1", 1);
+  arc.set("2", 2);
+  arc.set("3", 3);
+  arc.set("4", 4);
+  assertEquals(arc.get("key"), undefined);
 });
 
 Deno.test("ARC get removed entry, should return undefined", () => {
-  const arcCache = Velo.builder().capacity(5).arc().build();
-  arcCache.set("1", 1);
-  arcCache.set("2", 2);
-  arcCache.set("3", 3);
-  arcCache.set("4", 4);
-  arcCache.remove("3");
-  assertEquals(arcCache.get("3"), undefined);
+  const arc = new Arc(5);
+  arc.set("1", 1);
+  arc.set("2", 2);
+  arc.set("3", 3);
+  arc.set("4", 4);
+  arc.remove("3");
+  assertEquals(arc.get("3"), undefined);
+});
+
+Deno.test("ARC peek in t1, should return value", () => {
+  const arc = new Arc(5);
+  arc.set("1", 1);
+  assertEquals(arc.peek("1"), 1);
+});
+
+Deno.test("ARC peek in t2, should return value", () => {
+  const arc = new Arc(5);
+  arc.set("1", 1);
+  arc.get("1");
+  arc.get("1");
+  assertEquals(arc.peek("1"), 1);
+});
+
+Deno.test("ARC peek non existent, should return undefined", () => {
+  const arc = new Arc(5);
+  assertEquals(arc.peek("1"), undefined);
 });
 
 Deno.test("ARC set after capacity reached, should evict to maintain capacity", () => {
-  const arcCache = Velo.builder().capacity(5).arc().build();
-  arcCache.set("1", 1);
-  arcCache.set("2", 2);
-  arcCache.set("3", 3);
-  arcCache.set("4", 4);
-  arcCache.set("5", 5);
-  arcCache.set("6", 6);
-  assertEquals(arcCache.size, 5);
+  const arc = new Arc(5);
+  arc.set("1", 1);
+  arc.set("2", 2);
+  arc.set("3", 3);
+  arc.set("4", 4);
+  arc.set("5", 5);
+  arc.set("6", 6);
+  assertEquals(arc.size, 5);
 });
 
 Deno.test("ARC set after capacity reached, should evict first inserted key", () => {
-  const arcCache = Velo.builder().capacity(5).arc().build();
-  arcCache.set("1", 1);
-  arcCache.set("2", 2);
-  arcCache.set("3", 3);
-  arcCache.set("4", 4);
-  arcCache.set("5", 5);
-  arcCache.set("6", 6);
-  assert(!arcCache.has("1"));
+  const arc = new Arc(5);
+  arc.set("1", 1);
+  arc.set("2", 2);
+  arc.set("3", 3);
+  arc.set("4", 4);
+  arc.set("5", 5);
+  arc.set("6", 6);
+  assert(!arc.has("1"));
+});
+
+Deno.test("ARC remove from t1 and t2, should return the value", () => {
+  const arc = new Arc(5);
+  arc.set("1", 1);
+  let removed = arc.remove("1");
+  assertEquals(removed, 1);
+  arc.set("1", 1);
+  arc.set("1", 1);
+  removed = arc.remove("1");
+  assertEquals(removed, 1);
+});
+
+Deno.test("ARC remove non existent, should return undefined", () => {
+  const arc = new Arc(5);
+  assertEquals(arc.remove("1"), undefined);
+});
+
+Deno.test("ARC clear, should reset the cache", () => {
+  const arc = new Arc(5);
+  arc.set("1", 1);
+  arc.set("2", 2);
+  arc.set("2", 2);
+  arc.clear();
+  assertEquals(arc.size, 0);
 });
 
 Deno.test("ARC immediate full scan, should evict all keys", () => {
-  const arcCache = Velo.builder().capacity(3).arc().build();
-  arcCache.set("1", 1);
-  arcCache.set("2", 2);
-  arcCache.set("3", 3);
-  arcCache.set("4", 4);
-  arcCache.set("5", 5);
-  arcCache.set("6", 6);
+  const arc = new Arc(3);
+  arc.set("1", 1);
+  arc.set("2", 2);
+  arc.set("3", 3);
+  arc.set("4", 4);
+  arc.set("5", 5);
+  arc.set("6", 6);
 
-  assertEquals(arcCache.keys, ["4", "5", "6"]);
+  assertEquals(arc.keys, ["4", "5", "6"]);
 });
 
 Deno.test("ARC forEach should print out the right key value pairs", () => {
-  const arcCache = Velo.builder<string, number>().capacity(5).arc().build();
-  arcCache.set("1", 1);
-  arcCache.set("2", 2);
-  arcCache.set("3", 3);
-  arcCache.set("4", 4);
-  arcCache.set("5", 5);
-  arcCache.remove("3");
+  const arc = new Arc<string, number>(5);
+  arc.set("1", 1);
+  arc.set("2", 2);
+  arc.set("3", 3);
+  arc.set("4", 4);
+  arc.set("5", 5);
+  arc.remove("3");
   const testKeys: string[] = [];
-  arcCache.forEach((e, _) => {
+  arc.forEach((e, _) => {
     testKeys.push(e.key);
   });
   assertEquals(testKeys, ["5", "4", "2", "1"]);
 });
 
 Deno.test("ARC use with ttl", async () => {
-  const arcCache = Velo.builder().capacity(5).ttl(100).arc().build();
-  arcCache.set("1", 1);
-  arcCache.set("2", 2);
-  arcCache.set("3", 3);
-  arcCache.set("4", 4);
-  arcCache.set("5", 5);
+  const arc = Velo.builder().capacity(5).ttl(100).arc().build();
+  arc.set("1", 1);
+  arc.set("2", 2);
+  arc.set("3", 3);
+  arc.set("4", 4);
+  arc.set("5", 5);
   await sleep(1070);
-  arcCache.get("");
-  assertEquals(arcCache.size, 0);
-  assertEquals(arcCache.keys, []);
+  arc.get("");
+  assertEquals(arc.size, 0);
+  assertEquals(arc.keys, []);
 });
 
 Deno.test("ARC getting entry from t1, should move it to t2", () => {
-  const arcCache = Velo.builder().capacity(5).arc().build();
-  arcCache.set("1", 1);
-  arcCache.set("2", 2);
-  arcCache.set("3", 3);
-  arcCache.get("3");
-  assertEquals(getPolicy(arcCache).t2.keys, ["3"]); // frequently set
+  const arc = new Arc(5);
+  arc.set("1", 1);
+  arc.set("2", 2);
+  arc.set("3", 3);
+  arc.get("3");
+  assertEquals((arc as any).t2.keys, ["3"]); // frequently set
 });
 
 Deno.test(
   "ARC setting entry that was evicted from t1, should remove it from b1 into t2 and also evict the last entry from t1 into b1",
   () => {
-    const arcCache = Velo.builder().capacity(5).arc().build();
-    arcCache.set("1", 1);
-    arcCache.set("2", 2);
-    arcCache.set("3", 3);
-    arcCache.set("4", 4);
-    arcCache.set("5", 5);
-    arcCache.set("6", 6);
-    assertEquals(getPolicy(arcCache).b1.keys, ["1"]); // recently evicted
-    arcCache.set("1", 1);
-    assertEquals(getPolicy(arcCache).b1.keys, ["2"]); // recently evicted
-    assertEquals(getPolicy(arcCache).t1.keys, ["6", "3", "4", "5"]); // recently set
-    assertEquals(getPolicy(arcCache).t2.keys, ["1"]); // frequently set
+    const arc = new Arc(5);
+    arc.set("1", 1);
+    arc.set("2", 2);
+    arc.set("3", 3);
+    arc.set("4", 4);
+    arc.set("5", 5);
+    arc.set("6", 6);
+    assertEquals((arc as any).b1.keys, ["1"]); // recently evicted
+    arc.set("1", 1);
+    assertEquals((arc as any).b1.keys, ["2"]); // recently evicted
+    assertEquals((arc as any).t1.keys, ["6", "3", "4", "5"]); // recently set
+    assertEquals((arc as any).t2.keys, ["1"]); // frequently set
   }
 );
 
 Deno.test("ARC should collect cache stats", () => {
-  const arcCache = Velo.builder().capacity(3).arc().stats().build();
-  assertEquals(arcCache.stats.hitCount, 0);
-  assertEquals(arcCache.stats.missCount, 0);
+  const arc = Velo.builder().capacity(3).arc().stats().build();
+  assertEquals(arc.stats.hitCount, 0);
+  assertEquals(arc.stats.missCount, 0);
 
-  arcCache.set("1", 1);
-  arcCache.set("2", 2);
-  arcCache.set("3", 3);
-  arcCache.set("4", 4); // evict
-  arcCache.get("1"); // miss
-  arcCache.get("2"); // hit
-  arcCache.get("3"); // hit
-  arcCache.get("4"); // hit
+  arc.set("1", 1);
+  arc.set("2", 2);
+  arc.set("3", 3);
+  arc.set("4", 4); // evict
+  arc.get("1"); // miss
+  arc.get("2"); // hit
+  arc.get("3"); // hit
+  arc.get("4"); // hit
 
-  assertEquals(arcCache.stats.hitCount, 3);
-  assertEquals(arcCache.stats.missCount, 1);
+  assertEquals(arc.stats.hitCount, 3);
+  assertEquals(arc.stats.missCount, 1);
 });
 
 Deno.test("ARC should call onEvict listener", () => {
-  const arcCache = Velo.builder()
+  const arc = Velo.builder()
     .capacity(3)
     .arc()
     .removalListener((k, v, cause) => {
@@ -162,8 +207,17 @@ Deno.test("ARC should call onEvict listener", () => {
     })
     .build();
 
-  arcCache.set("1", 1);
-  arcCache.set("2", 2);
-  arcCache.set("3", 3);
-  arcCache.set("4", 4); // evicts "1"
+  arc.set("1", 1);
+  arc.set("2", 2);
+  arc.set("3", 3);
+  arc.set("4", 4); // evicts "1"
+});
+
+Deno.test("ARC, should expose keys and values", () => {
+  const arc = new Arc(5);
+  arc.set("1", 1);
+  arc.set("2", 2);
+  arc.set("3", 3);
+  assertEquals(arc.keys, ["1", "2", "3"]);
+  assertEquals(arc.values, [1, 2, 3]);
 });
