@@ -7,6 +7,8 @@ and adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## unreleased
+- 
+## [1.0.0]
 
 - Add Builder API for creating a cache (`Velo.builder()`)
 - Add value loading functionality with `VeloLoadingCache` 

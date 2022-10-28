@@ -1,10 +1,10 @@
 {
-  "version": "0.1.6",
+  "version": "0.1.5",
   "name": "velo",
-  "description": "Velo provides performant Cache imlementations for Deno. Supports LRU, LFU, ARC and other caching policies.",
+  "description": "A high-performance caching library for Deno. Supports LRU, LFU, ARC, and TinyLFU.",
   "repository": "https://github.com/velo-org/velo",
   "stable": true,
-  "files": ["./src/**/*", "mod.ts", "deps.ts", "README.md", "./media/*"],
+  "files": ["./src/**/*", "mod.ts", "deps.ts", "README.md"],
   "check": true,
   "entry": "./mod.ts",
   "homepage": "https://github.com/velo-org/velo",
