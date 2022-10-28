@@ -135,6 +135,17 @@ Deno.test(
   }
 );
 
+Deno.test("TinyLFU set existent key in protected, should update the value", () => {
+  const tinyLfu = new WindowTinyLfu(100);
+  tinyLfu.set("1", 1);
+  tinyLfu.set("1", 2);
+  tinyLfu.get("1");
+  tinyLfu.set("1", 3);
+  assertEquals(tinyLfu.get("1"), 3);
+  assertEquals((tinyLfu as any).protected.size(), 1);
+  assertEquals((tinyLfu as any).window.size(), 0);
+});
+
 Deno.test("TinyLFU set existent key in window and window is not full, should keep it in the window segment", () => {
   const tinyLfu = new WindowTinyLfu(500); // window size is 5
   tinyLfu.set("1", 1);
@@ -233,4 +244,18 @@ Deno.test("TinyLFU should expose key and value arrays", () => {
   tinyLfu.set("4", 4);
   assertEquals(tinyLfu.keys, ["4", "1", "2", "3"]);
   assertEquals(tinyLfu.values, [4, 1, 2, 3]);
+});
+
+Deno.test("TinyLFU, should evict from full cache", () => {
+  const tinyLfu = new WindowTinyLfu(100);
+
+  for (let i = 0; i < 100; i++) {
+    tinyLfu.set(i.toString(), i);
+    tinyLfu.set(i.toString(), i + 1);
+    tinyLfu.get(i.toString());
+  }
+
+  assertEquals(tinyLfu.size, 100);
+  tinyLfu.set("200", 200);
+  assertEquals((tinyLfu as any).window.keys(), ["200"]);
 });

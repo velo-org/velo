@@ -221,3 +221,21 @@ Deno.test("ARC, should expose keys and values", () => {
   assertEquals(arc.keys, ["1", "2", "3"]);
   assertEquals(arc.values, [1, 2, 3]);
 });
+
+Deno.test("ARC, evict from t2", () => {
+  const arc = new Arc(2);
+  arc.set("1", 0);
+  arc.set("2", 0);
+  arc.set("3", 0);
+  arc.set("1", 0);
+  arc.set("2", 0);
+  arc.set("3", 0);
+  arc.set("1", 0);
+  arc.set("2", 0);
+  arc.set("3", 0);
+  arc.set("4", 0);
+  assertEquals(arc.keys, ["4", "3"]);
+  assertEquals((arc as any).t1.keys, ["4"]);
+  assertEquals((arc as any).t2.keys, ["3"]);
+  assertEquals((arc as any).b2.keys, ["2"]);
+});

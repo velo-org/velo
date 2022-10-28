@@ -258,11 +258,6 @@ class ArcList<K extends Key, V> {
     return oldValue;
   }
 
-  moveToFront(key: K) {
-    const p = this.items[key];
-    this.pointers.moveToFront(p);
-  }
-
   evict(onEvict?: RemoveListener<K, V>): K {
     const p = this.pointers.removeBack();
     const key = this._keys[p]!;

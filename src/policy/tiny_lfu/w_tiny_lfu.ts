@@ -367,15 +367,4 @@ class LruPointerList<K extends Key, V> {
       p = this.pointers.nextOf(p);
     }
   }
-
-  *[Symbol.iterator]() {
-    if (this.isEmpty()) {
-      return;
-    }
-    let p: number | undefined = this.pointers.front;
-    for (let i = 0; p !== undefined; i++) {
-      yield { key: this._keys[p], value: this._values[p] };
-      p = this.pointers.nextOf(p);
-    }
-  }
 }
