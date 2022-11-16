@@ -154,10 +154,7 @@ export class PointerList {
       this._root = this.next[this._root];
     }
 
-    if (this._size >= this.capacity) {
-      this.nextIndex.push(pointer);
-    }
-
+    this.nextIndex.push(pointer);
     this.next[this.prev[pointer]] = this.next[pointer];
     this.prev[this.next[pointer]] = this.prev[pointer];
     this._size--;
@@ -214,9 +211,7 @@ export class PointerList {
    * @returns the previous pointer or undefined if it would be prev[root]
    */
   prevOf(pointer: number): number | undefined {
-    return this.prev[pointer] !== this.prev[this._root]
-      ? this.prev[pointer]
-      : undefined;
+    return this.prev[pointer] !== this.prev[this._root] ? this.prev[pointer] : undefined;
   }
 
   /**
